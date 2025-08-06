@@ -7,6 +7,7 @@ class SocketService {
         this.partyService = partyService;
         this.gameService = new GameService(partyService);
         this.selectionTimers = new Map(); // partyCode -> timer
+        this.finishedPlayers = new Map(); // partyCode -> Set of finished player IDs
     }
 
     // Handle new socket connection
@@ -147,8 +148,26 @@ class SocketService {
             // Leave socket room
             socket.leave(partyCode);
 
-            // Notify remaining players
-            if (!party.isEmpty()) {
+            // Clean up finished players tracking
+            if (this.finishedPlayers.has(partyCode)) {
+                this.finishedPlayers.get(partyCode).delete(player.id);
+                if (this.finishedPlayers.get(partyCode).size === 0) {
+                    this.finishedPlayers.delete(partyCode);
+                }
+            }
+
+            // If game is in progress and player leaves, end game immediately
+            if (party && !party.isEmpty() && party.gameState.phase === 'playing') {
+                const remainingPlayer = Array.from(party.players.values())[0];
+                
+                // Notify remaining player they won by default
+                this.io.to(partyCode).emit('game_ended_by_leave', {
+                    winner: remainingPlayer.getPublicInfo(),
+                    leftPlayer: player.getPublicInfo(),
+                    message: `${player.name} left the game. ${remainingPlayer.name} wins by default!`
+                });
+            } else if (!party.isEmpty()) {
+                // Notify remaining players
                 this.io.to(partyCode).emit('player_left', {
                     party: party.getPublicInfo(),
                     leftPlayer: player.getPublicInfo()
@@ -216,6 +235,9 @@ class SocketService {
             party.startGame(player.id);
             party.startSelectionPhase();
 
+            // Initialize finished players tracking
+            this.finishedPlayers.set(party.code, new Set());
+
             // Start selection timer
             this.startSelectionTimer(party);
 
@@ -269,7 +291,7 @@ class SocketService {
         }
     }
 
-    // Handle make guess
+    // Handle make guess - FIXED: Don't end game immediately
     handleMakeGuess(socket, data) {
         try {
             const { guess } = data;
@@ -283,6 +305,13 @@ class SocketService {
             const player = this.partyService.getPlayerBySocket(socket.id);
             if (!player) {
                 socket.emit('error', { message: 'Player not found' });
+                return;
+            }
+
+            // Check if player already finished
+            const finishedSet = this.finishedPlayers.get(party.code) || new Set();
+            if (finishedSet.has(player.id)) {
+                socket.emit('error', { message: 'You have already found the number! Wait for your opponent.' });
                 return;
             }
 
@@ -313,10 +342,39 @@ class SocketService {
                 isCorrect: guessResult.isCorrect
             });
 
-            // If correct, end the round IMMEDIATELY
+            // If correct, mark player as finished but DON'T end game yet
             if (guessResult.isCorrect) {
-                // End round right away - don't wait for opponent
-                this.endRound(party, player.id);
+                finishedSet.add(player.id);
+                this.finishedPlayers.set(party.code, finishedSet);
+                
+                // Mark player as finished
+                player.hasFinished = true;
+                player.finishedAt = Date.now();
+                
+                // Notify both players about the finish
+                this.io.to(party.code).emit('player_finished', {
+                    playerId: player.id,
+                    playerName: player.name,
+                    attempts: player.attempts
+                });
+
+                // Check if BOTH players have finished
+                if (finishedSet.size >= 2) {
+                    // Both players finished, determine winner by attempts
+                    const players = Array.from(party.players.values());
+                    const finishedPlayers = players.filter(p => finishedSet.has(p.id));
+                    
+                    // Sort by attempts (lower is better), then by finish time
+                    finishedPlayers.sort((a, b) => {
+                        if (a.attempts !== b.attempts) {
+                            return a.attempts - b.attempts;
+                        }
+                        return a.finishedAt - b.finishedAt; // Earlier finish time wins if same attempts
+                    });
+                    
+                    const winner = finishedPlayers[0];
+                    this.endRound(party, winner.id);
+                }
             }
 
         } catch (error) {
@@ -343,6 +401,9 @@ class SocketService {
             party.nextRound();
             party.startSelectionPhase();
 
+            // Reset finished players tracking
+            this.finishedPlayers.set(party.code, new Set());
+
             // Start selection timer
             this.startSelectionTimer(party);
 
@@ -368,6 +429,9 @@ class SocketService {
             }
 
             party.rematch();
+
+            // Reset finished players tracking
+            this.finishedPlayers.set(party.code, new Set());
 
             // Start selection timer
             this.startSelectionTimer(party);
@@ -452,6 +516,11 @@ class SocketService {
         if (result) {
             const { party, player, partyCode } = result;
             
+            // Clean up finished players tracking
+            if (this.finishedPlayers.has(partyCode)) {
+                this.finishedPlayers.get(partyCode).delete(player.id);
+            }
+            
             // Notify other players about disconnection
             this.io.to(partyCode).emit('player_disconnected', {
                 playerId: player.id,
@@ -462,6 +531,7 @@ class SocketService {
             // Clear selection timer if party becomes inactive
             if (party.isEmpty()) {
                 this.clearSelectionTimer(partyCode);
+                this.finishedPlayers.delete(partyCode);
             }
         }
     }
@@ -525,6 +595,9 @@ class SocketService {
             const result = party.endRound(winnerId);
             const { roundResult, isGameComplete, gameWinner } = result;
 
+            // Clean up finished players tracking for this round
+            this.finishedPlayers.delete(party.code);
+
             // Record game completion if game is complete
             if (isGameComplete) {
                 this.partyService.recordGameCompletion();
@@ -551,6 +624,7 @@ class SocketService {
     cleanup() {
         this.selectionTimers.forEach(timer => clearInterval(timer));
         this.selectionTimers.clear();
+        this.finishedPlayers.clear();
     }
 }
 

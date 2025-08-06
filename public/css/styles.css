@@ -1217,3 +1217,764 @@ body {
         transition-duration: 0.01ms !important;
     }
 }
+/* Enhanced UX Styles - Add these to your existing styles.css */
+
+/* Confirmation Dialog Styles */
+.confirm-dialog {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.confirm-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+}
+
+.confirm-content {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    border-radius: 15px;
+    padding: 30px;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+}
+
+.confirm-title {
+    color: #4facfe;
+    margin-bottom: 15px;
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.confirm-message {
+    color: #b8c5d6;
+    margin-bottom: 25px;
+    line-height: 1.6;
+}
+
+.confirm-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+/* Pulse Animation */
+.pulse-animation {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+/* Invitation Helper */
+.invitation-helper {
+    margin: 20px 0;
+    padding: 20px;
+    background: rgba(79, 172, 254, 0.1);
+    border-radius: 12px;
+    border: 1px solid rgba(79, 172, 254, 0.3);
+    text-align: center;
+    animation: slideIn 0.5s ease;
+}
+
+.helper-content h4 {
+    color: #4facfe;
+    margin-bottom: 10px;
+}
+
+.share-options {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin: 15px 0;
+}
+
+.helper-tip {
+    font-size: 0.9rem;
+    color: #b8c5d6;
+    font-style: italic;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Back Button Styles */
+.back-btn {
+    z-index: 100;
+    font-size: 0.9rem !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    min-width: auto !important;
+    padding: 10px 15px !important;
+}
+
+.back-btn:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+    transform: translateY(-1px);
+}
+
+/* Enhanced Notifications */
+.notification {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 300px;
+    max-width: 500px;
+}
+
+.notification-icon {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.notification-message {
+    flex: 1;
+}
+
+.notification-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    margin-left: auto;
+    padding: 0;
+    opacity: 0.7;
+    flex-shrink: 0;
+}
+
+.notification-close:hover {
+    opacity: 1;
+}
+
+/* Settings Disabled State */
+.settings-section.disabled {
+    opacity: 0.6;
+    pointer-events: none;
+    position: relative;
+}
+
+.settings-section.disabled::after {
+    content: "Only host can change settings";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.8);
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    color: #ffc107;
+    pointer-events: none;
+}
+
+/* Enhanced Game Elements */
+.guess-item.new-guess {
+    background: rgba(79, 172, 254, 0.2);
+    transform: scale(1.02);
+    transition: all 0.3s ease;
+}
+
+.guess-item.correct-guess {
+    background: rgba(81, 207, 102, 0.2);
+    border-left: 4px solid #51cf66;
+    animation: correctGuess 0.5s ease;
+}
+
+@keyframes correctGuess {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.hidden-number {
+    font-family: monospace;
+    letter-spacing: 2px;
+    font-weight: bold;
+    color: #666;
+}
+
+.revealed-number {
+    font-family: monospace;
+    letter-spacing: 2px;
+    font-weight: bold;
+    color: #51cf66;
+    background: rgba(81, 207, 102, 0.2);
+    padding: 2px 8px;
+    border-radius: 4px;
+    animation: reveal 0.5s ease;
+}
+
+@keyframes reveal {
+    from { opacity: 0; transform: scale(0.8); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* Game Button States */
+.btn.finished {
+    background: rgba(81, 207, 102, 0.3) !important;
+    color: #51cf66 !important;
+    cursor: not-allowed;
+    animation: none !important;
+}
+
+/* Message Highlight Animation */
+@keyframes messageHighlight {
+    0% { transform: scale(1); background-opacity: 1; }
+    50% { transform: scale(1.02); background-opacity: 0.8; }
+    100% { transform: scale(1); background-opacity: 1; }
+}
+
+/* Enhanced Results Animations */
+@keyframes bounceIn {
+    0% { 
+        transform: scale(0.3); 
+        opacity: 0; 
+    }
+    50% { 
+        transform: scale(1.05); 
+    }
+    70% { 
+        transform: scale(0.9); 
+    }
+    100% { 
+        transform: scale(1); 
+        opacity: 1; 
+    }
+}
+
+@keyframes winnerHighlight {
+    0% { 
+        transform: scale(1); 
+        box-shadow: 0 0 20px rgba(81, 207, 102, 0.3);
+    }
+    50% { 
+        transform: scale(1.05); 
+        box-shadow: 0 0 30px rgba(81, 207, 102, 0.6);
+    }
+    100% { 
+        transform: scale(1); 
+        box-shadow: 0 0 20px rgba(81, 207, 102, 0.3);
+    }
+}
+
+/* End Game Actions */
+.end-game-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 20px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    animation: slideUp 0.5s ease;
+}
+
+.end-game-actions h4 {
+    color: #4facfe;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.quick-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.host-message {
+    text-align: center;
+    margin-top: 10px;
+    color: #ffc107;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Player Status Enhancements */
+.player-card.active {
+    border-color: #4facfe;
+    background: rgba(79, 172, 254, 0.1);
+    box-shadow: 0 0 20px rgba(79, 172, 254, 0.2);
+    animation: activePlayer 2s infinite;
+}
+
+@keyframes activePlayer {
+    0%, 100% { box-shadow: 0 0 20px rgba(79, 172, 254, 0.2); }
+    50% { box-shadow: 0 0 30px rgba(79, 172, 254, 0.4); }
+}
+
+.player-name {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+/* Loading States */
+.loading-state {
+    opacity: 0.7;
+    pointer-events: none;
+    position: relative;
+}
+
+.loading-state::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid rgba(79, 172, 254, 0.3);
+    border-radius: 50%;
+    border-top-color: #4facfe;
+    animation: spin 1s linear infinite;
+}
+
+/* Enhanced Input Focus */
+.input-field:focus {
+    border-color: #4facfe;
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.2);
+    transform: translateY(-1px);
+    outline: none;
+}
+
+/* Game Screen Enhancements */
+.vs-divider {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #ff6b6b;
+    text-align: center;
+    text-shadow: 0 2px 10px rgba(255, 107, 107, 0.3);
+    animation: vsGlow 3s ease-in-out infinite;
+}
+
+@keyframes vsGlow {
+    0%, 100% { text-shadow: 0 2px 10px rgba(255, 107, 107, 0.3); }
+    50% { text-shadow: 0 2px 15px rgba(255, 107, 107, 0.6); }
+}
+
+/* Battle Cards Enhancement */
+.player-battle-card {
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.player-battle-card:hover {
+    transform: translateY(-2px);
+}
+
+.player-battle-card.finished::before {
+    content: "✅";
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #51cf66;
+    color: white;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    z-index: 10;
+    animation: finishedBadge 0.5s ease;
+}
+
+@keyframes finishedBadge {
+    from { transform: scale(0); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+    .back-btn {
+        position: relative !important;
+        top: auto !important;
+        left: auto !important;
+        margin: 0 0 20px 0;
+        width: 100%;
+    }
+    
+    .share-options {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .confirm-content {
+        margin: 20px;
+        padding: 20px;
+    }
+    
+    .confirm-buttons {
+        flex-direction: column;
+    }
+    
+    .quick-actions {
+        grid-template-columns: 1fr;
+    }
+    
+    .notification {
+        min-width: auto;
+    }
+    
+    .settings-section.disabled::after {
+        font-size: 0.8rem;
+        padding: 8px 12px;
+    }
+}
+
+/* Accessibility Improvements */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    .pulse-animation {
+        animation: none !important;
+    }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+    .game-container {
+        border: 3px solid #ffffff;
+    }
+    
+    .message {
+        border-width: 3px;
+    }
+    
+    .btn {
+        border: 2px solid #ffffff;
+    }
+    
+    .confirm-content {
+        border: 3px solid #ffffff;
+    }
+}
+
+/* Dark Mode Enhancements */
+@media (prefers-color-scheme: dark) {
+    .invitation-helper {
+        background: rgba(79, 172, 254, 0.15);
+        border-color: rgba(79, 172, 254, 0.4);
+    }
+    
+    .confirm-content {
+        background: linear-gradient(135deg, #0a0a1e 0%, #0e1a3e 100%);
+    }
+}
+
+/* Focus Visible for Keyboard Navigation */
+.btn:focus-visible,
+.input-field:focus-visible {
+    outline: 3px solid #4facfe;
+    outline-offset: 2px;
+}
+
+/* Party Code Animation */
+.party-code-display {
+    animation: codeGlow 2s ease-in-out infinite;
+}
+
+@keyframes codeGlow {
+    0%, 100% { 
+        text-shadow: 0 2px 10px rgba(79, 172, 254, 0.3);
+        transform: scale(1);
+    }
+    50% { 
+        text-shadow: 0 2px 15px rgba(79, 172, 254, 0.6);
+        transform: scale(1.02);
+    }
+}
+
+/* Connection Status Enhancements */
+.connection-status {
+    transition: all 0.3s ease;
+}
+
+.connection-status.connected {
+    background: rgba(81, 207, 102, 0.2);
+    border: 1px solid rgba(81, 207, 102, 0.4);
+    color: #51cf66;
+    animation: connectedPulse 3s infinite;
+}
+
+@keyframes connectedPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; }
+}
+
+.connection-status.disconnected {
+    background: rgba(255, 107, 107, 0.3);
+    border: 1px solid rgba(255, 107, 107, 0.5);
+    color: #ff6b6b;
+    animation: disconnectedBlink 1s infinite;
+}
+
+@keyframes disconnectedBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+/* Footer Styles - Add these to your styles.css */
+
+.game-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, rgba(26, 26, 46, 0.95) 0%, rgba(22, 33, 62, 0.95) 100%);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 999;
+    padding: 8px 0;
+    transition: all 0.3s ease;
+}
+
+.footer-content {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.footer-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.footer-text {
+    color: #b8c5d6;
+    font-size: 0.85rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 400;
+}
+
+.footer-icon {
+    font-size: 1rem;
+    animation: sparkle 3s ease-in-out infinite;
+}
+
+@keyframes sparkle {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.8; }
+}
+
+.developer-name {
+    color: #4facfe;
+    font-weight: 600;
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.developer-name:hover {
+    transform: translateY(-1px);
+    text-shadow: 0 2px 10px rgba(79, 172, 254, 0.3);
+}
+
+.footer-links {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #868e96;
+    font-size: 0.75rem;
+    font-weight: 400;
+}
+
+.footer-version {
+    background: rgba(79, 172, 254, 0.1);
+    color: #4facfe;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 500;
+    font-size: 0.7rem;
+}
+
+.footer-separator {
+    color: #495057;
+}
+
+.footer-year {
+    color: #868e96;
+}
+
+/* Adjust main content to account for footer */
+body {
+    padding-bottom: 50px; /* Add space for footer */
+}
+
+.game-container {
+    margin-bottom: 0;
+    min-height: calc(100vh - 70px); /* Adjust for footer height */
+}
+
+/* Footer hover effects */
+.game-footer:hover {
+    background: linear-gradient(135deg, rgba(26, 26, 46, 0.98) 0%, rgba(22, 33, 62, 0.98) 100%);
+    border-top-color: rgba(79, 172, 254, 0.2);
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+    .game-footer {
+        padding: 6px 0;
+    }
+    
+    .footer-text {
+        font-size: 0.8rem;
+    }
+    
+    .footer-links {
+        font-size: 0.7rem;
+        gap: 6px;
+    }
+    
+    .footer-version {
+        font-size: 0.65rem;
+        padding: 1px 4px;
+    }
+    
+    body {
+        padding-bottom: 45px;
+    }
+    
+    .game-container {
+        min-height: calc(100vh - 65px);
+    }
+}
+
+/* Small screens */
+@media (max-width: 480px) {
+    .footer-info {
+        gap: 2px;
+    }
+    
+    .footer-text {
+        font-size: 0.75rem;
+        gap: 4px;
+    }
+    
+    .footer-icon {
+        font-size: 0.9rem;
+    }
+}
+
+/* Hide footer during loading overlay */
+.loading-overlay ~ .game-footer {
+    opacity: 0.3;
+}
+
+/* Dark theme enhancements */
+@media (prefers-color-scheme: dark) {
+    .game-footer {
+        background: linear-gradient(135deg, rgba(10, 10, 30, 0.95) 0%, rgba(14, 26, 62, 0.95) 100%);
+    }
+    
+    .game-footer:hover {
+        background: linear-gradient(135deg, rgba(10, 10, 30, 0.98) 0%, rgba(14, 26, 62, 0.98) 100%);
+    }
+}
+
+/* Accessibility - High contrast mode */
+@media (prefers-contrast: high) {
+    .game-footer {
+        background: rgba(0, 0, 0, 0.9);
+        border-top: 2px solid #ffffff;
+    }
+    
+    .footer-text {
+        color: #ffffff;
+    }
+    
+    .developer-name {
+        color: #ffffff;
+        -webkit-text-fill-color: #ffffff;
+    }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .footer-icon {
+        animation: none;
+    }
+    
+    .developer-name:hover {
+        transform: none;
+    }
+}
+
+/* Easter egg - Click animation */
+.developer-name:active {
+    transform: scale(0.95);
+}
+
+/* Optional: Add a subtle glow effect */
+.game-footer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(79, 172, 254, 0.5), transparent);
+    opacity: 0.6;
+}
+
+/* Add a subtle glow effect on hover */
+.game-footer:hover::before {
+    background: linear-gradient(90deg, transparent, rgba(79, 172, 254, 0.8), transparent);
+    opacity: 1; 
+}
