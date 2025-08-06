@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎯 Multiplayer Number Guesser</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="icon" href="/assets/favicon.ico" type="image/x-icon">
+    <meta name="description" content="Real-time multiplayer number guessing game with friends">
+    <meta name="theme-color" content="#1a1a2e">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Number Guesser">
+</head>
+<body>
+    <div class="game-container">
+        <!-- Header -->
+        <header class="header">
+            <h1>🎯 Multiplayer Number Guesser</h1>
+            <div class="party-info" id="partyInfo" style="display:none;">
+                Party: <span id="partyCodeDisplay"></span>
+            </div>
+        </header>
+
+        <main class="content">
+            <!-- Welcome Screen -->
+            <section class="screen active" id="welcomeScreen">
+                <div class="welcome-content">
+                    <div class="emoji-large">🎮</div>
+                    <h2>Welcome to the Ultimate Number Guessing Challenge!</h2>
+                    <p>Challenge your friends or play against our smart AI bot.</p>
+                </div>
+
+                <div class="input-group">
+                    <label for="playerName">Your Name</label>
+                    <input type="text" class="input-field" id="playerName" placeholder="Enter your name" maxlength="20" autocomplete="name" required>
+                </div>
+
+                <div class="game-mode-selection">
+                    <h3>Choose Game Mode</h3>
+                    <div class="mode-buttons">
+                        <button class="btn btn-mode" id="singlePlayerBtn" type="button">🤖 Single Player</button>
+                        <button class="btn btn-mode" id="multiplayerBtn" type="button">👥 Multiplayer</button>
+                    </div>
+                </div>
+
+                <!-- Multiplayer Options -->
+                <div id="multiplayerOptions" class="multiplayer-options" style="display:none;">
+                    <div class="button-group">
+                        <button class="btn btn-primary" id="createPartyBtn" type="button">🎮 Create Party</button>
+                        <button class="btn btn-secondary" id="joinPartyBtn" type="button">🚀 Join Party</button>
+                    </div>
+
+                    <div id="joinPartyDiv" class="join-party-section" style="display:none;">
+                        <div class="input-group">
+                            <label for="partyCodeInput">Party Code</label>
+                            <input type="text" class="input-field" id="partyCodeInput" placeholder="Enter 6-character code" maxlength="6" style="text-transform:uppercase;" pattern="[A-Z0-9]{6}">
+                        </div>
+                        <button class="btn btn-primary" id="joinPartySubmitBtn" type="button">Join Game</button>
+                    </div>
+                </div>
+
+                <!-- Single Player Options -->
+                <div id="singlePlayerOptions" class="single-player-options" style="display:none;">
+                    <div class="settings-section">
+                        <h3>🎯 Game Settings</h3>
+                        <div class="settings-grid">
+                            <div class="input-group">
+                                <label for="singleRangeStart">Start Number</label>
+                                <input type="number" class="input-field" id="singleRangeStart" value="1" min="1" max="9999">
+                            </div>
+                            <div class="input-group">
+                                <label for="singleRangeEnd">End Number</label>
+                                <input type="number" class="input-field" id="singleRangeEnd" value="100" min="2" max="10000">
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label for="botDifficulty">Bot Difficulty</label>
+                            <select class="input-field" id="botDifficulty">
+                                <option value="easy">Easy - Bot makes random guesses</option>
+                                <option value="medium" selected>Medium - Bot uses basic strategy</option>
+                                <option value="hard">Hard - Bot uses optimal strategy</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn btn-success" id="startSinglePlayerBtn" type="button">🎮 Start Single Player</button>
+                </div>
+            </section>
+
+            <!-- Lobby Screen -->
+            <section class="screen" id="lobbyScreen">
+                <div class="party-code-section">
+                    <div class="party-code-label">Share this code with your friend:</div>
+                    <div class="party-code-display" id="lobbyPartyCode" role="status" aria-live="polite"></div>
+                    <button class="btn btn-copy" id="copyCodeBtn" type="button">📋 Copy Code</button>
+                </div>
+
+                <div class="players-section">
+                    <div class="players-grid">
+                        <div class="player-card" id="player1Card">
+                            <div class="player-avatar" role="img" aria-label="Player 1 Avatar">👤</div>
+                            <div class="player-name" id="player1Name">
+                                <span class="status-indicator offline" aria-label="Offline"></span>
+                                Waiting...
+                            </div>
+                            <div class="player-role">Host</div>
+                        </div>
+                        <div class="player-card" id="player2Card">
+                            <div class="player-avatar" role="img" aria-label="Player 2 Avatar">👤</div>
+                            <div class="player-name" id="player2Name">
+                                <span class="status-indicator offline" aria-label="Offline"></span>
+                                Waiting for player...
+                            </div>
+                            <div class="player-role">Guest</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-section" id="gameSettings">
+                    <h3>🎯 Game Settings</h3>
+                    <div class="settings-grid">
+                        <div class="input-group">
+                            <label for="rangeStart">Start Number</label>
+                            <input type="number" class="input-field" id="rangeStart" value="1" min="1" max="9999">
+                        </div>
+                        <div class="input-group">
+                            <label for="rangeEnd">End Number</label>
+                            <input type="number" class="input-field" id="rangeEnd" value="100" min="2" max="10000">
+                        </div>
+                    </div>
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="bestOfThree" class="checkbox">
+                            <span class="checkmark"></span>
+                            Best of 3 Rounds
+                        </label>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-success" id="startGameBtn" type="button" disabled>⏳ Waiting for player...</button>
+                    <button class="btn btn-danger" id="leaveLobbyBtn" type="button">🚪 Leave Party</button>
+                </div>
+            </section>
+
+            <!-- Selection Screen -->
+            <section class="screen" id="selectionScreen">
+                <div class="round-info" id="selectionRoundInfo">
+                    <div class="round-text">Round 1</div>
+                </div>
+
+                <div class="timer-section">
+                    <div class="timer-label">Choose your secret number:</div>
+                    <div class="timer" id="selectionTimer" role="timer" aria-live="assertive">30</div>
+                </div>
+
+                <div class="message info" id="selectionMessage">
+                    Choose your secret number between <span id="selectionRangeDisplay">1 and 100</span>
+                </div>
+
+                <div class="input-group">
+                    <label for="secretNumber">Your Secret Number</label>
+                    <input type="number" class="input-field" id="secretNumber" placeholder="Enter your secret number" required>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-success" id="readyBtn" type="button">✅ Ready</button>
+                </div>
+
+                <div class="ready-status" id="readyStatus" role="status" aria-live="polite"></div>
+            </section>
+
+            <!-- Game Screen -->
+            <section class="screen" id="gameScreen">
+                <div class="round-info" id="gameRoundInfo">
+                    <div class="round-text">Round 1</div>
+                </div>
+
+                <div class="game-battle">
+                    <div class="players-battle-grid">
+                        <div class="player-battle-card" id="myBattleCard">
+                            <div class="player-header">
+                                <div class="player-name" id="myBattleName">You</div>
+                                <div class="player-target">Guessing: <span id="opponentTarget">???</span></div>
+                            </div>
+                            <div class="player-stats">
+                                <div class="stat">
+                                    <div class="stat-number" id="myAttempts">0</div>
+                                    <div class="stat-label">Attempts</div>
+                                </div>
+                                <div class="stat">
+                                    <div class="stat-number" id="myWins">0</div>
+                                    <div class="stat-label">Wins</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="vs-divider" role="separator">VS</div>
+
+                        <div class="player-battle-card" id="opponentBattleCard">
+                            <div class="player-header">
+                                <div class="player-name" id="opponentBattleName">Opponent</div>
+                                <div class="player-target">Guessing: <span id="myTarget">???</span></div>
+                            </div>
+                            <div class="player-stats">
+                                <div class="stat">
+                                    <div class="stat-number" id="opponentAttempts">0</div>
+                                    <div class="stat-label">Attempts</div>
+                                </div>
+                                <div class="stat">
+                                    <div class="stat-number" id="opponentWins">0</div>
+                                    <div class="stat-label">Wins</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="guess-section">
+                    <div class="input-group">
+                        <label for="guessInput">Your Guess</label>
+                        <input type="number" class="input-field" id="guessInput" placeholder="Enter your guess" required>
+                    </div>
+                    <button class="btn btn-primary" id="makeGuessBtn" type="button">🎯 Guess!</button>
+                </div>
+
+                <div class="message" id="gameMessage" role="status" aria-live="polite"></div>
+
+                <div class="guess-history" id="gameGuessHistory">
+                    <div class="history-header">📝 Your Guess History</div>
+                    <div class="history-content">
+                        <div class="history-placeholder">Your guess history will appear here...</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Results Screen -->
+            <section class="screen" id="resultsScreen">
+                <div class="results-header">
+                    <div class="result-emoji" id="resultEmoji" role="img" aria-label="Result">🎉</div>
+                    <div class="result-title" id="resultTitle">Round Complete!</div>
+                </div>
+
+                <div class="results-grid">
+                    <div class="result-card" id="myResultCard">
+                        <div class="result-player-name" id="myResultName">You</div>
+                        <div class="result-stats">
+                            <div class="result-stat">
+                                <div class="result-stat-number" id="myFinalAttempts">0</div>
+                                <div class="result-stat-label">Attempts</div>
+                            </div>
+                            <div class="result-stat">
+                                <div class="result-stat-number" id="myTotalWins">0</div>
+                                <div class="result-stat-label">Total Wins</div>
+                            </div>
+                        </div>
+                        <div class="performance-badge" id="myPerformance"></div>
+                    </div>
+
+                    <div class="result-card" id="opponentResultCard">
+                        <div class="result-player-name" id="opponentResultName">Opponent</div>
+                        <div class="result-stats">
+                            <div class="result-stat">
+                                <div class="result-stat-number" id="opponentFinalAttempts">0</div>
+                                <div class="result-stat-label">Attempts</div>
+                            </div>
+                            <div class="result-stat">
+                                <div class="result-stat-number" id="opponentTotalWins">0</div>
+                                <div class="result-stat-label">Total Wins</div>
+                            </div>
+                        </div>
+                        <div class="performance-badge" id="opponentPerformance"></div>
+                    </div>
+                </div>
+
+                <div class="message" id="finalResultMessage" role="status" aria-live="polite"></div>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" id="nextRoundBtn" type="button" style="display:none;">🚀 Next Round</button>
+                    <button class="btn btn-success" id="rematchBtn" type="button">🔄 Rematch</button>
+                    <button class="btn btn-danger" id="leaveResultsBtn" type="button">🚪 Leave Party</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Connection Status -->
+    <div class="connection-status" id="connectionStatus">
+        <span class="loading-spinner" aria-hidden="true"></span> Connecting...
+    </div>
+
+    <!-- Notifications -->
+    <div class="notification-container" id="notificationContainer" role="alert" aria-live="assertive"></div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="loadingText">
+        <div class="loading-content">
+            <div class="loading-spinner-large" aria-hidden="true"></div>
+            <div class="loading-text" id="loadingText">Loading...</div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/socket-client.js"></script>
+    <script src="/js/ui.js"></script>
+    <script src="/js/single-player.js"></script>
+    <script src="/js/game.js"></script>
+</body>
+</html>
