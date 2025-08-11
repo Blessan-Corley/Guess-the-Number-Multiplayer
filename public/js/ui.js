@@ -5,6 +5,20 @@ class UI {
         this.setupKeyboardShortcuts();
         this.showScreen('welcomeScreen');
         this.setupNavigationConfirmation();
+        this.setupEnhancedUI();
+        this.notificationQueue = [];
+        this.maxNotifications = 3;
+    }
+
+    static setupEnhancedUI() {
+        // Add enhanced UI class for progressive enhancement
+        document.body.classList.add('enhanced-ui');
+        
+        // Setup real-time input validation
+        this.setupRealTimeValidation();
+        
+        // Initialize QR code functionality
+        this.loadQRLibrary();
     }
 
     static setupEventListeners() {
@@ -23,11 +37,15 @@ class UI {
 
         // Welcome screen
         document.getElementById('createPartyBtn').addEventListener('click', () => {
+            const button = document.getElementById('createPartyBtn');
             const playerName = document.getElementById('playerName').value.trim();
-            if (!playerName) {
-                this.showNotification('Please enter your name', 'error');
+            
+            if (!this.validateInput(document.getElementById('playerName'))) {
+                this.showNotification('Please enter a valid name', 'error');
                 return;
             }
+            
+            this.setButtonLoading(button, 'Creating...');
             Game.createParty(playerName);
         });
 
@@ -48,15 +66,17 @@ class UI {
         });
 
         document.getElementById('joinPartySubmitBtn').addEventListener('click', () => {
-            const playerName = document.getElementById('playerName').value.trim();
-            const partyCode = document.getElementById('partyCodeInput').value.trim();
+            const button = document.getElementById('joinPartySubmitBtn');
+            const playerNameInput = document.getElementById('playerName');
+            const partyCodeInput = document.getElementById('partyCodeInput');
             
-            if (!playerName || !partyCode) {
-                this.showNotification('Please enter both name and party code', 'error');
+            if (!this.validateInput(playerNameInput) || !this.validateInput(partyCodeInput)) {
+                this.showNotification('Please enter valid name and party code', 'error');
                 return;
             }
             
-            Game.joinParty(partyCode, playerName);
+            this.setButtonLoading(button, 'Joining...');
+            Game.joinParty(partyCodeInput.value.trim(), playerNameInput.value.trim());
         });
 
         // Back to menu buttons
@@ -80,12 +100,30 @@ class UI {
             );
         });
 
-        // Settings change listeners
-        document.getElementById('rangeStart').addEventListener('change', () => {
+        // Settings change listeners with validation
+        document.getElementById('rangeStart').addEventListener('change', (e) => {
+            const start = parseInt(e.target.value);
+            const end = parseInt(document.getElementById('rangeEnd').value);
+            
+            if (start >= end) {
+                UI.showNotification('Start number must be less than end number', 'warning');
+                e.target.value = Math.max(1, end - 1);
+                return;
+            }
+            
             Game.updateSettings();
         });
 
-        document.getElementById('rangeEnd').addEventListener('change', () => {
+        document.getElementById('rangeEnd').addEventListener('change', (e) => {
+            const start = parseInt(document.getElementById('rangeStart').value);
+            const end = parseInt(e.target.value);
+            
+            if (end <= start) {
+                UI.showNotification('End number must be greater than start number', 'warning');
+                e.target.value = Math.min(10000, start + 1);
+                return;
+            }
+            
             Game.updateSettings();
         });
 
@@ -93,23 +131,52 @@ class UI {
             Game.updateSettings();
         });
 
+        // Add input validation for range inputs
+        document.getElementById('rangeStart').addEventListener('input', (e) => {
+            const value = parseInt(e.target.value);
+            if (value < 1) e.target.value = 1;
+            if (value > 9999) e.target.value = 9999;
+        });
+
+        document.getElementById('rangeEnd').addEventListener('input', (e) => {
+            const value = parseInt(e.target.value);
+            if (value < 2) e.target.value = 2;
+            if (value > 10000) e.target.value = 10000;
+        });
+
         // Selection screen
         document.getElementById('readyBtn').addEventListener('click', () => {
-            const secretNumber = parseInt(document.getElementById('secretNumber').value);
-            if (isNaN(secretNumber)) {
-                this.showNotification('Please enter a valid number', 'error');
+            const button = document.getElementById('readyBtn');
+            const secretNumberInput = document.getElementById('secretNumber');
+            
+            if (!this.validateInput(secretNumberInput)) {
+                this.showNotification('Please enter a valid secret number', 'error');
                 return;
             }
+            
+            const secretNumber = parseInt(secretNumberInput.value);
+            this.setButtonLoading(button, 'Setting...');
             Game.setReady(secretNumber);
         });
 
         // Game screen
         document.getElementById('makeGuessBtn').addEventListener('click', () => {
-            const guess = parseInt(document.getElementById('guessInput').value);
-            if (isNaN(guess)) {
-                this.showNotification('Please enter a valid number', 'error');
+            const button = document.getElementById('makeGuessBtn');
+            const guessInput = document.getElementById('guessInput');
+            
+            if (!this.validateInput(guessInput)) {
+                this.showNotification('Please enter a valid guess', 'error');
                 return;
             }
+            
+            const guess = parseInt(guessInput.value);
+            this.setButtonLoading(button, 'Guessing...');
+            
+            // Reset button after a short delay
+            setTimeout(() => {
+                this.resetButton(button, '🎯 Guess!');
+            }, 1000);
+            
             Game.makeGuess(guess);
         });
 
@@ -301,54 +368,15 @@ class UI {
         }, 100);
     }
 
-    // Enhanced notification system
-    static showNotification(message, type = 'info', duration = 4000) {
-        const container = document.getElementById('notificationContainer');
-        const notification = document.createElement('div');
-        notification.className = `notification ${type}`;
+    // Enhanced notification system with queue management
+    static showNotification(message, type = 'info', duration = 4000, specialStyle = null) {
+        // Add to queue if too many notifications
+        if (this.getActiveNotifications().length >= this.maxNotifications) {
+            this.notificationQueue.push({ message, type, duration, specialStyle });
+            return;
+        }
         
-        // Add icon based on type
-        const icons = {
-            success: '✅',
-            error: '❌',
-            warning: '⚠️',
-            info: 'ℹ️'
-        };
-        
-        notification.innerHTML = `
-            <span class="notification-icon">${icons[type] || icons.info}</span>
-            <span class="notification-message">${message}</span>
-            <button class="notification-close" onclick="this.parentElement.remove()">×</button>
-        `;
-        
-        container.appendChild(notification);
-        
-        // Auto remove
-        setTimeout(() => {
-            if (notification.parentNode) {
-                notification.style.opacity = '0';
-                setTimeout(() => {
-                    if (notification.parentNode) {
-                        container.removeChild(notification);
-                    }
-                }, 300);
-            }
-        }, duration);
-        
-        // Manual remove on click
-        notification.addEventListener('click', (e) => {
-            if (e.target.classList.contains('notification-close')) {
-                return; // Let the onclick handle it
-            }
-            if (notification.parentNode) {
-                notification.style.opacity = '0';
-                setTimeout(() => {
-                    if (notification.parentNode) {
-                        container.removeChild(notification);
-                    }
-                }, 300);
-            }
-        });
+        this.displayNotification(message, type, duration, specialStyle);
     }
 
     // Confirmation dialog system
@@ -397,20 +425,25 @@ class UI {
         }, 100);
     }
 
-    // Connection status
+    // Enhanced connection status
     static updateConnectionStatus(status) {
         const statusElement = document.getElementById('connectionStatus');
         statusElement.className = `connection-status ${status}`;
         
         switch (status) {
             case 'connected':
-                statusElement.innerHTML = '🟢 Connected';
+                statusElement.innerHTML = 'Connected';
+                statusElement.title = 'Connected to server';
                 break;
             case 'connecting':
-                statusElement.innerHTML = '<span class="loading-spinner"></span> Connecting...';
+                statusElement.innerHTML = 'Connecting...';
+                statusElement.title = 'Connecting to server...';
                 break;
             case 'disconnected':
-                statusElement.innerHTML = '🔴 Disconnected';
+                statusElement.innerHTML = 'Disconnected';
+                statusElement.title = 'Disconnected from server - attempting to reconnect';
+                // Show critical notification for disconnection
+                this.showNotification('🚨 Connection lost! Attempting to reconnect...', 'critical', 10000);
                 break;
         }
     }
@@ -530,8 +563,9 @@ class UI {
                     <div class="share-options">
                         <button class="btn btn-copy" onclick="UI.copyToClipboard('${partyCode}')">📋 Copy Code</button>
                         <button class="btn btn-secondary" onclick="UI.sharePartyLink('${partyCode}')">🔗 Share Link</button>
+                        <button class="btn btn-primary" onclick="UI.generateQRCode('${partyCode}')">📱 QR Code</button>
                     </div>
-                    <p class="helper-tip">💡 Tip: Your friend can join by entering this code!</p>
+                    <p class="helper-tip">💡 Tip: Your friend can scan the QR code or enter the code manually!</p>
                 </div>
             `;
             
@@ -567,6 +601,9 @@ class UI {
         // Update single player settings too
         document.getElementById('singleRangeStart').value = settings.rangeStart;
         document.getElementById('singleRangeEnd').value = settings.rangeEnd;
+        
+        // Update range display
+        Game.updateRangeDisplay(settings.rangeStart, settings.rangeEnd);
     }
 
     static disableSettings(disabled = true) {
@@ -597,22 +634,43 @@ class UI {
         secretNumberInput.min = party.gameSettings.rangeStart;
         secretNumberInput.max = party.gameSettings.rangeEnd;
         secretNumberInput.value = '';
-        secretNumberInput.placeholder = `Enter ${rangeDisplay}`;
+        secretNumberInput.disabled = false;
+        secretNumberInput.placeholder = `Choose ${rangeDisplay}`;
+        
+        // Update range hints
+        document.getElementById('secretNumberRange').textContent = `(${rangeDisplay})`;
+        document.getElementById('secretNumberHint').innerHTML = `💡 Choose wisely - your opponent will try to guess this number!`;
         
         // Add range hint
         const selectionMessage = document.getElementById('selectionMessage');
         selectionMessage.innerHTML = `
-            Choose your secret number between <strong>${rangeDisplay}</strong><br>
-            <small>💡 Tip: Choose wisely - your opponent will try to guess it!</small>
+            <strong>🎯 Choose your secret number between ${rangeDisplay}</strong><br>
+            <small>💡 Think strategically! Not too obvious, not too random.</small>
         `;
+        selectionMessage.className = 'message info enhanced';
         
-        // Reset ready button
-        document.getElementById('readyBtn').disabled = false;
-        document.getElementById('readyBtn').textContent = '✅ Ready';
+        // FIXED: Ensure button is properly reset for all new games/rounds/rematches
+        const readyBtn = document.getElementById('readyBtn');
+        readyBtn.disabled = false;
+        readyBtn.textContent = '✅ Ready';
+        readyBtn.classList.remove('btn-disabled', 'loading', 'success', 'error');
+        readyBtn.style.opacity = '1';
+        
+        // Clear ready status completely
         document.getElementById('readyStatus').textContent = '';
+        document.getElementById('readyStatus').innerHTML = '';
+        
+        // Clear any previous timeout/interval from button reset
+        if (readyBtn._resetTimeout) {
+            clearTimeout(readyBtn._resetTimeout);
+            delete readyBtn._resetTimeout;
+        }
         
         // Focus on input
         setTimeout(() => secretNumberInput.focus(), 200);
+        
+        // Add input validation with toast messages
+        this.setupSecretNumberValidation(secretNumberInput, party.gameSettings.rangeStart, party.gameSettings.rangeEnd);
     }
 
     static updateSelectionTimer(timeLeft) {
@@ -665,22 +723,25 @@ class UI {
         const opponent = players.find(p => p.id !== socketClient.gameState.playerId);
         
         if (myPlayer && opponent) {
-            // Update player names with enhanced display
-            document.getElementById('myBattleName').innerHTML = `${myPlayer.name} <small>(You)</small>`;
-            document.getElementById('opponentBattleName').innerHTML = `${opponent.name} <small>(Opponent)</small>`;
+            // Update player names with enhanced display and match scores
+            const myWins = myPlayer.wins || 0;
+            const opponentWins = opponent.wins || 0;
+            
+            document.getElementById('myBattleName').innerHTML = `${myPlayer.name} <small>(You) - ${myWins} wins</small>`;
+            document.getElementById('opponentBattleName').innerHTML = `${opponent.name} <small>(Opponent) - ${opponentWins} wins</small>`;
             
             // Update stats
-            document.getElementById('myAttempts').textContent = myPlayer.attempts;
-            document.getElementById('myWins').textContent = myPlayer.wins;
-            document.getElementById('opponentAttempts').textContent = opponent.attempts;
-            document.getElementById('opponentWins').textContent = opponent.wins;
+            document.getElementById('myAttempts').textContent = myPlayer.attempts || 0;
+            document.getElementById('myWins').textContent = myWins;
+            document.getElementById('opponentAttempts').textContent = opponent.attempts || 0;
+            document.getElementById('opponentWins').textContent = opponentWins;
             
             // Update targets with better display
             document.getElementById('myTarget').textContent = myPlayer.secretNumber || '???';
             document.getElementById('opponentTarget').innerHTML = '<span class="hidden-number">???</span>'; // Always hidden during game
         }
         
-        // Setup guess input with enhanced UX
+        // Setup guess input with enhanced UX and validation
         const guessInput = document.getElementById('guessInput');
         guessInput.min = party.gameSettings.rangeStart;
         guessInput.max = party.gameSettings.rangeEnd;
@@ -693,6 +754,15 @@ class UI {
         guessBtn.disabled = false;
         guessBtn.textContent = '🎯 Guess!';
         guessBtn.classList.remove('finished');
+        
+        // Update range display
+        const guessRangeEl = document.getElementById('guessRange');
+        if (guessRangeEl) {
+            guessRangeEl.textContent = `(${party.gameSettings.rangeStart}-${party.gameSettings.rangeEnd})`;
+        }
+        
+        // Add input validation for guess input
+        this.setupGuessInputValidation(guessInput, party.gameSettings.rangeStart, party.gameSettings.rangeEnd);
         
         // Focus on input
         setTimeout(() => guessInput.focus(), 300);
@@ -789,7 +859,7 @@ class UI {
     }
 
     // Enhanced results screen
-    static updateResultsScreen(roundResult, isGameComplete, gameWinner, party) {
+    static updateResultsScreen(roundResult, isGameComplete, gameWinner, party, additionalData = {}) {
         const isWinner = roundResult.winner.id === socketClient.gameState.playerId;
         
         // Update header with enhanced animations
@@ -945,6 +1015,57 @@ class UI {
         }
     }
 
+    // Button Loading States
+    static setButtonLoading(button, text = 'Loading...') {
+        if (!button) return;
+        
+        button.dataset.originalText = button.innerHTML;
+        button.innerHTML = text;
+        button.classList.add('loading');
+        button.disabled = true;
+    }
+    
+    static setButtonSuccess(button, text = 'Success!', duration = 2000) {
+        if (!button) return;
+        
+        const originalText = button.dataset.originalText || button.innerHTML;
+        button.innerHTML = text;
+        button.classList.remove('loading');
+        button.classList.add('success');
+        button.disabled = false;
+        
+        setTimeout(() => {
+            this.resetButton(button, originalText);
+        }, duration);
+    }
+    
+    static setButtonError(button, text = 'Error!', duration = 2000) {
+        if (!button) return;
+        
+        const originalText = button.dataset.originalText || button.innerHTML;
+        button.innerHTML = text;
+        button.classList.remove('loading');
+        button.classList.add('error');
+        button.disabled = false;
+        
+        setTimeout(() => {
+            this.resetButton(button, originalText);
+        }, duration);
+    }
+    
+    static resetButton(button, text = null) {
+        if (!button) return;
+        
+        const originalText = text || button.dataset.originalText;
+        if (originalText) {
+            button.innerHTML = originalText;
+            delete button.dataset.originalText;
+        }
+        
+        button.classList.remove('loading', 'success', 'error');
+        button.disabled = false;
+    }
+
     // Auto-join from URL parameter
     static checkAutoJoin() {
         const urlParams = new URLSearchParams(window.location.search);
@@ -962,6 +1083,414 @@ class UI {
             document.getElementById('playerName').focus();
             
             this.showNotification('Party code loaded from link! Enter your name to join.', 'info', 6000);
+        }
+    }
+
+    // Input validation methods
+    static setupSecretNumberValidation(input, rangeStart, rangeEnd) {
+        // Remove any existing listeners
+        input.removeEventListener('input', input._secretValidationHandler);
+        input.removeEventListener('blur', input._secretBlurHandler);
+        
+        const validationHandler = (e) => {
+            const value = parseInt(e.target.value);
+            if (e.target.value && !isNaN(value)) {
+                if (value < rangeStart) {
+                    this.showNotification(`⚠️ Number too low! Choose between ${rangeStart} and ${rangeEnd}`, 'warning', 3000);
+                    e.target.style.borderColor = '#ffc107';
+                } else if (value > rangeEnd) {
+                    this.showNotification(`⚠️ Number too high! Choose between ${rangeStart} and ${rangeEnd}`, 'warning', 3000);
+                    e.target.style.borderColor = '#ffc107';
+                } else {
+                    e.target.style.borderColor = '';
+                }
+            }
+        };
+
+        const blurHandler = (e) => {
+            const value = parseInt(e.target.value);
+            if (e.target.value && (isNaN(value) || value < rangeStart || value > rangeEnd)) {
+                this.showNotification(`🚫 Please enter a number between ${rangeStart} and ${rangeEnd}`, 'error', 4000);
+                e.target.focus();
+            }
+        };
+
+        input._secretValidationHandler = validationHandler;
+        input._secretBlurHandler = blurHandler;
+        input.addEventListener('input', validationHandler);
+        input.addEventListener('blur', blurHandler);
+    }
+
+    static setupGuessInputValidation(input, rangeStart, rangeEnd) {
+        // Remove any existing listeners
+        input.removeEventListener('input', input._guessValidationHandler);
+        
+        const validationHandler = (e) => {
+            const value = parseInt(e.target.value);
+            if (e.target.value && !isNaN(value)) {
+                if (value < rangeStart || value > rangeEnd) {
+                    this.showInputError(e.target, `Guess must be between ${rangeStart} and ${rangeEnd}`);
+                } else {
+                    this.clearInputError(e.target);
+                }
+            }
+        };
+
+        input._guessValidationHandler = validationHandler;
+        input.addEventListener('input', validationHandler);
+    }
+
+    // Enhanced notification system with queue management
+    static displayNotification(message, type = 'info', duration = 4000, specialStyle = null) {
+        const container = document.getElementById('notificationContainer');
+        const notification = document.createElement('div');
+        
+        // Add special styling for competitive scenarios
+        let className = `notification ${type}`;
+        if (specialStyle) {
+            className += ` ${specialStyle}`;
+        }
+        notification.className = className;
+        
+        // Add icon based on type
+        const icons = {
+            success: '✅',
+            error: '❌',
+            warning: '⚠️',
+            info: 'ℹ️',
+            competitive: '🔥',
+            victory: '🏆',
+            critical: '🚨'
+        };
+        
+        const icon = icons[specialStyle] || icons[type] || icons.info;
+        
+        // Enhanced notification structure
+        notification.innerHTML = `
+            <span class="notification-icon">${icon}</span>
+            <div class="notification-message">${message}</div>
+            <button class="notification-close" aria-label="Close notification">×</button>
+        `;
+        
+        container.appendChild(notification);
+        
+        // Add click handlers
+        const closeBtn = notification.querySelector('.notification-close');
+        closeBtn.onclick = () => this.removeNotification(notification);
+        
+        // Auto remove with smart timing
+        const autoRemoveDelay = type === 'critical' ? duration * 2 : duration;
+        const timeoutId = setTimeout(() => {
+            this.removeNotification(notification);
+        }, autoRemoveDelay);
+        
+        // Store timeout ID for manual cancellation
+        notification.dataset.timeoutId = timeoutId;
+        
+        // Pause auto-remove on hover
+        notification.addEventListener('mouseenter', () => {
+            clearTimeout(timeoutId);
+        });
+        
+        notification.addEventListener('mouseleave', () => {
+            const newTimeoutId = setTimeout(() => {
+                this.removeNotification(notification);
+            }, 2000); // Shorter delay after hover
+            notification.dataset.timeoutId = newTimeoutId;
+        });
+    }
+    
+    static removeNotification(notification) {
+        if (!notification.parentNode) return;
+        
+        // Clear any pending timeout
+        clearTimeout(notification.dataset.timeoutId);
+        
+        notification.style.opacity = '0';
+        notification.style.transform = 'translateY(-20px)';
+        
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+                // Process queue
+                this.processNotificationQueue();
+            }
+        }, 300);
+    }
+    
+    static processNotificationQueue() {
+        if (this.notificationQueue.length > 0 && this.getActiveNotifications().length < this.maxNotifications) {
+            const next = this.notificationQueue.shift();
+            this.displayNotification(next.message, next.type, next.duration, next.specialStyle);
+        }
+    }
+    
+    static getActiveNotifications() {
+        return document.querySelectorAll('.notification');
+    }
+    
+    static clearAllNotifications() {
+        const notifications = this.getActiveNotifications();
+        notifications.forEach(notification => {
+            this.removeNotification(notification);
+        });
+        this.notificationQueue = [];
+    }
+
+    // QR Code functionality
+    static loadQRLibrary() {
+        // Load QR code library if not already loaded
+        if (window.QRCode) {
+            return Promise.resolve();
+        }
+        
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js';
+            script.onload = resolve;
+            script.onerror = reject;
+            document.head.appendChild(script);
+        });
+    }
+    
+    static generateQRCode(partyCode) {
+        const url = `${window.location.origin}${window.location.pathname}?join=${partyCode}`;
+        
+        this.loadQRLibrary().then(() => {
+            const canvas = document.createElement('canvas');
+            window.QRCode.toCanvas(canvas, url, {
+                width: 200,
+                margin: 2,
+                color: {
+                    dark: '#1a1a2e',
+                    light: '#ffffff'
+                }
+            }, (error) => {
+                if (error) {
+                    console.error('QR Code generation failed:', error);
+                    return;
+                }
+                
+                this.showQRCodeModal(canvas, partyCode, url);
+            });
+        }).catch(() => {
+            // Fallback to just showing the URL
+            this.showNotification('QR code unavailable, but you can share this link: ' + url, 'info', 8000);
+        });
+    }
+    
+    static showQRCodeModal(canvas, partyCode, url) {
+        // Remove existing QR modal
+        const existingModal = document.querySelector('.qr-modal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+        
+        const modal = document.createElement('div');
+        modal.className = 'confirm-dialog qr-modal';
+        modal.innerHTML = `
+            <div class="confirm-overlay"></div>
+            <div class="confirm-content qr-code-container">
+                <h4>🎮 Share Party Code</h4>
+                <div class="party-code-display">${partyCode}</div>
+                <div class="qr-code"></div>
+                <p class="qr-share-text">Scan this QR code or share the party code</p>
+                <div class="confirm-buttons">
+                    <button class="btn btn-primary" onclick="UI.copyToClipboard('${partyCode}')">📋 Copy Code</button>
+                    <button class="btn btn-secondary" onclick="UI.copyToClipboard('${url}')">🔗 Copy Link</button>
+                    <button class="btn btn-danger qr-close">Close</button>
+                </div>
+            </div>
+        `;
+        
+        // Add the canvas
+        modal.querySelector('.qr-code').appendChild(canvas);
+        
+        document.body.appendChild(modal);
+        
+        // Add event listeners
+        modal.querySelector('.qr-close').onclick = () => modal.remove();
+        modal.querySelector('.confirm-overlay').onclick = () => modal.remove();
+        
+        // Focus the close button
+        setTimeout(() => {
+            modal.querySelector('.qr-close').focus();
+        }, 100);
+    }
+
+    // Enhanced input validation
+    static setupRealTimeValidation() {
+        // Add real-time validation for all form inputs
+        document.addEventListener('blur', (e) => {
+            if (e.target.matches('input')) {
+                this.validateInput(e.target);
+            }
+        }, true);
+        
+        document.addEventListener('input', (e) => {
+            if (e.target.matches('input')) {
+                // Clear error state on input
+                this.clearInputError(e.target);
+            }
+        }, true);
+    }
+    
+    static validateInput(input) {
+        const id = input.id;
+        const value = input.value.trim();
+        
+        switch (id) {
+            case 'playerName':
+                return this.validatePlayerName(input);
+            case 'partyCodeInput':
+                return this.validatePartyCode(input);
+            case 'secretNumber':
+            case 'guessInput':
+                return this.validateGameNumber(input);
+            case 'rangeStart':
+            case 'rangeEnd':
+            case 'singleRangeStart':
+            case 'singleRangeEnd':
+                return this.validateRangeNumber(input);
+            default:
+                return true;
+        }
+    }
+    
+    static validatePlayerName(input) {
+        const value = input.value.trim();
+        
+        if (!value) {
+            this.showInputError(input, 'Name is required');
+            return false;
+        }
+        
+        if (value.length < 2) {
+            this.showInputError(input, 'Name must be at least 2 characters');
+            return false;
+        }
+        
+        if (!/^[a-zA-Z0-9\s\-_]+$/.test(value)) {
+            this.showInputError(input, 'Name can only contain letters, numbers, spaces, hyphens, and underscores');
+            return false;
+        }
+        
+        this.showInputSuccess(input, 'Name looks good!');
+        return true;
+    }
+    
+    static validatePartyCode(input) {
+        const value = input.value.trim();
+        
+        if (!value) {
+            this.clearInputState(input);
+            return false;
+        }
+        
+        if (value.length !== 6) {
+            this.showInputError(input, 'Party code must be 6 characters');
+            return false;
+        }
+        
+        if (!/^[A-Z0-9]+$/.test(value)) {
+            this.showInputError(input, 'Party code can only contain letters and numbers');
+            return false;
+        }
+        
+        this.showInputSuccess(input, 'Party code format is correct');
+        return true;
+    }
+    
+    static validateGameNumber(input) {
+        const value = parseInt(input.value);
+        const screen = input.closest('.screen');
+        
+        if (!value && input.value !== '0') {
+            this.clearInputState(input);
+            return false;
+        }
+        
+        // Get current game range
+        let min = 1, max = 100;
+        if (screen) {
+            const rangeDisplay = screen.querySelector('[id*="Range"]');
+            if (rangeDisplay) {
+                const rangeText = rangeDisplay.textContent;
+                const matches = rangeText.match(/(\d+).*?(\d+)/);
+                if (matches) {
+                    min = parseInt(matches[1]);
+                    max = parseInt(matches[2]);
+                }
+            }
+        }
+        
+        if (value < min || value > max) {
+            this.showInputError(input, `Number must be between ${min} and ${max}`);
+            return false;
+        }
+        
+        this.showInputSuccess(input, 'Number is in valid range');
+        return true;
+    }
+    
+    static validateRangeNumber(input) {
+        const value = parseInt(input.value);
+        
+        if (!value && input.value !== '0') {
+            this.clearInputState(input);
+            return false;
+        }
+        
+        const min = input.id.includes('Start') ? 1 : 2;
+        const max = input.id.includes('Start') ? 9999 : 10000;
+        
+        if (value < min || value > max) {
+            this.showInputError(input, `Must be between ${min} and ${max}`);
+            return false;
+        }
+        
+        this.clearInputState(input);
+        return true;
+    }
+    
+    static showInputError(input, message) {
+        input.classList.add('error');
+        input.classList.remove('success');
+        this.updateInputHint(input, message, 'error');
+    }
+    
+    static showInputSuccess(input, message) {
+        input.classList.add('success');
+        input.classList.remove('error');
+        this.updateInputHint(input, message, 'success');
+    }
+    
+    static clearInputError(input) {
+        input.classList.remove('error');
+        // Don't remove success state immediately
+    }
+    
+    static clearInputState(input) {
+        input.classList.remove('error', 'success');
+        this.clearInputHint(input);
+    }
+    
+    static updateInputHint(input, message, type) {
+        let hint = input.parentElement.querySelector('.input-hint');
+        if (!hint) {
+            hint = document.createElement('div');
+            hint.className = 'input-hint';
+            input.parentElement.appendChild(hint);
+        }
+        
+        hint.textContent = message;
+        hint.className = `input-hint ${type}`;
+    }
+    
+    static clearInputHint(input) {
+        const hint = input.parentElement.querySelector('.input-hint');
+        if (hint) {
+            hint.remove();
         }
     }
 }
@@ -1001,6 +1530,116 @@ const additionalStyles = `
     z-index: 1;
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+}
+
+/* Range Preset Styles */
+.range-presets {
+    margin: 20px 0;
+    padding: 15px;
+    background: rgba(79, 172, 254, 0.05);
+    border-radius: 10px;
+    border: 1px solid rgba(79, 172, 254, 0.2);
+}
+
+.range-presets h4 {
+    color: #4facfe;
+    margin-bottom: 10px;
+    font-size: 0.95rem;
+}
+
+.preset-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+
+.btn-preset {
+    background: rgba(79, 172, 254, 0.1) !important;
+    border: 1px solid rgba(79, 172, 254, 0.3) !important;
+    color: #4facfe !important;
+    font-size: 0.85rem !important;
+    padding: 8px 12px !important;
+    border-radius: 6px !important;
+    transition: all 0.2s ease !important;
+}
+
+.btn-preset:hover {
+    background: rgba(79, 172, 254, 0.2) !important;
+    border-color: rgba(79, 172, 254, 0.5) !important;
+    color: #66b3ff !important;
+    transform: translateY(-1px);
+}
+
+.range-info {
+    margin-top: 15px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    text-align: center;
+}
+
+.range-info small {
+    color: #b8c5d6;
+    font-size: 0.85rem;
+}
+
+#currentRangeDisplay {
+    color: #4facfe;
+    font-weight: 600;
+}
+
+#rangeSize {
+    color: #51cf66;
+    font-weight: 600;
+}
+
+/* Competitive Mode Styles */
+.competitive-mode {
+    background: linear-gradient(135deg, rgba(255, 107, 107, 0.1) 0%, rgba(255, 107, 107, 0.05) 100%);
+    border: 2px solid rgba(255, 107, 107, 0.3);
+    border-radius: 12px;
+    animation: competitivePulse 2s infinite;
+}
+
+.finished-indicator {
+    color: #51cf66;
+    font-weight: bold;
+    font-size: 0.9rem;
+    background: rgba(81, 207, 102, 0.2);
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: 1px solid rgba(81, 207, 102, 0.4);
+}
+
+/* Enhanced notification styles for different scenarios */
+.notification.competitive {
+    background: linear-gradient(135deg, rgba(255, 107, 107, 0.9) 0%, rgba(255, 154, 107, 0.9) 100%);
+    border-left: 4px solid #ff6b6b;
+    animation: urgentShake 0.5s ease-in-out;
+}
+
+.notification.victory {
+    background: linear-gradient(135deg, rgba(81, 207, 102, 0.9) 0%, rgba(64, 192, 87, 0.9) 100%);
+    border-left: 4px solid #51cf66;
+    animation: victoryGlow 1s ease-in-out;
+}
+
+@keyframes competitivePulse {
+    0% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.4); }
+    50% { box-shadow: 0 0 0 10px rgba(255, 107, 107, 0.1); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0); }
+}
+
+@keyframes urgentShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-2px); }
+    75% { transform: translateX(2px); }
+}
+
+@keyframes victoryGlow {
+    0% { box-shadow: 0 0 5px rgba(81, 207, 102, 0.5); }
+    50% { box-shadow: 0 0 20px rgba(81, 207, 102, 0.8); }
+    100% { box-shadow: 0 0 5px rgba(81, 207, 102, 0.5); }
 }
 
 .confirm-title {

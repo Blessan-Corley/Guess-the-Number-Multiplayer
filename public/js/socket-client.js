@@ -162,6 +162,11 @@ class SocketClient {
             Game.handleRematchStarted(data);
         });
 
+        this.socket.on('rematch_requested', (data) => {
+            console.log('Rematch requested:', data);
+            Game.handleRematchRequested(data);
+        });
+
         // Communication events
         this.socket.on('player_typing', (data) => {
             Game.handlePlayerTyping(data);
@@ -177,6 +182,22 @@ class SocketClient {
             UI.showNotification(`${data.playerName} reconnected`, 'success');
         });
 
+        // New enhanced game flow events
+        this.socket.on('opponent_finished_first', (data) => {
+            console.log('Opponent finished first:', data);
+            Game.handleOpponentFinishedFirst(data);
+        });
+
+        this.socket.on('waiting_for_opponent', (data) => {
+            console.log('Waiting for opponent:', data);
+            Game.handleWaitingForOpponent(data);
+        });
+
+        this.socket.on('player_finished', (data) => {
+            console.log('Enhanced player finished:', data);
+            Game.handlePlayerFinished(data);
+        });
+
         // Heartbeat
         this.socket.on('heartbeat_ack', (data) => {
             // Server acknowledged heartbeat
@@ -185,7 +206,29 @@ class SocketClient {
         // Error handling
         this.socket.on('error', (data) => {
             console.error('Server error:', data);
-            UI.showNotification(data.message || 'An error occurred', 'error');
+            
+            // Hide loading overlay on any error
+            UI.hideLoadingOverlay();
+            
+            // Show appropriate error message based on error type
+            let message = data.message || 'An error occurred';
+            let type = 'error';
+            
+            if (data.type === 'party_full') {
+                message = '🚫 Session is full! This party already has 2 players. Try creating a new party or wait for a spot to open.';
+                type = 'warning';
+            } else if (data.type === 'not_found') {
+                message = '🔍 Party not found! Please check the party code and try again.';
+                type = 'error';
+            } else if (data.type === 'validation') {
+                message = `❌ ${data.message}`;
+                type = 'error';
+            } else if (data.type === 'already_in_party') {
+                message = '⚠️ You are already in a party! Please leave your current party first.';
+                type = 'warning';
+            }
+            
+            UI.showNotification(message, type, 5000); // Show for 5 seconds for important errors
         });
 
         // Reconnection events
@@ -216,6 +259,14 @@ class SocketClient {
 
         UI.showLoadingOverlay('Creating party...');
         this.socket.emit('create_party', { playerName });
+        
+        // Set a timeout to prevent infinite loading
+        setTimeout(() => {
+            if (document.querySelector('.loading-overlay.active')) {
+                UI.hideLoadingOverlay();
+                UI.showNotification('⏱️ Request timed out. Please try again.', 'warning');
+            }
+        }, 10000); // 10 second timeout
     }
 
     joinParty(partyCode, playerName) {
@@ -226,6 +277,14 @@ class SocketClient {
 
         UI.showLoadingOverlay('Joining party...');
         this.socket.emit('join_party', { partyCode, playerName });
+        
+        // Set a timeout to prevent infinite loading
+        setTimeout(() => {
+            if (document.querySelector('.loading-overlay.active')) {
+                UI.hideLoadingOverlay();
+                UI.showNotification('⏱️ Request timed out. Please try again.', 'warning');
+            }
+        }, 10000); // 10 second timeout
     }
 
     leaveParty() {

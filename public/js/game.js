@@ -152,18 +152,53 @@ class Game {
             return;
         }
         
-        if (settings.rangeEnd - settings.rangeStart < 10) {
-            UI.showNotification('Range must be at least 10 numbers', 'error');
+        if (settings.rangeEnd - settings.rangeStart < 5) {
+            UI.showNotification('Range must be at least 5 numbers', 'error');
             return;
         }
         
-        if (settings.rangeEnd - settings.rangeStart > 1000) {
-            UI.showNotification('Range cannot exceed 1000 numbers for fair gameplay', 'warning');
+        if (settings.rangeEnd - settings.rangeStart > 10000) {
+            UI.showNotification('Range cannot exceed 10000 numbers for performance', 'warning');
             return;
         }
         
         console.log('Updating settings:', settings);
         socketClient.updateSettings(settings);
+        
+        // Update range display
+        this.updateRangeDisplay(settings.rangeStart, settings.rangeEnd);
+    }
+
+    static setRangePreset(start, end) {
+        if (!socketClient.isHost()) {
+            UI.showNotification('Only the host can change settings', 'error');
+            return;
+        }
+        
+        document.getElementById('rangeStart').value = start;
+        document.getElementById('rangeEnd').value = end;
+        
+        // Update display immediately
+        this.updateRangeDisplay(start, end);
+        
+        // Trigger settings update
+        this.updateSettings();
+    }
+
+    static updateRangeDisplay(start, end) {
+        const rangeSize = end - start + 1;
+        document.getElementById('currentRangeDisplay').textContent = `${start} to ${end}`;
+        document.getElementById('rangeSize').textContent = rangeSize;
+        
+        // Update difficulty indicator
+        let difficultyText = '';
+        if (rangeSize <= 10) difficultyText = ' - Very Easy';
+        else if (rangeSize <= 50) difficultyText = ' - Easy';
+        else if (rangeSize <= 100) difficultyText = ' - Medium';
+        else if (rangeSize <= 500) difficultyText = ' - Hard';
+        else difficultyText = ' - Expert';
+        
+        document.getElementById('rangeSize').textContent = rangeSize + difficultyText;
     }
 
     // Game Flow
@@ -182,12 +217,28 @@ class Game {
         
         const { rangeStart, rangeEnd } = this.currentState.party.gameSettings;
         
+        // Enhanced validation
+        if (isNaN(secretNumber) || !Number.isInteger(secretNumber)) {
+            UI.showNotification('Please enter a valid whole number', 'error');
+            return;
+        }
+        
         if (secretNumber < rangeStart || secretNumber > rangeEnd) {
-            UI.showNotification(`Secret number must be between ${rangeStart} and ${rangeEnd}`, 'error');
+            UI.showNotification(`⚠️ Secret number must be between ${rangeStart} and ${rangeEnd}`, 'error');
+            document.getElementById('secretNumber').focus();
             return;
         }
         
         console.log('Setting ready with secret number:', secretNumber);
+        
+        // Show confirmation message
+        UI.showNotification(`✅ Secret number ${secretNumber} selected! Waiting for opponent...`, 'success');
+        
+        // Disable input and button
+        document.getElementById('secretNumber').disabled = true;
+        document.getElementById('readyBtn').disabled = true;
+        document.getElementById('readyBtn').textContent = '✅ Ready!';
+        
         socketClient.setReady(secretNumber);
     }
 
@@ -221,6 +272,10 @@ class Game {
         this.currentState.player = data.player;
         this.currentState.isHost = true;
         
+        // Reset button state
+        const createBtn = document.getElementById('createPartyBtn');
+        UI.setButtonSuccess(createBtn, '✓ Created!');
+        
         UI.hideLoadingOverlay();
         UI.showScreen('lobbyScreen');
         UI.updatePartyInfo(data.party);
@@ -229,7 +284,7 @@ class Game {
         
         document.getElementById('lobbyPartyCode').textContent = data.party.code;
         
-        UI.showNotification(`Party ${data.party.code} created! Share the code with your friend.`, 'success');
+        UI.showNotification(`🎉 Party ${data.party.code} created! Share it with your friend.`, 'success');
         
         // Auto-copy party code to clipboard
         setTimeout(() => {
@@ -243,6 +298,10 @@ class Game {
         this.currentState.player = data.player;
         this.currentState.isHost = false;
         
+        // Reset button state
+        const joinBtn = document.getElementById('joinPartySubmitBtn');
+        UI.setButtonSuccess(joinBtn, '✓ Joined!');
+        
         UI.hideLoadingOverlay();
         UI.showScreen('lobbyScreen');
         UI.updatePartyInfo(data.party);
@@ -253,7 +312,7 @@ class Game {
         document.getElementById('lobbyPartyCode').textContent = data.party.code;
         document.getElementById('startGameBtn').style.display = 'none'; // Only host can start
         
-        UI.showNotification(`Joined party ${data.party.code}! Wait for the host to start.`, 'success');
+        UI.showNotification(`🎉 Joined party ${data.party.code}! Wait for the host to start.`, 'success');
     }
 
     static handlePlayerJoined(data) {
@@ -386,25 +445,81 @@ class Game {
     }
 
     static handlePlayerFinished(data) {
-        console.log('Player finished:', data);
+        console.log('Enhanced player finished:', data);
         
-        // Show notification about who finished
+        // Show notification about who finished with context
         if (data.playerId === socketClient.gameState.playerId) {
-            UI.showNotification(`You finished in ${data.attempts} attempts! 🎯 Waiting for opponent...`, 'success');
+            if (data.isFirstToFinish) {
+                UI.showNotification(`🎯 Excellent! You found it first in ${data.attempts} attempts! Waiting for opponent to finish...`, 'success', 4000);
+            } else {
+                UI.showNotification(`✅ You found it in ${data.attempts} attempts! Let's see who wins...`, 'success', 4000);
+            }
         } else {
-            UI.showNotification(`${data.playerName} finished in ${data.attempts} attempts! ⚡ Keep going!`, 'warning');
-            
-            // If opponent finished but you haven't, show encouragement
-            if (!this.currentState.hasFinished) {
-                setTimeout(() => {
-                    UI.showNotification(`Don't give up! You can still win with fewer attempts! 💪`, 'info');
-                }, 2000);
+            if (data.isFirstToFinish && !this.currentState.hasFinished) {
+                UI.showNotification(`⚡ ${data.playerName} found it first in ${data.attempts} attempts! You need fewer attempts to win!`, 'warning', 5000);
+            } else if (!this.currentState.hasFinished) {
+                UI.showNotification(`${data.playerName} found it in ${data.attempts} attempts! Keep going!`, 'info', 4000);
             }
         }
         
         // Update opponent's attempts display
         if (data.playerId !== socketClient.gameState.playerId) {
             UI.updateGameStats(null, data.attempts);
+        }
+    }
+
+    // Handle when opponent finishes first with competitive messaging
+    static handleOpponentFinishedFirst(data) {
+        console.log('Opponent finished first, can still win:', data);
+        
+        const { opponentName, opponentAttempts, yourAttempts, attemptsToWin } = data;
+        
+        // Show competitive message
+        UI.showNotification(
+            `${opponentName} found it in ${opponentAttempts} attempts! You have ${yourAttempts} attempts so far. Find it in ${attemptsToWin} or fewer to win!`, 
+            'warning', 
+            6000, 
+            'competitive'
+        );
+        
+        // Update game message with pressure
+        UI.showGameMessage(
+            `🏁 FINAL SPRINT! You need to find it in ${attemptsToWin} or fewer attempts to beat ${opponentName}!`, 
+            'warning'
+        );
+        
+        // Add visual urgency
+        const gameScreen = document.getElementById('gameScreen');
+        gameScreen.classList.add('competitive-mode');
+        
+        // Update opponent card to show they finished
+        document.getElementById('opponentTarget').innerHTML = `<span class="finished-indicator">✅ Found it!</span>`;
+    }
+
+    // Handle waiting for opponent after finishing first
+    static handleWaitingForOpponent(data) {
+        console.log('Waiting for opponent to finish:', data);
+        
+        UI.showNotification(data.message, 'success', 5000);
+        
+        // Disable further input
+        const guessInput = document.getElementById('guessInput');
+        const guessBtn = document.getElementById('makeGuessBtn');
+        
+        guessInput.disabled = true;
+        guessInput.placeholder = '✅ You finished first!';
+        guessBtn.disabled = true;
+        guessBtn.textContent = '✅ Waiting...';
+        guessBtn.classList.add('finished');
+        
+        // Update game message
+        UI.showGameMessage(`🏆 You finished first! Waiting for your opponent to complete...`, 'success');
+        
+        // Show opponent's current attempts if available
+        if (data.opponentAttempts) {
+            setTimeout(() => {
+                UI.showNotification(`Your opponent has ${data.opponentAttempts} attempts so far...`, 'info', 3000);
+            }, 2000);
         }
     }
 
@@ -465,32 +580,64 @@ class Game {
     }
 
     static handleRoundEnded(data) {
-        console.log('Round ended:', data);
+        console.log('Round ended with detailed data:', data);
         this.currentState.party = data.party;
         this.currentState.gamePhase = 'results';
         this.currentState.hasFinished = false;
         
-        UI.showScreen('resultsScreen');
-        UI.updateResultsScreen(data.roundResult, data.isGameComplete, data.gameWinner, data.party);
+        // Remove competitive mode styling
+        const gameScreen = document.getElementById('gameScreen');
+        gameScreen.classList.remove('competitive-mode');
         
-        // Show appropriate notification
+        UI.showScreen('resultsScreen');
+        UI.updateResultsScreen(data.roundResult, data.isGameComplete, data.gameWinner, data.party, data.additionalData);
+        
+        // Show detailed win reason notification
         const isWinner = data.roundResult.winner.id === socketClient.gameState.playerId;
-        let message;
+        const additionalData = data.additionalData || {};
+        let message = '';
         
         if (isWinner) {
-            message = `🎉 Round victory! You won in ${data.roundResult.winner.attempts} attempts!`;
+            if (additionalData.winReason === 'fewer_attempts') {
+                message = `🏆 Victory! You won with ${additionalData.winnerAttempts} attempts vs ${additionalData.loserAttempts} attempts!`;
+            } else if (additionalData.winReason === 'same_attempts_faster') {
+                message = `🏆 Victory! Same attempts (${additionalData.winnerAttempts}), but you were faster!`;
+            } else if (additionalData.winReason === 'exceeded_attempts') {
+                message = `🏆 Victory! Your opponent exceeded your ${additionalData.winnerAttempts} attempts!`;
+            } else {
+                message = `🎉 Round victory! You won in ${data.roundResult.winner.attempts} attempts!`;
+            }
             this.playSound('win');
         } else {
-            message = `Round complete! Better luck next time! 💪`;
+            if (additionalData.winReason === 'fewer_attempts') {
+                message = `😔 Defeat! Opponent won with ${additionalData.winnerAttempts} vs your ${additionalData.loserAttempts} attempts.`;
+            } else if (additionalData.winReason === 'same_attempts_faster') {
+                message = `😔 So close! Same attempts (${additionalData.winnerAttempts}), but they were faster!`;
+            } else if (additionalData.winReason === 'exceeded_attempts') {
+                message = `😔 You exceeded their ${additionalData.winnerAttempts} attempts. Better luck next round!`;
+            } else {
+                message = `Round complete! Better luck next time! 💪`;
+            }
             this.playSound('lose');
         }
         
-        UI.showNotification(message, isWinner ? 'success' : 'info');
+        UI.showNotification(message, isWinner ? 'success' : 'warning', 6000, isWinner ? 'victory' : null);
+        
+        // Show additional context messages
+        if (additionalData.earlyEnd) {
+            setTimeout(() => {
+                UI.showNotification(`⚡ Game ended early - no point continuing when victory is impossible!`, 'info', 4000);
+            }, 2000);
+        } else if (additionalData.bothFinished) {
+            setTimeout(() => {
+                UI.showNotification(`🎯 Both players found the number! Winner determined by performance.`, 'info', 4000);
+            }, 2000);
+        }
         
         // Show end game options after a delay
         setTimeout(() => {
             this.showEndGameOptions(data.isGameComplete);
-        }, 2000);
+        }, 3000);
     }
 
     static showEndGameOptions(isGameComplete) {
@@ -514,8 +661,8 @@ class Game {
                     `<button class="btn btn-primary pulse-animation" onclick="Game.nextRound()">🚀 Next Round</button>` : 
                     ''
                 }
-                <button class="btn btn-success" onclick="Game.rematch()">🔄 ${isGameComplete ? 'Play Again' : 'Restart Match'}</button>
-                <button class="btn btn-secondary" onclick="Game.newGame()">🎯 New Game</button>
+                <button class="btn btn-success pulse-animation" onclick="Game.playAgain()">🎯 Play Again</button>
+                <button class="btn btn-secondary" onclick="Game.newGame()">⚙️ New Settings</button>
                 <button class="btn btn-danger" onclick="Game.leaveParty()">🏠 Main Menu</button>
             </div>
             ${!hostControls && !isGameComplete ? 
@@ -523,6 +670,59 @@ class Game {
                 ''
             }
         `;
+    }
+
+    static playAgain() {
+        console.log('Starting play again...');
+        
+        // Reset finished state
+        this.currentState.hasFinished = false;
+        
+        // Clear any previous game state
+        this.clearGameInputs();
+        
+        socketClient.rematch();
+    }
+
+    static clearGameInputs() {
+        // Clear guess input
+        const guessInput = document.getElementById('guessInput');
+        if (guessInput) {
+            guessInput.value = '';
+            guessInput.disabled = false;
+            guessInput.placeholder = 'Enter your guess...';
+        }
+        
+        // Reset guess button
+        const guessBtn = document.getElementById('makeGuessBtn');
+        if (guessBtn) {
+            guessBtn.disabled = false;
+            guessBtn.textContent = '🎯 Guess!';
+            guessBtn.classList.remove('finished');
+        }
+        
+        // FIXED: Clear selection inputs properly for rematches
+        const secretNumberInput = document.getElementById('secretNumber');
+        if (secretNumberInput) {
+            secretNumberInput.value = '';
+            secretNumberInput.disabled = false;
+        }
+        
+        // Reset ready button completely
+        const readyBtn = document.getElementById('readyBtn');
+        if (readyBtn) {
+            readyBtn.disabled = false;
+            readyBtn.textContent = '✅ Ready';
+            readyBtn.classList.remove('btn-disabled', 'loading', 'success', 'error');
+            readyBtn.style.opacity = '1';
+        }
+        
+        // Clear ready status
+        const readyStatus = document.getElementById('readyStatus');
+        if (readyStatus) {
+            readyStatus.textContent = '';
+            readyStatus.innerHTML = '';
+        }
     }
 
     static newGame() {
@@ -548,16 +748,58 @@ class Game {
         UI.showNotification(`Round ${data.party.currentRound} started! Choose wisely! 🎯`, 'success');
     }
 
+    static handleRematchRequested(data) {
+        console.log('Rematch requested:', data);
+        
+        if (data.playerId === socketClient.gameState.playerId) {
+            // I requested the rematch
+            UI.showNotification('🔄 Rematch requested! Waiting for opponent to agree...', 'info', 3000);
+            this.updateRematchButtons('waiting');
+        } else {
+            // Opponent requested rematch
+            UI.showNotification(`${data.requestedBy} wants a rematch! Click "Play Again" to agree.`, 'info', 5000);
+            this.updateRematchButtons('requested');
+        }
+    }
+
     static handleRematchStarted(data) {
         console.log('Rematch started:', data);
         this.currentState.party = data.party;
         this.currentState.gamePhase = 'selection';
         this.currentState.hasFinished = false;
         
+        // Clear any previous game state
+        this.clearGameInputs();
+        
         UI.showScreen('selectionScreen');
         UI.updateSelectionScreen(data.party, data.selectionTimeLimit);
         
-        UI.showNotification('Rematch started! Fresh start, good luck! 🍀', 'success');
+        UI.showNotification('🎮 Both players agreed! New game starting! Good luck! 🍀', 'success');
+    }
+
+    static updateRematchButtons(state) {
+        const endGameDiv = document.getElementById('endGameActions');
+        if (!endGameDiv) return;
+        
+        const playAgainBtn = endGameDiv.querySelector('.btn-success');
+        if (!playAgainBtn) return;
+        
+        switch (state) {
+            case 'waiting':
+                playAgainBtn.textContent = '⏳ Waiting for opponent...';
+                playAgainBtn.disabled = true;
+                playAgainBtn.classList.remove('pulse-animation');
+                break;
+            case 'requested':
+                playAgainBtn.textContent = '✅ Accept Rematch';
+                playAgainBtn.disabled = false;
+                playAgainBtn.classList.add('pulse-animation');
+                break;
+            default:
+                playAgainBtn.textContent = '🎯 Play Again';
+                playAgainBtn.disabled = false;
+                playAgainBtn.classList.add('pulse-animation');
+        }
     }
 
     static handlePlayerTyping(data) {
@@ -755,8 +997,16 @@ class Game {
     }
 
     // Error handling
-    static handleError(error, context = 'Unknown') {
+    static handleError(error, context = 'Unknown', buttonId = null) {
         console.error(`Game error in ${context}:`, error);
+        
+        // Reset button state if provided
+        if (buttonId) {
+            const button = document.getElementById(buttonId);
+            if (button) {
+                UI.setButtonError(button, 'Error!');
+            }
+        }
         
         let userMessage = 'An unexpected error occurred';
         
@@ -1043,6 +1293,9 @@ document.addEventListener('DOMContentLoaded', () => {
     Game.init();
     Game.initializeEnhancements();
     Game.loadPreferences();
+    
+    // Initialize range display
+    Game.updateRangeDisplay(1, 100);
     
     // Try to restore previous game state
     setTimeout(() => {

@@ -125,10 +125,21 @@
                         <div class="input-group">
                             <label for="rangeStart">Start Number</label>
                             <input type="number" class="input-field" id="rangeStart" value="1" min="1" max="9999">
+                            <div class="input-hint">Minimum: 1</div>
                         </div>
                         <div class="input-group">
                             <label for="rangeEnd">End Number</label>
                             <input type="number" class="input-field" id="rangeEnd" value="100" min="2" max="10000">
+                            <div class="input-hint">Maximum: 10000</div>
+                        </div>
+                    </div>
+                    <div class="range-presets">
+                        <h4>Quick Presets:</h4>
+                        <div class="preset-buttons">
+                            <button type="button" class="btn btn-preset" onclick="Game.setRangePreset(1, 10)">1-10 (Easy)</button>
+                            <button type="button" class="btn btn-preset" onclick="Game.setRangePreset(1, 50)">1-50 (Medium)</button>
+                            <button type="button" class="btn btn-preset" onclick="Game.setRangePreset(1, 100)">1-100 (Hard)</button>
+                            <button type="button" class="btn btn-preset" onclick="Game.setRangePreset(1, 1000)">1-1000 (Expert)</button>
                         </div>
                     </div>
                     <div class="checkbox-group">
@@ -137,6 +148,9 @@
                             <span class="checkmark"></span>
                             Best of 3 Rounds
                         </label>
+                    </div>
+                    <div class="range-info">
+                        <small>💡 Current range: <span id="currentRangeDisplay">1 to 100</span> (<span id="rangeSize">100</span> numbers)</small>
                     </div>
                 </div>
 
@@ -162,8 +176,9 @@
                 </div>
 
                 <div class="input-group">
-                    <label for="secretNumber">Your Secret Number</label>
-                    <input type="number" class="input-field" id="secretNumber" placeholder="Enter your secret number" required>
+                    <label for="secretNumber">Your Secret Number <span class="range-hint" id="secretNumberRange"></span></label>
+                    <input type="number" class="input-field secret-number-input" id="secretNumber" placeholder="Enter your secret number" required>
+                    <div class="input-hint" id="secretNumberHint">Choose wisely - your opponent will try to guess this!</div>
                 </div>
 
                 <div class="button-group">
@@ -221,8 +236,9 @@
 
                 <div class="guess-section">
                     <div class="input-group">
-                        <label for="guessInput">Your Guess</label>
-                        <input type="number" class="input-field" id="guessInput" placeholder="Enter your guess" required>
+                        <label for="guessInput">Your Guess <span class="range-hint" id="guessRange"></span></label>
+                        <input type="number" class="input-field guess-input" id="guessInput" placeholder="Enter your guess" required>
+                        <div class="input-hint" id="guessHint">Find your opponent's secret number!</div>
                     </div>
                     <button class="btn btn-primary" id="makeGuessBtn" type="button">🎯 Guess!</button>
                 </div>

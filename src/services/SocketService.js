@@ -97,13 +97,25 @@ class SocketService {
             // Validate inputs
             const codeValidation = this.partyService.validatePartyCode(partyCode);
             if (!codeValidation.valid) {
-                socket.emit('error', { message: codeValidation.error });
+                socket.emit('error', { message: codeValidation.error, type: 'validation' });
                 return;
             }
 
             const nameValidation = this.partyService.validatePlayerName(playerName);
             if (!nameValidation.valid) {
-                socket.emit('error', { message: nameValidation.error });
+                socket.emit('error', { message: nameValidation.error, type: 'validation' });
+                return;
+            }
+
+            // Check if party exists and is full before attempting to join
+            const party = this.partyService.getParty(partyCode.toUpperCase());
+            if (!party) {
+                socket.emit('error', { message: 'Party not found. Please check the code and try again.', type: 'not_found' });
+                return;
+            }
+
+            if (party.isFull()) {
+                socket.emit('error', { message: 'This session is full. Only 2 players can join a party.', type: 'party_full' });
                 return;
             }
 
@@ -133,7 +145,22 @@ class SocketService {
 
         } catch (error) {
             console.error('Error joining party:', error);
-            socket.emit('error', { message: error.message });
+            let errorType = 'general';
+            let errorMessage = error.message;
+
+            // Provide specific error types for different scenarios
+            if (error.message.includes('full')) {
+                errorType = 'party_full';
+                errorMessage = 'This session is full. Only 2 players can join a party.';
+            } else if (error.message.includes('not found')) {
+                errorType = 'not_found';
+                errorMessage = 'Party not found. Please check the code and try again.';
+            } else if (error.message.includes('already in')) {
+                errorType = 'already_in_party';
+                errorMessage = 'You are already in a party. Please leave your current party first.';
+            }
+
+            socket.emit('error', { message: errorMessage, type: errorType });
         }
     }
 
@@ -315,17 +342,25 @@ class SocketService {
                 return;
             }
 
-            // Make the guess
+            // Make the guess - This already contains the feedback logic internally
             const guessResult = party.makeGuess(player.id, guess);
             
-            // Generate feedback message
+            // Find opponent for notifications
             const opponent = Array.from(party.players.values()).find(p => p.id !== player.id);
+            if (!opponent) {
+                socket.emit('error', { message: 'Opponent not found' });
+                return;
+            }
+            
+            // Generate feedback message using the correct target number (opponent's secret)
             const feedback = this.gameService.generateFeedback(
                 guess, 
                 opponent.secretNumber, 
                 party.gameSettings.rangeStart, 
                 party.gameSettings.rangeEnd
             );
+            
+            console.log(`Player ${player.name} guessed ${guess}, target is ${opponent.secretNumber}, correct: ${guessResult.isCorrect}`);
 
             // Send feedback to guesser
             socket.emit('guess_result', {
@@ -342,7 +377,7 @@ class SocketService {
                 isCorrect: guessResult.isCorrect
             });
 
-            // If correct, mark player as finished but DON'T end game yet
+            // If correct, mark player as finished
             if (guessResult.isCorrect) {
                 finishedSet.add(player.id);
                 this.finishedPlayers.set(party.code, finishedSet);
@@ -351,29 +386,55 @@ class SocketService {
                 player.hasFinished = true;
                 player.finishedAt = Date.now();
                 
-                // Notify both players about the finish
+                // Get opponent for comparison
+                const players = Array.from(party.players.values());
+                const opponentPlayer = players.find(p => p.id !== player.id);
+                
+                // Notify both players about the finish with detailed info
                 this.io.to(party.code).emit('player_finished', {
                     playerId: player.id,
                     playerName: player.name,
-                    attempts: player.attempts
+                    attempts: player.attempts,
+                    isFirstToFinish: finishedSet.size === 1
                 });
 
-                // Check if BOTH players have finished
+                // Check game ending conditions
                 if (finishedSet.size >= 2) {
-                    // Both players finished, determine winner by attempts
-                    const players = Array.from(party.players.values());
-                    const finishedPlayers = players.filter(p => finishedSet.has(p.id));
+                    // Both players finished - determine winner by attempts and timing
+                    this.determineWinnerAndEndRound(party, finishedSet);
+                } else if (finishedSet.size === 1) {
+                    // First player finished - check if opponent can still win
+                    const canOpponentWin = opponentPlayer.attempts < player.attempts;
                     
-                    // Sort by attempts (lower is better), then by finish time
-                    finishedPlayers.sort((a, b) => {
-                        if (a.attempts !== b.attempts) {
-                            return a.attempts - b.attempts;
-                        }
-                        return a.finishedAt - b.finishedAt; // Earlier finish time wins if same attempts
-                    });
-                    
-                    const winner = finishedPlayers[0];
-                    this.endRound(party, winner.id);
+                    if (canOpponentWin) {
+                        // Opponent can still win, continue game
+                        this.io.to(opponentPlayer.socketId).emit('opponent_finished_first', {
+                            opponentName: player.name,
+                            opponentAttempts: player.attempts,
+                            yourAttempts: opponentPlayer.attempts,
+                            attemptsToWin: player.attempts - 1,
+                            message: `${player.name} found the number in ${player.attempts} attempts! You need to find it in ${player.attempts - 1} or fewer attempts to win!`
+                        });
+                        
+                        this.io.to(player.socketId).emit('waiting_for_opponent', {
+                            message: `🎯 Great! You found it in ${player.attempts} attempts! Waiting for ${opponentPlayer.name} to finish...`,
+                            opponentAttempts: opponentPlayer.attempts
+                        });
+                    } else {
+                        // Opponent already exceeded attempts, game over
+                        this.endRoundEarly(party, player.id, 'exceeded_attempts');
+                    }
+                }
+            } else {
+                // Wrong guess - check if opponent finished and this player exceeded attempts
+                const opponentFinished = Array.from(party.players.values()).find(p => 
+                    p.id !== player.id && finishedSet.has(p.id)
+                );
+                
+                if (opponentFinished && player.attempts >= opponentFinished.attempts) {
+                    // This player has exceeded the winner's attempts, end game
+                    this.endRoundEarly(party, opponentFinished.id, 'exceeded_attempts');
+                    return;
                 }
             }
 
@@ -419,7 +480,7 @@ class SocketService {
         }
     }
 
-    // Handle rematch
+    // Handle rematch request
     handleRematch(socket) {
         try {
             const party = this.partyService.getPartyBySocket(socket.id);
@@ -428,22 +489,47 @@ class SocketService {
                 return;
             }
 
-            party.rematch();
+            const player = this.partyService.getPlayerBySocket(socket.id);
+            if (!player) {
+                socket.emit('error', { message: 'Player not found' });
+                return;
+            }
 
-            // Reset finished players tracking
-            this.finishedPlayers.set(party.code, new Set());
+            // Mark player as wanting rematch
+            player.wantsRematch = true;
+            
+            // Check if all players want rematch
+            const allWantRematch = Array.from(party.players.values()).every(p => p.wantsRematch);
+            
+            if (allWantRematch) {
+                // All players agreed, start rematch
+                party.rematch();
+                
+                // Reset rematch flags
+                party.players.forEach(p => p.wantsRematch = false);
 
-            // Start selection timer
-            this.startSelectionTimer(party);
+                // Reset finished players tracking
+                this.finishedPlayers.set(party.code, new Set());
 
-            // Notify all players
-            this.io.to(party.code).emit('rematch_started', {
-                party: party.getDetailedState(),
-                selectionTimeLimit: config.SELECTION_TIME_LIMIT
-            });
+                // Start selection timer
+                this.startSelectionTimer(party);
+
+                // Notify all players
+                this.io.to(party.code).emit('rematch_started', {
+                    party: party.getDetailedState(),
+                    selectionTimeLimit: config.SELECTION_TIME_LIMIT
+                });
+            } else {
+                // Notify about rematch request
+                this.io.to(party.code).emit('rematch_requested', {
+                    requestedBy: player.name,
+                    playerId: player.id,
+                    allPlayersReady: allWantRematch
+                });
+            }
 
         } catch (error) {
-            console.error('Error starting rematch:', error);
+            console.error('Error handling rematch:', error);
             socket.emit('error', { message: error.message });
         }
     }
@@ -512,27 +598,43 @@ class SocketService {
     handleDisconnection(socket, reason) {
         console.log(`Socket disconnected: ${socket.id}, reason: ${reason}`);
         
-        const result = this.partyService.cleanupDisconnectedPlayer(socket.id);
+        const result = this.partyService.leaveParty(socket.id);
         if (result) {
             const { party, player, partyCode } = result;
             
             // Clean up finished players tracking
             if (this.finishedPlayers.has(partyCode)) {
                 this.finishedPlayers.get(partyCode).delete(player.id);
+                if (this.finishedPlayers.get(partyCode).size === 0) {
+                    this.finishedPlayers.delete(partyCode);
+                }
             }
-            
-            // Notify other players about disconnection
-            this.io.to(partyCode).emit('player_disconnected', {
-                playerId: player.id,
-                playerName: player.name,
-                reason: reason
-            });
+
+            // If game is in progress and player leaves, end game immediately
+            if (party && !party.isEmpty() && party.gameState.phase === 'playing') {
+                const remainingPlayer = Array.from(party.players.values())[0];
+                
+                // Notify remaining player they won by default
+                this.io.to(partyCode).emit('game_ended_by_leave', {
+                    winner: remainingPlayer.getPublicInfo(),
+                    leftPlayer: player.getPublicInfo(),
+                    message: `${player.name} disconnected. ${remainingPlayer.name} wins by default!`
+                });
+            } else if (!party.isEmpty()) {
+                // Notify remaining players
+                this.io.to(partyCode).emit('player_left', {
+                    party: party.getPublicInfo(),
+                    leftPlayer: player.getPublicInfo()
+                });
+            }
 
             // Clear selection timer if party becomes inactive
             if (party.isEmpty()) {
                 this.clearSelectionTimer(partyCode);
                 this.finishedPlayers.delete(partyCode);
             }
+            
+            console.log(`Player ${player?.name || 'Unknown'} removed from party ${partyCode} due to disconnection`);
         }
     }
 
@@ -589,8 +691,55 @@ class SocketService {
         }
     }
 
+    // Determine winner when both players finished and end round
+    determineWinnerAndEndRound(party, finishedSet) {
+        const players = Array.from(party.players.values());
+        const finishedPlayers = players.filter(p => finishedSet.has(p.id));
+        
+        // Sort by attempts (lower is better), then by finish time (earlier wins)
+        finishedPlayers.sort((a, b) => {
+            if (a.attempts !== b.attempts) {
+                return a.attempts - b.attempts;
+            }
+            return a.finishedAt - b.finishedAt; // Earlier finish time wins if same attempts
+        });
+        
+        const winner = finishedPlayers[0];
+        const loser = finishedPlayers[1];
+        
+        // Determine win reason
+        let winReason = '';
+        if (winner.attempts < loser.attempts) {
+            winReason = 'fewer_attempts';
+        } else if (winner.attempts === loser.attempts) {
+            winReason = 'same_attempts_faster';
+        }
+        
+        this.endRound(party, winner.id, { 
+            winReason, 
+            winnerAttempts: winner.attempts, 
+            loserAttempts: loser.attempts,
+            bothFinished: true
+        });
+    }
+
+    // End round early due to one player exceeding attempts
+    endRoundEarly(party, winnerId, reason) {
+        const winner = party.getPlayer(winnerId);
+        const players = Array.from(party.players.values());
+        const loser = players.find(p => p.id !== winnerId);
+        
+        this.endRound(party, winnerId, {
+            winReason: reason,
+            winnerAttempts: winner.attempts,
+            loserAttempts: loser.attempts,
+            bothFinished: false,
+            earlyEnd: true
+        });
+    }
+
     // End round
-    endRound(party, winnerId) {
+    endRound(party, winnerId, additionalData = {}) {
         try {
             const result = party.endRound(winnerId);
             const { roundResult, isGameComplete, gameWinner } = result;
@@ -603,15 +752,17 @@ class SocketService {
                 this.partyService.recordGameCompletion();
             }
 
-            // Generate round summary
+            // Generate round summary with additional context
             const roundSummary = this.gameService.generateRoundSummary(roundResult, party.gameSettings);
+            roundSummary.additionalData = additionalData;
 
             // Notify all players
             this.io.to(party.code).emit('round_ended', {
                 roundResult: roundSummary,
                 isGameComplete,
                 gameWinner: gameWinner ? gameWinner.getPublicInfo() : null,
-                party: party.getDetailedState()
+                party: party.getDetailedState(),
+                additionalData
             });
 
         } catch (error) {
