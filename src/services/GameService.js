@@ -7,7 +7,7 @@ class GameService {
         this.partyService = partyService;
     }
 
-    // Generate feedback for a guess
+    // Generate feedback for a guess - IMPROVED: Better range-appropriate thresholds
     generateFeedback(guess, target, rangeStart, rangeEnd) {
         if (guess === target) {
             return {
@@ -18,9 +18,32 @@ class GameService {
         }
 
         const difference = Math.abs(guess - target);
-        const range = rangeEnd - rangeStart;
-        const closeThreshold = Math.max(1, Math.floor(range * 0.1)); // 10% of range
-        const veryCloseThreshold = Math.max(1, Math.floor(range * 0.05)); // 5% of range
+        const range = rangeEnd - rangeStart + 1;
+        
+        // IMPROVED: Smart thresholds that scale better with range size
+        let veryCloseThreshold, closeThreshold;
+        
+        if (range <= 20) {
+            // Small range: Very tight thresholds
+            veryCloseThreshold = 1;
+            closeThreshold = 2;
+        } else if (range <= 50) {
+            // Small-medium range
+            veryCloseThreshold = 2;
+            closeThreshold = 4;
+        } else if (range <= 100) {
+            // Classic range
+            veryCloseThreshold = 3;
+            closeThreshold = 8;
+        } else if (range <= 500) {
+            // Large range: Adaptive thresholds
+            veryCloseThreshold = Math.max(5, Math.ceil(range * 0.015)); // 1.5%
+            closeThreshold = Math.max(10, Math.ceil(range * 0.04)); // 4%
+        } else {
+            // Very large range: Even more adaptive
+            veryCloseThreshold = Math.max(8, Math.ceil(range * 0.012)); // 1.2%
+            closeThreshold = Math.max(20, Math.ceil(range * 0.035)); // 3.5%
+        }
 
         let messageType;
         let messageKey;

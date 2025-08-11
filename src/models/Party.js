@@ -277,11 +277,9 @@ class Party {
         this.stats.totalGuesses++;
         this.updateActivity();
 
-        // Check if player won
-        if (guessResult.isCorrect) {
-            this.endRound(playerId);
-        }
-
+        // Don't immediately end round - let SocketService manage when both players finish
+        // The SocketService will call endRound when appropriate
+        
         return guessResult;
     }
 

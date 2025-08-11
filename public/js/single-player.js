@@ -34,36 +34,80 @@ class SinglePlayerGame {
                 "📈 That's stratosphere level! Think lower!",
                 "🚀 Houston, we have a problem - too high!",
                 "⬆️ Nope, bring it down several notches!",
-                "🎈 Your guess is floating in the clouds!"
+                "🎈 Your guess is floating in the clouds!",
+                "🏔️ That's mountain-top high!",
+                "🎢 Whoa! Take it down a level!",
+                "⛰️ You're reaching the summit! Come down!",
+                "🛸 That's outer space territory! Descend!",
+                "📡 Satellite level! Bring it way down!",
+                "🎯 Aim lower, sharpshooter!",
+                "🔻 Drop it like it's hot!"
             ],
             TOO_LOW: [
                 "🕳️ That's underground territory!",
                 "📉 You're mining too deep! Go higher!",
                 "⬇️ Think way higher than that!",
                 "🐠 You're swimming in the deep end!",
-                "🏠 That's basement level thinking!"
+                "🏠 That's basement level thinking!",
+                "🌊 You're below sea level!",
+                "⛏️ Stop digging and climb up!",
+                "🐙 Deep ocean vibes! Surface level please!",
+                "🚇 You're in the subway! Go upstairs!",
+                "🔺 Elevate your thinking!",
+                "🎯 Aim higher, champion!",
+                "🚁 Time to take off!"
             ],
             CLOSE_HIGH: [
                 "🔥 Getting warm, but still too HIGH!",
                 "🎯 Close! Just dial it down a bit!",
                 "👀 So close! Nudge it down slightly!",
-                "⚡ Hot! But still flying too HIGH!"
+                "⚡ Hot! But still flying too HIGH!",
+                "🎪 In the neighborhood, but aim LOWER!",
+                "🔍 Burning hot! Come down just a bit!",
+                "🌡️ Temperature rising! Cool it down!",
+                "🏹 Good shot! Just adjust down!",
+                "🎲 You're in the zone! Step down!",
+                "🧭 Right direction! Just lower!",
+                "🎨 Close call! Paint it lower!",
+                "⚖️ Almost balanced! Tip it down!"
             ],
             CLOSE_LOW: [
                 "🔥 Getting warm, but still too LOW!",
                 "🎯 Close! Just bump it up a bit!",
                 "👀 So close! Nudge it up slightly!",
-                "⚡ Hot! But still diving too LOW!"
+                "⚡ Hot! But still diving too LOW!",
+                "🎪 In the neighborhood, but aim HIGHER!",
+                "🔍 Burning hot! Climb up just a bit!",
+                "🌡️ Temperature rising! Heat it up!",
+                "🏹 Good shot! Just adjust up!",
+                "🎲 You're in the zone! Step up!",
+                "🧭 Right direction! Just higher!",
+                "🎨 Close call! Paint it higher!",
+                "⚖️ Almost balanced! Tip it up!"
             ],
             VERY_CLOSE_HIGH: [
                 "🌟 SO CLOSE! Just a tiny bit LOWER!",
                 "💫 Almost perfect! Go down just a smidge!",
-                "🎊 You're practically there! Slightly LOWER!"
+                "🎊 You're practically there! Slightly LOWER!",
+                "🔥 BURNING HOT! Just nudge it down!",
+                "⭐ Right on the edge! Think LOWER!",
+                "💎 Diamond close! Polish it down!",
+                "🎯 Bullseye territory! A hair lower!",
+                "🔮 Crystal ball says: DOWN just a notch!",
+                "🏆 Champion level! Just a whisper down!",
+                "⚡ Electric! Just a spark lower!"
             ],
             VERY_CLOSE_LOW: [
                 "🌟 SO CLOSE! Just a tiny bit HIGHER!",
                 "💫 Almost perfect! Go up just a smidge!",
-                "🎊 You're practically there! Slightly HIGHER!"
+                "🎊 You're practically there! Slightly HIGHER!",
+                "🔥 BURNING HOT! Just nudge it up!",
+                "⭐ Right on the edge! Think HIGHER!",
+                "💎 Diamond close! Polish it up!",
+                "🎯 Bullseye territory! A hair higher!",
+                "🔮 Crystal ball says: UP just a notch!",
+                "🏆 Champion level! Just a whisper up!",
+                "⚡ Electric! Just a spark higher!"
             ]
         };
     }
@@ -73,10 +117,10 @@ class SinglePlayerGame {
         this.gameState.rangeStart = rangeStart;
         this.gameState.rangeEnd = rangeEnd;
         this.gameState.botDifficulty = botDifficulty;
-        this.gameState.gamePhase = 'setup';
+        this.gameState.gamePhase = 'selection';
         
-        // Generate secret numbers
-        this.gameState.playerSecretNumber = this.generateRandomNumber(rangeStart, rangeEnd);
+        // FIXED: Don't auto-generate player's secret number - let user choose
+        this.gameState.playerSecretNumber = null; // Will be set when player chooses
         this.gameState.botSecretNumber = this.generateRandomNumber(rangeStart, rangeEnd);
         
         // Initialize bot strategy
@@ -88,7 +132,79 @@ class SinglePlayerGame {
         this.gameState.playerGuessHistory = [];
         this.gameState.botGuessHistory = [];
         
-        this.showSinglePlayerGame();
+        // Show selection screen instead of going directly to game
+        this.showSinglePlayerSelection();
+    }
+
+    showSinglePlayerSelection() {
+        // Show selection screen for single player
+        UI.showScreen('selectionScreen');
+        
+        // Update round info for single player
+        document.getElementById('selectionRoundInfo').querySelector('.round-text').textContent = 'Single Player vs Bot';
+        
+        const rangeDisplay = `${this.gameState.rangeStart} - ${this.gameState.rangeEnd}`;
+        document.getElementById('selectionRangeDisplay').textContent = rangeDisplay;
+        
+        const secretNumberInput = document.getElementById('secretNumber');
+        secretNumberInput.min = this.gameState.rangeStart;
+        secretNumberInput.max = this.gameState.rangeEnd;
+        secretNumberInput.value = '';
+        secretNumberInput.disabled = false;
+        secretNumberInput.placeholder = `Choose ${rangeDisplay}`;
+        
+        // Update selection message for single player
+        const selectionMessage = document.getElementById('selectionMessage');
+        selectionMessage.innerHTML = `
+            <strong>🎯 Choose your secret number between ${rangeDisplay}</strong><br>
+            <small>🤖 The AI bot will try to guess YOUR number!</small>
+        `;
+        selectionMessage.className = 'message info enhanced';
+        
+        // Reset ready button for single player
+        const readyBtn = document.getElementById('readyBtn');
+        readyBtn.disabled = false;
+        readyBtn.textContent = '✅ Start Game';
+        readyBtn.onclick = () => this.setPlayerReady();
+        
+        // Clear ready status
+        document.getElementById('readyStatus').innerHTML = '';
+        
+        // Focus on input
+        setTimeout(() => secretNumberInput.focus(), 200);
+        
+        UI.showNotification('🤖 Choose your secret number! The AI bot will try to guess it.', 'info', 4000);
+    }
+
+    setPlayerReady() {
+        const secretNumberInput = document.getElementById('secretNumber');
+        const secretNumber = parseInt(secretNumberInput.value);
+        
+        // Validate input
+        if (!secretNumber || secretNumber < this.gameState.rangeStart || secretNumber > this.gameState.rangeEnd) {
+            UI.showNotification(`⚠️ Please enter a number between ${this.gameState.rangeStart} and ${this.gameState.rangeEnd}`, 'error');
+            secretNumberInput.focus();
+            return;
+        }
+        
+        // Set the player's secret number
+        this.gameState.playerSecretNumber = secretNumber;
+        
+        // Disable input and update button
+        secretNumberInput.disabled = true;
+        const readyBtn = document.getElementById('readyBtn');
+        readyBtn.disabled = true;
+        readyBtn.textContent = '✅ Starting Game...';
+        
+        // Update status
+        document.getElementById('readyStatus').innerHTML = `✅ Your secret number: ${secretNumber}<br><small>🤖 Starting game with AI bot...</small>`;
+        
+        UI.showNotification(`✅ Secret number ${secretNumber} selected! Starting game...`, 'success');
+        
+        // Start the actual game after a short delay
+        setTimeout(() => {
+            this.showSinglePlayerGame();
+        }, 2000);
     }
 
     showSinglePlayerGame() {
@@ -276,9 +392,27 @@ class SinglePlayerGame {
         }
 
         const difference = Math.abs(guess - target);
-        const range = this.gameState.rangeEnd - this.gameState.rangeStart;
-        const closeThreshold = Math.max(1, Math.floor(range * 0.1));
-        const veryCloseThreshold = Math.max(1, Math.floor(range * 0.05));
+        const range = this.gameState.rangeEnd - this.gameState.rangeStart + 1;
+        
+        // IMPROVED: Smart thresholds matching server-side logic
+        let veryCloseThreshold, closeThreshold;
+        
+        if (range <= 20) {
+            veryCloseThreshold = 1;
+            closeThreshold = 2;
+        } else if (range <= 50) {
+            veryCloseThreshold = 2;
+            closeThreshold = 4;
+        } else if (range <= 100) {
+            veryCloseThreshold = 3;
+            closeThreshold = 8;
+        } else if (range <= 500) {
+            veryCloseThreshold = Math.max(5, Math.ceil(range * 0.015));
+            closeThreshold = Math.max(10, Math.ceil(range * 0.04));
+        } else {
+            veryCloseThreshold = Math.max(8, Math.ceil(range * 0.012));
+            closeThreshold = Math.max(20, Math.ceil(range * 0.035));
+        }
 
         let messageType;
         let messageKey;
@@ -403,18 +537,19 @@ class SinglePlayerGame {
         this.gameState.botAttempts = 0;
         this.gameState.playerGuessHistory = [];
         this.gameState.botGuessHistory = [];
+        this.gameState.gamePhase = 'selection';
         
-        // Generate new secret numbers
-        this.gameState.playerSecretNumber = this.generateRandomNumber(this.gameState.rangeStart, this.gameState.rangeEnd);
+        // FIXED: Don't auto-generate new secret numbers - let user choose again
+        this.gameState.playerSecretNumber = null; // User must choose
         this.gameState.botSecretNumber = this.generateRandomNumber(this.gameState.rangeStart, this.gameState.rangeEnd);
         
         // Reset bot strategy
         this.initializeBotStrategy();
         
-        // Show game screen
-        this.showSinglePlayerGame();
+        // Show selection screen again
+        this.showSinglePlayerSelection();
         
-        UI.showNotification('New game started! 🎮', 'success');
+        UI.showNotification('New game! Choose your secret number again! 🎮', 'success');
     }
 
     returnToMenu() {

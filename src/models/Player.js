@@ -16,6 +16,7 @@ class Player {
         this.joinedAt = Date.now();
         this.hasFinished = false; // New: track if player found the number
         this.finishedAt = null;   // New: timestamp when player finished
+        this.wantsRematch = false; // Track rematch requests
         this.stats = {
             totalGames: 0,
             totalWins: 0,
@@ -47,6 +48,7 @@ class Player {
         this.guessHistory = [];
         this.hasFinished = false;  // Reset finished status
         this.finishedAt = null;    // Reset finished timestamp
+        this.wantsRematch = false; // Reset rematch flag
         this.updateActivity();
     }
 
