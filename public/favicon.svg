@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4facfe;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#00f2fe;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="number" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffd700;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ffb347;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="32" cy="32" r="30" fill="url(#bg)" stroke="#1a1a2e" stroke-width="4"/>
+  
+  <!-- Question mark and numbers background -->
+  <circle cx="32" cy="32" r="22" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+  
+  <!-- Main question mark -->
+  <text x="32" y="42" font-family="Arial Black, sans-serif" font-size="28" font-weight="bold" text-anchor="middle" fill="url(#number)" stroke="#1a1a2e" stroke-width="1">?</text>
+  
+  <!-- Small decorative numbers -->
+  <text x="18" y="20" font-family="Arial, sans-serif" font-size="8" font-weight="bold" fill="rgba(255,255,255,0.6)">1</text>
+  <text x="46" y="20" font-family="Arial, sans-serif" font-size="8" font-weight="bold" fill="rgba(255,255,255,0.6)">9</text>
+  <text x="12" y="48" font-family="Arial, sans-serif" font-size="8" font-weight="bold" fill="rgba(255,255,255,0.6)">5</text>
+  <text x="52" y="48" font-family="Arial, sans-serif" font-size="8" font-weight="bold" fill="rgba(255,255,255,0.6)">7</text>
+  
+  <!-- Sparkle effects -->
+  <circle cx="45" cy="15" r="1.5" fill="#ffd700" opacity="0.8"/>
+  <circle cx="19" cy="55" r="1.5" fill="#ffd700" opacity="0.8"/>
+  <polygon points="50,25 52,27 50,29 48,27" fill="#ffffff" opacity="0.7"/>
+  <polygon points="14,35 16,37 14,39 12,37" fill="#ffffff" opacity="0.7"/>
+</svg>

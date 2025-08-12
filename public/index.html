@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Number Guesser</title>
+    <title>Number Guesser - Multiplayer Brain Challenge</title>
     <link rel="stylesheet" href="/css/styles.css">
-    <link rel="icon" href="/assets/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/favicon.svg">
     <meta name="description" content="Real-time multiplayer number guessing game with friends">
     <meta name="theme-color" content="#1a1a2e">
     
@@ -136,10 +138,13 @@
                     <div class="range-presets">
                         <h4>Quick Presets:</h4>
                         <div class="preset-buttons">
-                            <button type="button" class="btn btn-preset" onclick="Game.setRangePreset(1, 10)">1-10 (Easy)</button>
-                            <button type="button" class="btn btn-preset" onclick="Game.setRangePreset(1, 50)">1-50 (Medium)</button>
-                            <button type="button" class="btn btn-preset" onclick="Game.setRangePreset(1, 100)">1-100 (Hard)</button>
+                            <button type="button" class="btn btn-preset" onclick="Game.setRangePreset(1, 10)">1-10 (Beginner)</button>
+                            <button type="button" class="btn btn-preset" onclick="Game.setRangePreset(1, 50)">1-50 (Easy)</button>
+                            <button type="button" class="btn btn-preset" onclick="Game.setRangePreset(1, 100)">1-100 (Medium)</button>
+                            <button type="button" class="btn btn-preset" onclick="Game.setRangePreset(1, 500)">1-500 (Hard)</button>
                             <button type="button" class="btn btn-preset" onclick="Game.setRangePreset(1, 1000)">1-1000 (Expert)</button>
+                            <button type="button" class="btn btn-preset" onclick="Game.setRangePreset(1, 5000)">1-5000 (Insane)</button>
+                            <button type="button" class="btn btn-preset" onclick="Game.setRangePreset(1, 10000)">1-10000 (Legendary)</button>
                         </div>
                     </div>
                     <div class="checkbox-group">

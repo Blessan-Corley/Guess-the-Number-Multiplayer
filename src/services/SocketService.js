@@ -390,12 +390,14 @@ class SocketService {
                 const players = Array.from(party.players.values());
                 const opponentPlayer = players.find(p => p.id !== player.id);
                 
-                // Notify both players about the finish with detailed info
+                // Enhanced notification with more context
                 this.io.to(party.code).emit('player_finished', {
                     playerId: player.id,
                     playerName: player.name,
                     attempts: player.attempts,
-                    isFirstToFinish: finishedSet.size === 1
+                    isFirstToFinish: finishedSet.size === 1,
+                    targetNumber: opponent.secretNumber, // Include what number they found
+                    timeToFinish: Date.now() - party.gameState.roundStartTime || 0
                 });
 
                 // Check game ending conditions

@@ -112,7 +112,8 @@ class Party {
             throw new Error('Only host can update settings');
         }
 
-        if (this.gameState.phase !== 'lobby') {
+        // Allow settings changes in lobby, results, and finished phases
+        if (this.gameState.phase === 'selection' || this.gameState.phase === 'playing') {
             throw new Error('Cannot update settings during active game');
         }
 
@@ -121,12 +122,20 @@ class Party {
             if (typeof settings.rangeStart !== 'number' || settings.rangeStart < 1) {
                 throw new Error('Invalid range start');
             }
+            // Enhanced validation for expanded range
+            if (settings.rangeStart > 10000) {
+                throw new Error('Range start cannot exceed 10000');
+            }
             this.gameSettings.rangeStart = settings.rangeStart;
         }
 
         if (settings.rangeEnd !== undefined) {
             if (typeof settings.rangeEnd !== 'number' || settings.rangeEnd <= this.gameSettings.rangeStart) {
                 throw new Error('Invalid range end');
+            }
+            // Enhanced validation for expanded range
+            if (settings.rangeEnd > 10000) {
+                throw new Error('Range end cannot exceed 10000');
             }
             this.gameSettings.rangeEnd = settings.rangeEnd;
         }
