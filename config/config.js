@@ -13,8 +13,8 @@ module.exports = {
     // Game Rules
     DEFAULT_RANGE_START: 1,
     DEFAULT_RANGE_END: 100,
-    MAX_RANGE_SIZE: 1000,
-    MIN_RANGE_SIZE: 10,
+    MAX_RANGE_SIZE: 10000, // Increased from 1000 to 10000
+    MIN_RANGE_SIZE: 5, // Reduced from 10 to 5 for more flexibility
     
     // Socket Configuration
     SOCKET_TIMEOUT: 60000, // 60 seconds

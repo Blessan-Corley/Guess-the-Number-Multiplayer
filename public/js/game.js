@@ -152,13 +152,18 @@ class Game {
             return;
         }
         
-        if (settings.rangeEnd - settings.rangeStart < 5) {
+        if (settings.rangeEnd - settings.rangeStart < 4) {
             UI.showNotification('Range must be at least 5 numbers', 'error');
             return;
         }
         
         if (settings.rangeEnd - settings.rangeStart > 10000) {
             UI.showNotification('Range cannot exceed 10000 numbers for performance', 'warning');
+            return;
+        }
+        
+        if (settings.rangeStart > 10000 || settings.rangeEnd > 10000) {
+            UI.showNotification('Range values cannot exceed 10000', 'error');
             return;
         }
         
@@ -188,17 +193,44 @@ class Game {
     static updateRangeDisplay(start, end) {
         const rangeSize = end - start + 1;
         document.getElementById('currentRangeDisplay').textContent = `${start} to ${end}`;
-        document.getElementById('rangeSize').textContent = rangeSize;
         
-        // Update difficulty indicator
+        // Enhanced difficulty classification with more levels
         let difficultyText = '';
-        if (rangeSize <= 10) difficultyText = ' - Very Easy';
-        else if (rangeSize <= 50) difficultyText = ' - Easy';
-        else if (rangeSize <= 100) difficultyText = ' - Medium';
-        else if (rangeSize <= 500) difficultyText = ' - Hard';
-        else difficultyText = ' - Expert';
+        let difficultyClass = '';
         
-        document.getElementById('rangeSize').textContent = rangeSize + difficultyText;
+        if (rangeSize <= 10) {
+            difficultyText = ' - Beginner 😊';
+            difficultyClass = 'difficulty-beginner';
+        } else if (rangeSize <= 50) {
+            difficultyText = ' - Easy 🙂';
+            difficultyClass = 'difficulty-easy';
+        } else if (rangeSize <= 100) {
+            difficultyText = ' - Medium 😐';
+            difficultyClass = 'difficulty-medium';
+        } else if (rangeSize <= 500) {
+            difficultyText = ' - Hard 😤';
+            difficultyClass = 'difficulty-hard';
+        } else if (rangeSize <= 1000) {
+            difficultyText = ' - Expert 😰';
+            difficultyClass = 'difficulty-expert';
+        } else if (rangeSize <= 5000) {
+            difficultyText = ' - Insane 🤯';
+            difficultyClass = 'difficulty-insane';
+        } else {
+            difficultyText = ' - Legendary 😱';
+            difficultyClass = 'difficulty-legendary';
+        }
+        
+        const rangeSizeElement = document.getElementById('rangeSize');
+        rangeSizeElement.textContent = rangeSize + difficultyText;
+        rangeSizeElement.className = `range-size ${difficultyClass}`;
+        
+        // Show optimal attempts estimate
+        const optimalAttempts = Math.ceil(Math.log2(rangeSize));
+        const rangeInfo = document.querySelector('.range-info small');
+        if (rangeInfo) {
+            rangeInfo.innerHTML = `💡 Current range: <span id="currentRangeDisplay">${start} to ${end}</span> (<span id="rangeSize" class="${difficultyClass}">${rangeSize}${difficultyText}</span>)<br><small>🎯 Optimal strategy: ~${optimalAttempts} attempts max</small>`;
+        }
     }
 
     // Game Flow
@@ -562,18 +594,15 @@ class Game {
     static handleOpponentGuessed(data) {
         console.log('Opponent guessed:', data);
         
-        // Update opponent's attempt count
-        const opponentAttemptsElement = document.getElementById('opponentAttempts');
-        if (opponentAttemptsElement) {
-            opponentAttemptsElement.textContent = data.attempts;
-        }
+        // Use the enhanced updateGameStats function for better real-time display
+        UI.updateGameStats(null, data.attempts);
         
         // Show notification based on correctness
         if (data.isCorrect) {
             UI.showNotification(`💥 ${data.opponentName} found your number! The round is over.`, 'warning');
         } else {
-            // Only show guess notifications occasionally to avoid spam
-            if (data.attempts % 3 === 0) { // Every 3rd guess
+            // Show attempt updates more frequently for better engagement
+            if (data.attempts % 2 === 0 || data.attempts <= 5) { // Every 2nd guess or first 5 guesses
                 UI.showNotification(`${data.opponentName}: ${data.attempts} attempts so far...`, 'info', 2000);
             }
         }
@@ -706,6 +735,7 @@ class Game {
         if (secretNumberInput) {
             secretNumberInput.value = '';
             secretNumberInput.disabled = false;
+            secretNumberInput.placeholder = 'Enter secret number...';
         }
         
         // Reset ready button completely
@@ -717,11 +747,30 @@ class Game {
             readyBtn.style.opacity = '1';
         }
         
-        // Clear ready status
+        // Clear ready status and reset all UI indicators
         const readyStatus = document.getElementById('readyStatus');
         if (readyStatus) {
             readyStatus.textContent = '';
             readyStatus.innerHTML = '';
+        }
+        
+        // Reset attempts counters to 0
+        UI.updateGameStats(0, 0);
+        
+        // Clear guess history display
+        UI.clearGuessHistory();
+        
+        // Reset game messages
+        const gameMessage = document.getElementById('gameMessage');
+        if (gameMessage) {
+            gameMessage.textContent = '';
+            gameMessage.className = 'message';
+        }
+        
+        // Remove any competitive styling
+        const gameScreen = document.getElementById('gameScreen');
+        if (gameScreen) {
+            gameScreen.classList.remove('competitive-mode');
         }
     }
 

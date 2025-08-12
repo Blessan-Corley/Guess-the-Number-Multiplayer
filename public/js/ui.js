@@ -727,14 +727,44 @@ class UI {
             const myWins = myPlayer.wins || 0;
             const opponentWins = opponent.wins || 0;
             
-            document.getElementById('myBattleName').innerHTML = `${myPlayer.name} <small>(You) - ${myWins} wins</small>`;
-            document.getElementById('opponentBattleName').innerHTML = `${opponent.name} <small>(Opponent) - ${opponentWins} wins</small>`;
+            // Enhanced win display with session context
+            document.getElementById('myBattleName').innerHTML = `${myPlayer.name} <small>(You) - Session: ${myWins} wins</small>`;
+            document.getElementById('opponentBattleName').innerHTML = `${opponent.name} <small>(Opponent) - Session: ${opponentWins} wins</small>`;
             
-            // Update stats
+            // Update stats with better real-time tracking
             document.getElementById('myAttempts').textContent = myPlayer.attempts || 0;
             document.getElementById('myWins').textContent = myWins;
             document.getElementById('opponentAttempts').textContent = opponent.attempts || 0;
             document.getElementById('opponentWins').textContent = opponentWins;
+            
+            // Add session performance indicator
+            const winDifference = myWins - opponentWins;
+            let performanceClass = 'neutral';
+            let performanceText = 'Tied';
+            
+            if (winDifference > 0) {
+                performanceClass = 'leading';
+                performanceText = `+${winDifference} ahead`;
+            } else if (winDifference < 0) {
+                performanceClass = 'trailing';
+                performanceText = `${Math.abs(winDifference)} behind`;
+            }
+            
+            // Update battle cards with performance indicators
+            const myCard = document.getElementById('myBattleCard');
+            const opponentCard = document.getElementById('opponentBattleCard');
+            
+            if (myCard) {
+                myCard.className = myCard.className.replace(/\b(leading|trailing|neutral)\b/g, '');
+                myCard.classList.add(performanceClass);
+                
+                let statusIndicator = myCard.querySelector('.win-status') || document.createElement('div');
+                statusIndicator.className = 'win-status';
+                statusIndicator.textContent = performanceText;
+                if (!myCard.contains(statusIndicator)) {
+                    myCard.appendChild(statusIndicator);
+                }
+            }
             
             // Update targets with better display
             document.getElementById('myTarget').textContent = myPlayer.secretNumber || '???';
@@ -774,9 +804,32 @@ class UI {
     }
 
     static updateGameStats(myAttempts, opponentAttempts) {
-        document.getElementById('myAttempts').textContent = myAttempts || 0;
+        // Always update my attempts if provided
+        if (myAttempts !== null && myAttempts !== undefined) {
+            document.getElementById('myAttempts').textContent = myAttempts;
+        }
+        
+        // Always update opponent attempts if provided - this fixes the real-time display issue
         if (opponentAttempts !== null && opponentAttempts !== undefined) {
             document.getElementById('opponentAttempts').textContent = opponentAttempts;
+        }
+        
+        // Also update the battle card displays for better visibility
+        const myCard = document.getElementById('myBattleCard');
+        const opponentCard = document.getElementById('opponentBattleCard');
+        
+        if (myCard && myAttempts !== null && myAttempts !== undefined) {
+            const attemptsDisplay = myCard.querySelector('.attempts-display') || myCard.querySelector('.attempts');
+            if (attemptsDisplay) {
+                attemptsDisplay.textContent = `${myAttempts} attempts`;
+            }
+        }
+        
+        if (opponentCard && opponentAttempts !== null && opponentAttempts !== undefined) {
+            const attemptsDisplay = opponentCard.querySelector('.attempts-display') || opponentCard.querySelector('.attempts');
+            if (attemptsDisplay) {
+                attemptsDisplay.textContent = `${opponentAttempts} attempts`;
+            }
         }
     }
 
@@ -892,8 +945,31 @@ class UI {
             
             document.getElementById('myFinalAttempts').textContent = myPlayer.attempts;
             document.getElementById('opponentFinalAttempts').textContent = opponent.attempts;
-            document.getElementById('myTotalWins').textContent = myPlayer.wins;
-            document.getElementById('opponentTotalWins').textContent = opponent.wins;
+            // Enhanced session win tracking display
+            document.getElementById('myTotalWins').textContent = `${myPlayer.wins} session wins`;
+            document.getElementById('opponentTotalWins').textContent = `${opponent.wins} session wins`;
+            
+            // Add session summary
+            const totalRounds = myPlayer.wins + opponent.wins;
+            let sessionSummary = `Session: ${totalRounds} rounds played`;
+            if (totalRounds > 0) {
+                const myWinRate = ((myPlayer.wins / totalRounds) * 100).toFixed(0);
+                sessionSummary += ` | Your win rate: ${myWinRate}%`;
+            }
+            
+            // Update or create session info display
+            let sessionInfo = document.getElementById('sessionInfo');
+            if (!sessionInfo) {
+                sessionInfo = document.createElement('div');
+                sessionInfo.id = 'sessionInfo';
+                sessionInfo.className = 'session-info';
+                const resultsScreen = document.getElementById('resultsScreen');
+                const resultsHeader = resultsScreen.querySelector('h2');
+                if (resultsHeader && resultsHeader.nextSibling) {
+                    resultsScreen.insertBefore(sessionInfo, resultsHeader.nextSibling);
+                }
+            }
+            sessionInfo.textContent = sessionSummary;
             
             // Enhanced performance display
             this.updatePerformanceBadge('myPerformance', roundResult.winner.performance, isWinner);
@@ -950,6 +1026,36 @@ class UI {
         }
         
         leaveBtn.textContent = '🏠 Back to Menu';
+    }
+
+    // Enhanced win badge system for session tracking
+    static updateWinBadges(cardId, wins) {
+        const card = document.getElementById(cardId);
+        if (!card) return;
+        
+        // Remove existing badges
+        const existingBadge = card.querySelector('.win-badge');
+        if (existingBadge) {
+            existingBadge.remove();
+        }
+        
+        // Add new badge if there are wins
+        if (wins > 0) {
+            const badge = document.createElement('div');
+            badge.className = 'win-badge';
+            badge.innerHTML = `<span class="win-count">${wins}</span><span class="win-label">wins</span>`;
+            
+            // Add streak indicator
+            if (wins >= 3) {
+                badge.classList.add('hot-streak');
+                badge.title = 'On fire! 🔥';
+            } else if (wins >= 2) {
+                badge.classList.add('winning-streak');
+                badge.title = 'Building momentum! 💪';
+            }
+            
+            card.appendChild(badge);
+        }
     }
 
     static updatePerformanceBadge(elementId, performance, isWinner) {
