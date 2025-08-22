@@ -12,7 +12,6 @@ class SocketService {
 
     // Handle new socket connection
     handleConnection(socket) {
-        console.log(`Socket connected: ${socket.id}`);
 
         // Register all event handlers
         this.registerEventHandlers(socket);
@@ -84,10 +83,8 @@ class SocketService {
                 player: party.getPlayer(party.hostId).getPrivateInfo()
             });
 
-            console.log(`Party created: ${party.code} by ${nameValidation.name}`);
 
         } catch (error) {
-            console.error('Error creating party:', error);
             socket.emit('error', { message: error.message });
         }
     }
@@ -144,10 +141,8 @@ class SocketService {
                 player: result.player.getPrivateInfo()
             });
 
-            console.log(`Player joined: ${nameValidation.name} -> Party ${partyCode}`);
 
         } catch (error) {
-            console.error('Error joining party:', error);
             let errorType = 'general';
             let errorMessage = error.message;
 
@@ -197,7 +192,6 @@ class SocketService {
                 // Clear any timers
                 this.clearSelectionTimer(partyCode);
                 
-                console.log(`Host ${player.name} left party ${partyCode} - party closed`);
             } else if (!party.isEmpty()) {
                 // Regular player left
                 this.io.to(partyCode).emit('player_left', {
@@ -210,10 +204,8 @@ class SocketService {
             // Confirm to leaving player
             socket.emit('party_left', { partyCode });
 
-            console.log(`Player left: ${player?.name || 'Unknown'} from Party ${partyCode}`);
 
         } catch (error) {
-            console.error('Error leaving party:', error);
             socket.emit('error', { message: error.message });
         }
     }
@@ -242,7 +234,6 @@ class SocketService {
             });
 
         } catch (error) {
-            console.error('Error updating settings:', error);
             socket.emit('error', { message: error.message });
         }
     }
@@ -278,7 +269,6 @@ class SocketService {
             });
 
         } catch (error) {
-            console.error('Error starting game:', error);
             socket.emit('error', { message: error.message });
         }
     }
@@ -316,7 +306,6 @@ class SocketService {
             }
 
         } catch (error) {
-            console.error('Error setting ready:', error);
             socket.emit('error', { message: error.message });
         }
     }
@@ -363,7 +352,6 @@ class SocketService {
                 party.gameSettings.rangeEnd
             );
             
-            console.log(`Player ${player.name} guessed ${guess}, target is ${opponent.secretNumber}, correct: ${guessResult.isCorrect}`);
 
             // Send feedback to guesser
             socket.emit('guess_result', {
@@ -444,7 +432,6 @@ class SocketService {
             }
 
         } catch (error) {
-            console.error('Error making guess:', error);
             socket.emit('error', { message: error.message });
         }
     }
@@ -480,7 +467,6 @@ class SocketService {
             });
 
         } catch (error) {
-            console.error('Error starting next round:', error);
             socket.emit('error', { message: error.message });
         }
     }
@@ -535,7 +521,6 @@ class SocketService {
             }
 
         } catch (error) {
-            console.error('Error handling rematch:', error);
             socket.emit('error', { message: error.message });
         }
     }
@@ -577,10 +562,8 @@ class SocketService {
                 message: `${player.name} requested settings change`
             });
 
-            console.log(`Settings change requested by ${player.name} in party ${party.code}`);
 
         } catch (error) {
-            console.error('Error handling settings change:', error);
             socket.emit('error', { message: error.message });
         }
     }
@@ -634,20 +617,17 @@ class SocketService {
             }
 
         } catch (error) {
-            console.error('Error handling reconnection:', error);
             socket.emit('reconnect_failed', { error: error.message });
         }
     }
 
     // Handle socket error
     handleSocketError(socket, error) {
-        console.error(`Socket error for ${socket.id}:`, error);
         socket.emit('error', { message: 'Socket error occurred' });
     }
 
     // Handle disconnection
     handleDisconnection(socket, reason) {
-        console.log(`Socket disconnected: ${socket.id}, reason: ${reason}`);
         
         const result = this.partyService.leaveParty(socket.id);
         if (result) {
@@ -685,7 +665,6 @@ class SocketService {
                 this.finishedPlayers.delete(partyCode);
             }
             
-            console.log(`Player ${player?.name || 'Unknown'} removed from party ${partyCode} due to disconnection`);
         }
     }
 
@@ -737,7 +716,6 @@ class SocketService {
             });
 
         } catch (error) {
-            console.error('Error starting playing phase:', error);
             this.io.to(party.code).emit('error', { message: error.message });
         }
     }
@@ -817,7 +795,6 @@ class SocketService {
             });
 
         } catch (error) {
-            console.error('Error ending round:', error);
             this.io.to(party.code).emit('error', { message: error.message });
         }
     }

@@ -10,7 +10,6 @@ class Game {
             hasFinished: false // Track if current player has finished
         };
         
-        console.log('🎮 Multiplayer Number Guesser initialized!');
     }
 
     // Game Mode Selection
@@ -69,7 +68,6 @@ class Game {
 
     static makeGuess(guess) {
         if (this.currentState.gameMode === 'single') {
-            // Handle single player guess
             singlePlayerGame.makePlayerGuess(guess);
             return;
         }
@@ -89,29 +87,14 @@ class Game {
             return;
         }
         
-        console.log('Making guess:', guess);
+        // Just send the guess - UI already handled input clearing and button state
         socketClient.makeGuess(guess);
-        
-        // Clear input and add loading state
-        document.getElementById('guessInput').value = '';
-        const guessBtn = document.getElementById('makeGuessBtn');
-        guessBtn.disabled = true;
-        guessBtn.textContent = '🤔 Thinking...';
-        
-        // Re-enable after short delay
-        setTimeout(() => {
-            if (!this.currentState.hasFinished) {
-                guessBtn.disabled = false;
-                guessBtn.textContent = '🎯 Guess!';
-            }
-        }, 1000);
     }
 
     // Party Management
     static createParty(playerName) {
         if (!this.validatePlayerName(playerName)) return;
         
-        console.log('Creating party for:', playerName);
         socketClient.createParty(playerName);
     }
 
@@ -119,12 +102,10 @@ class Game {
         if (!this.validatePlayerName(playerName)) return;
         if (!this.validatePartyCode(partyCode)) return;
         
-        console.log('Joining party:', partyCode, 'as:', playerName);
         socketClient.joinParty(partyCode, playerName);
     }
 
     static leaveParty() {
-        console.log('Leaving party...');
         
         // Reset finished state
         this.currentState.hasFinished = false;
@@ -151,7 +132,6 @@ class Game {
             return;
         }
         
-        console.log('Updating settings:', settings);
         socketClient.updateSettings(settings);
         
         // Update range display immediately for host
@@ -228,7 +208,6 @@ class Game {
             return;
         }
         
-        console.log('Starting game...');
         socketClient.startGame();
     }
 
@@ -252,7 +231,6 @@ class Game {
             return;
         }
         
-        console.log('Setting ready with secret number:', secretNumber);
         
         // Show confirmation message
         UI.showNotification(`✅ Number ${secretNumber} chosen!`, 'success');
@@ -271,7 +249,6 @@ class Game {
             return;
         }
         
-        console.log('Starting next round...');
         
         // Reset finished state
         this.currentState.hasFinished = false;
@@ -280,7 +257,6 @@ class Game {
     }
 
     static rematch() {
-        console.log('Starting rematch...');
         
         // Reset finished state
         this.currentState.hasFinished = false;
@@ -290,7 +266,6 @@ class Game {
 
     // Event Handlers
     static handlePartyCreated(data) {
-        console.log('Party created successfully:', data);
         this.currentState.party = data.party;
         this.currentState.player = data.player;
         this.currentState.isHost = true;
@@ -320,7 +295,6 @@ class Game {
     }
 
     static handlePartyJoined(data) {
-        console.log('Joined party successfully:', data);
         this.currentState.party = data.party;
         this.currentState.player = data.player;
         this.currentState.isHost = false;
@@ -347,7 +321,6 @@ class Game {
     }
 
     static handlePlayerJoined(data) {
-        console.log('Player joined:', data);
         this.currentState.party = data.party;
         UI.updateLobbyPlayers(data.party);
         UI.showNotification(`${data.newPlayer.name} joined the party! 🎉`, 'success');
@@ -360,7 +333,6 @@ class Game {
     }
 
     static handlePlayerLeft(data) {
-        console.log('Player left:', data);
         this.currentState.party = data.party;
         UI.updateLobbyPlayers(data.party);
         UI.showNotification(`${data.leftPlayer.name} left the party`, 'warning');
@@ -375,14 +347,12 @@ class Game {
     }
 
     static handlePartyLeft(data) {
-        console.log('Left party:', data);
         this.resetGameState();
         UI.showNotification('Left the party', 'info');
     }
     
     // FIXED: Handle party closed when host leaves
     static handlePartyClosedHostLeft(data) {
-        console.log('Party closed - host left:', data);
         
         // Reset to main menu
         this.resetGameState();
@@ -398,7 +368,6 @@ class Game {
     }
 
     static handleSettingsUpdated(data) {
-        console.log('Settings updated:', data);
         
         // FIXED: Update current party settings
         if (this.currentState.party) {
@@ -419,7 +388,6 @@ class Game {
     }
 
     static handleGameStarted(data) {
-        console.log('Game started:', data);
         this.currentState.party = data.party;
         this.currentState.gamePhase = 'selection';
         this.currentState.hasFinished = false;
@@ -431,7 +399,6 @@ class Game {
     }
 
     static handlePlayerReady(data) {
-        console.log('Player ready:', data);
         UI.updateReadyStatus(data.playerId, data.playerName, data.allReady);
         
         if (data.playerId !== socketClient.gameState.playerId) {
@@ -444,7 +411,6 @@ class Game {
     }
 
     static handlePlayingStarted(data) {
-        console.log('Playing phase started:', data);
         this.currentState.party = data.party;
         this.currentState.gamePhase = 'playing';
         this.currentState.hasFinished = false;
@@ -456,8 +422,6 @@ class Game {
     }
 
     static handleGuessResult(data) {
-        console.log('Guess result:', data);
-        
         // Update attempts count
         UI.updateGameStats(data.attempts, null);
         
@@ -505,7 +469,6 @@ class Game {
     }
 
     static handlePlayerFinished(data) {
-        console.log('Enhanced player finished:', data);
         
         // Show notification about who finished with context
         if (data.playerId === socketClient.gameState.playerId) {
@@ -530,7 +493,6 @@ class Game {
 
     // Handle when opponent finishes first with competitive messaging
     static handleOpponentFinishedFirst(data) {
-        console.log('Opponent finished first, can still win:', data);
         
         const { opponentName, opponentAttempts, yourAttempts, attemptsToWin } = data;
         
@@ -558,7 +520,6 @@ class Game {
 
     // Handle waiting for opponent after finishing first
     static handleWaitingForOpponent(data) {
-        console.log('Waiting for opponent to finish:', data);
         
         UI.showNotification(data.message, 'success', 5000);
         
@@ -584,7 +545,6 @@ class Game {
     }
 
     static handleGameEndedByLeave(data) {
-        console.log('Game ended by leave:', data);
         
         // Reset finished state
         this.currentState.hasFinished = false;
@@ -620,7 +580,6 @@ class Game {
     }
 
     static handleOpponentGuessed(data) {
-        console.log('Opponent guessed:', data);
         
         // Use the enhanced updateGameStats function for better real-time display
         UI.updateGameStats(null, data.attempts);
@@ -637,7 +596,6 @@ class Game {
     }
 
     static handleRoundEnded(data) {
-        console.log('Round ended with detailed data:', data);
         this.currentState.party = data.party;
         this.currentState.gamePhase = 'results';
         this.currentState.hasFinished = false;
@@ -723,7 +681,6 @@ class Game {
 
     // FIXED: New rematch method - direct to selection with same settings
     static requestRematch() {
-        console.log('Requesting rematch...');
         
         // Show feedback to user
         UI.showNotification('🔄 Starting rematch...', 'info', 2000);
@@ -739,7 +696,6 @@ class Game {
     
     // FIXED: Change settings - go back to lobby for settings adjustment  
     static changeSettings() {
-        console.log('Requesting settings change...');
         
         // Show feedback to user with loading overlay
         UI.showLoadingOverlay('Returning to lobby...');
@@ -758,7 +714,6 @@ class Game {
     
     // FIXED: Handle settings change response from server
     static handleSettingsChangeStarted(data) {
-        console.log('Settings change started:', data);
         
         // Hide loading overlay
         UI.hideLoadingOverlay();
@@ -875,7 +830,6 @@ class Game {
     }
 
     static handleNextRoundStarted(data) {
-        console.log('Next round started:', data);
         this.currentState.party = data.party;
         this.currentState.gamePhase = 'selection';
         this.currentState.hasFinished = false;
@@ -887,7 +841,6 @@ class Game {
     }
 
     static handleRematchRequested(data) {
-        console.log('Rematch requested:', data);
         
         if (data.playerId === socketClient.gameState.playerId) {
             // I requested the rematch
@@ -901,7 +854,6 @@ class Game {
     }
 
     static handleRematchStarted(data) {
-        console.log('Rematch started:', data);
         this.currentState.party = data.party;
         this.currentState.hasFinished = false;
         
@@ -945,11 +897,9 @@ class Game {
 
     static handlePlayerTyping(data) {
         // Could show typing indicators here in the future
-        console.log('Player typing:', data);
     }
 
     static handleReconnected(data) {
-        console.log('Reconnected to game:', data);
         this.currentState.party = data.party;
         this.currentState.player = data.player;
         
@@ -1093,7 +1043,6 @@ class Game {
             oscillator.start();
             oscillator.stop(audioContext.currentTime + 0.5);
         } catch (error) {
-            console.log('Audio not available:', error);
         }
     }
 
@@ -1108,12 +1057,10 @@ class Game {
     }
 
     static simulateNetworkError() {
-        console.warn('Simulating network error...');
         socketClient.socket.disconnect();
     }
 
     static simulateReconnection() {
-        console.log('Simulating reconnection...');
         socketClient.socket.connect();
     }
 
@@ -1126,7 +1073,6 @@ class Game {
             ...data
         };
         
-        console.log('User action:', event);
         
         // Could send to analytics service here
         if (window.gtag) {
@@ -1139,7 +1085,6 @@ class Game {
 
     // Error handling
     static handleError(error, context = 'Unknown', buttonId = null) {
-        console.error(`Game error in ${context}:`, error);
         
         // Reset button state if provided
         if (buttonId) {
@@ -1282,7 +1227,6 @@ class Game {
         try {
             localStorage.setItem('numberGuesserPrefs', JSON.stringify(preferences));
         } catch (e) {
-            console.warn('Could not save preferences:', e);
         }
     }
 
@@ -1316,7 +1260,6 @@ class Game {
                 }
             }
         } catch (e) {
-            console.warn('Could not load preferences:', e);
         }
     }
 
@@ -1359,7 +1302,6 @@ class Game {
                 };
                 sessionStorage.setItem('gameStateBackup', JSON.stringify(gameState));
             } catch (e) {
-                console.warn('Could not save game state:', e);
             }
         }
     }
@@ -1380,7 +1322,6 @@ class Game {
                 }
             }
         } catch (e) {
-            console.warn('Could not restore game state:', e);
             sessionStorage.removeItem('gameStateBackup');
         }
     }
@@ -1454,10 +1395,8 @@ window.addEventListener('beforeunload', () => {
 // Handle page visibility changes (for mobile apps)
 document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
-        console.log('App went to background');
         Game.saveGameState();
     } else {
-        console.log('App came to foreground');
         // Could trigger reconnection check here
         if (socketClient && !socketClient.isConnected) {
             if (typeof UI !== 'undefined') {

@@ -448,10 +448,6 @@ class GameService {
         });
 
         // Log game completion
-        console.log(`Game completed in party ${party.code}:`);
-        console.log(`- Winner: ${gameSummary.gameWinner?.name || 'Tie'}`);
-        console.log(`- Total rounds: ${gameSummary.gameStats.totalRounds}`);
-        console.log(`- Duration: ${Math.round(gameSummary.gameStats.duration / 1000)} seconds`);
 
         return gameSummary;
     }

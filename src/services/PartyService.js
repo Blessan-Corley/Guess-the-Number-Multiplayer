@@ -72,7 +72,6 @@ class PartyService {
         this.stats.totalPartiesCreated++;
         this.stats.totalPlayersJoined++;
 
-        console.log(`Party created: ${partyCode} by ${hostName} (${hostSocketId}) - ALWAYS HOST`);
         return party;
     }
 
@@ -117,7 +116,6 @@ class PartyService {
         this.socketToPlayer.set(playerSocketId, player.id);
         this.stats.totalPlayersJoined++;
 
-        console.log(`Player joined: ${playerName} (${playerSocketId}) -> Party ${partyCode}`);
         return { party, player };
     }
 
@@ -149,10 +147,8 @@ class PartyService {
         // FIXED: If host left or party is empty, remove party completely
         if (removeResult === 'HOST_LEFT' || party.isEmpty()) {
             this.parties.delete(partyCode);
-            console.log(`Party deleted: ${partyCode} (${removeResult === 'HOST_LEFT' ? 'host left' : 'empty'})`);
         }
 
-        console.log(`Player left: ${player?.name || 'Unknown'} (${socketId}) from Party ${partyCode}`);
         return { party, player, partyCode, wasHost };
     }
 
@@ -207,7 +203,6 @@ class PartyService {
         // Update player
         player.updateSocketId(socketId);
 
-        console.log(`Player reconnected: ${player.name} (${oldSocketId} -> ${socketId})`);
         return { success: true, party, player };
     }
 
@@ -226,7 +221,6 @@ class PartyService {
 
                 this.parties.delete(partyCode);
                 cleanedCount++;
-                console.log(`Cleaned up inactive party: ${partyCode}`);
             }
         }
 
@@ -428,7 +422,6 @@ class PartyService {
         this.playerToParty.clear();
         this.socketToPlayer.clear();
 
-        console.log(`Emergency cleanup completed: ${partyCount} parties, ${playerCount} players removed`);
         return { partiesRemoved: partyCount, playersRemoved: playerCount };
     }
 

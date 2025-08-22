@@ -1,5 +1,30 @@
 class UI {
     static init() {
+        // Developer Credits Banner
+        console.log('┌────────────────────────────────────────────┐');
+        console.log('│                                            │');
+        console.log('│      Multiplayer Number Guesser Game      │');
+        console.log('│                                            │');
+        console.log('│    Designed & Developed by Blessan Corley  │');
+        console.log('│                                            │');
+        console.log('│  Technologies Used:                        │');
+        console.log('│  • Node.js & Express.js                   │');
+        console.log('│  • Socket.IO Real-time Communication      │');
+        console.log('│  • Vanilla JavaScript ES6+                │');
+        console.log('│  • CSS3 with Modern Features              │');
+        console.log('│  • Progressive Web App (PWA)              │');
+        console.log('│  • WebSocket Multiplayer Architecture     │');
+        console.log('│                                            │');
+        console.log('│  Features:                                 │');
+        console.log('│  ⚡ Real-time Multiplayer Gaming          │');
+        console.log('│  🎮 Cross-browser Compatibility           │');
+        console.log('│  📱 Mobile-responsive Design              │');
+        console.log('│  🔄 Auto-reconnection System              │');
+        console.log('│  ⚙️  Dynamic Game Settings                │');
+        console.log('│  🏆 Session-based Score Tracking          │');
+        console.log('│                                            │');
+        console.log('└────────────────────────────────────────────┘');
+        
         this.setupEventListeners();
         this.setupInputValidation();
         this.setupKeyboardShortcuts();
@@ -9,10 +34,10 @@ class UI {
         this.notificationQueue = [];
         this.maxNotifications = 3;
         
-        // Periodic button health check for Edge/Safari compatibility
+        // Simple periodic check every 30 seconds
         setInterval(() => {
-            this.ensureButtonsAreWorking();
-        }, 10000); // Check every 10 seconds
+            this.simpleButtonCheck();
+        }, 30000);
     }
 
     static setupEnhancedUI() {
@@ -77,11 +102,15 @@ class UI {
         // if (this._gameListenerAdded) return;
         // this._gameListenerAdded = true;
         
-        // Simple document-level delegation for critical buttons
+        // CLEAN BUTTON SYSTEM - Simple and reliable
         document.addEventListener('click', (e) => {
-            // Ready button
-            if (e.target.id === 'readyBtn' && !e.target.disabled) {
-                console.log('Ready button clicked');
+            // Ready button handler
+            if (e.target.id === 'readyBtn') {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                if (e.target.disabled) return;
+                
                 const input = document.getElementById('secretNumber');
                 if (!input || !input.value) {
                     this.showNotification('Please enter a secret number', 'error');
@@ -92,14 +121,28 @@ class UI {
                     this.showNotification('Please enter a valid number', 'error');
                     return;
                 }
-                this.setButtonLoading(e.target, 'Setting...');
+                
+                // Simple button disable
+                e.target.disabled = true;
+                e.target.textContent = 'Setting...';
+                
+                // Auto-enable after 2 seconds regardless
+                setTimeout(() => {
+                    e.target.disabled = false;
+                    e.target.textContent = '✅ Ready';
+                }, 2000);
+                
                 Game.setReady(num);
                 return;
             }
             
-            // Guess button
-            if (e.target.id === 'makeGuessBtn' && !e.target.disabled) {
-                console.log('Guess button clicked');
+            // Guess button handler - COMPLETELY REWRITTEN
+            if (e.target.id === 'makeGuessBtn') {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                if (e.target.disabled) return;
+                
                 const input = document.getElementById('guessInput');
                 if (!input || !input.value) {
                     this.showNotification('Please enter a guess', 'error');
@@ -110,9 +153,21 @@ class UI {
                     this.showNotification('Please enter a valid number', 'error');
                     return;
                 }
-                this.setButtonLoading(e.target, 'Guessing...');
                 
+                // Clear input immediately
+                input.value = '';
                 
+                // Simple button state change
+                e.target.disabled = true;
+                e.target.textContent = 'Guessing...';
+                
+                // GUARANTEED reset after 1.5 seconds
+                setTimeout(() => {
+                    e.target.disabled = false;
+                    e.target.textContent = '🎯 Guess!';
+                }, 1500);
+                
+                // Send the guess
                 Game.makeGuess(num);
                 return;
             }
@@ -444,7 +499,6 @@ class UI {
 
     // Screen management
     static showScreen(screenId) {
-        console.log('Switching to screen:', screenId);
         
         document.querySelectorAll('.screen').forEach(screen => {
             screen.classList.remove('active');
@@ -453,9 +507,7 @@ class UI {
         const targetScreen = document.getElementById(screenId);
         if (targetScreen) {
             targetScreen.classList.add('active');
-            console.log('Screen', screenId, 'is now active');
         } else {
-            console.error('Target screen not found:', screenId);
         }
         
         // Reset buttons when switching screens to prevent stuck states
@@ -468,7 +520,6 @@ class UI {
                     guessBtn.classList.remove('finished', 'loading', 'btn-loading');
                     guessBtn.style.backgroundColor = '';
                     guessBtn.style.transform = '';
-                    console.log('Reset guess button on game screen');
                 }
             }, 100);
         }
@@ -482,7 +533,6 @@ class UI {
                     readyBtn.classList.remove('finished', 'loading', 'btn-loading');
                     readyBtn.style.backgroundColor = '';
                     readyBtn.style.transform = '';
-                    console.log('Reset ready button on selection screen');
                 }
             }, 100);
         }
@@ -777,7 +827,6 @@ class UI {
             Game.updateRangeDisplay(settings.rangeStart, settings.rangeEnd);
         }
         
-        console.log('Settings synchronized for all players:', settings);
     }
 
     static disableSettings(disabled = true) {
@@ -857,22 +906,18 @@ class UI {
             
             // Re-attach event listener if it was lost
             if (!readyBtn._eventListenerAttached) {
-                console.log('Re-attaching ready button event listener');
                 
                 // Ensure we have the bound function
                 if (!this.handleReadyClick) {
                     this.handleReadyClick = (e) => {
-                        console.log('Ready button clicked!', e);
                         const button = document.getElementById('readyBtn');
                         const secretNumberInput = document.getElementById('secretNumber');
                         
                         if (!button || !secretNumberInput) {
-                            console.error('Required elements not found:', { button, secretNumberInput });
                             return;
                         }
                         
                         if (button.disabled) {
-                            console.log('Ready button is disabled, ignoring click');
                             return;
                         }
                         
@@ -882,7 +927,6 @@ class UI {
                         }
                         
                         const secretNumber = parseInt(secretNumberInput.value);
-                        console.log('Setting ready with secret number:', secretNumber);
                         this.setButtonLoading(button, 'Setting...');
                         Game.setReady(secretNumber);
                     };
@@ -890,18 +934,7 @@ class UI {
                 
                 readyBtn.addEventListener('click', this.handleReadyClick);
                 readyBtn._eventListenerAttached = true;
-                console.log('Ready button event listener re-attached in updateSelectionScreen');
             }
-            
-            console.log('Ready button state after reset:', {
-                disabled: readyBtn.disabled,
-                pointerEvents: readyBtn.style.pointerEvents,
-                cursor: readyBtn.style.cursor,
-                opacity: readyBtn.style.opacity,
-                classList: readyBtn.classList.toString()
-            });
-        } else {
-            console.error('Ready button not found in updateSelectionScreen!');
         }
         
         // Clear ready status completely
@@ -1371,7 +1404,6 @@ class UI {
         const content = document.getElementById('howToPlayContent');
         
         if (!modal || !content) {
-            console.warn('How to Play modal elements not found');
             return;
         }
         
@@ -1990,7 +2022,6 @@ class UI {
         const otherInput = document.getElementById(otherInputId);
         
         if (!otherInput) {
-            console.warn(`Other input ${otherInputId} not found`);
             return;
         }
         
@@ -2130,24 +2161,11 @@ class UI {
     static ensureReadyButtonFunctional() {
         const readyBtn = document.getElementById('readyBtn');
         if (!readyBtn) {
-            console.error('Ready button not found!');
             return;
         }
         
-        console.log('Checking ready button state:', {
-            exists: !!readyBtn,
-            disabled: readyBtn.disabled,
-            pointerEvents: readyBtn.style.pointerEvents,
-            cursor: readyBtn.style.cursor,
-            opacity: readyBtn.style.opacity,
-            display: getComputedStyle(readyBtn).display,
-            visibility: getComputedStyle(readyBtn).visibility,
-            zIndex: getComputedStyle(readyBtn).zIndex
-        });
-        
         // Test if click event fires
         readyBtn.addEventListener('click', function testClick() {
-            console.log('TEST: Ready button click detected!');
             readyBtn.removeEventListener('click', testClick);
         }, { once: true });
         
@@ -2162,39 +2180,23 @@ class UI {
     static ensureGuessButtonFunctional() {
         const guessBtn = document.getElementById('makeGuessBtn');
         if (!guessBtn) {
-            console.error('Guess button not found!');
             return;
         }
         
-        console.log('Checking guess button state:', {
-            exists: !!guessBtn,
-            disabled: guessBtn.disabled,
-            pointerEvents: guessBtn.style.pointerEvents,
-            cursor: guessBtn.style.cursor,
-            opacity: guessBtn.style.opacity,
-            display: getComputedStyle(guessBtn).display,
-            visibility: getComputedStyle(guessBtn).visibility,
-            zIndex: getComputedStyle(guessBtn).zIndex
-        });
-        
         // Re-attach event listener if it was lost
         if (!guessBtn._eventListenerAttached) {
-            console.log('Re-attaching guess button event listener');
             
             // Ensure we have the bound function
             if (!this.handleGuessClick) {
                 this.handleGuessClick = (e) => {
-                    console.log('Guess button clicked!', e);
                     const button = document.getElementById('makeGuessBtn');
                     const guessInput = document.getElementById('guessInput');
                     
                     if (!button || !guessInput) {
-                        console.error('Required elements not found:', { button, guessInput });
                         return;
                     }
                     
                     if (button.disabled) {
-                        console.log('Guess button is disabled, ignoring click');
                         return;
                     }
                     
@@ -2204,7 +2206,6 @@ class UI {
                     }
                     
                     const guess = parseInt(guessInput.value);
-                    console.log('Making guess:', guess);
                     this.setButtonLoading(button, 'Guessing...');
                     
                     setTimeout(() => {
@@ -2217,12 +2218,10 @@ class UI {
             
             guessBtn.addEventListener('click', this.handleGuessClick);
             guessBtn._eventListenerAttached = true;
-            console.log('Guess button event listener re-attached');
         }
         
         // Test if click event fires
         guessBtn.addEventListener('click', function testClick() {
-            console.log('TEST: Guess button click detected!');
             guessBtn.removeEventListener('click', testClick);
         }, { once: true });
         
@@ -2234,24 +2233,18 @@ class UI {
     }
     
     
-    // Ensure buttons are in working state (cross-browser compatibility)
-    static ensureButtonsAreWorking() {
-        // Reset ready button if stuck
+    // Simple button check - just ensure they're not permanently stuck
+    static simpleButtonCheck() {
         const readyBtn = document.getElementById('readyBtn');
-        if (readyBtn && (readyBtn.textContent === 'Setting...' || (readyBtn.disabled && readyBtn.textContent !== '✅ Ready!'))) {
+        if (readyBtn && readyBtn.textContent === 'Setting...') {
             readyBtn.disabled = false;
             readyBtn.textContent = '✅ Ready';
-            readyBtn.classList.remove('loading', 'btn-loading');
-            console.log('Auto-fixed stuck ready button');
         }
         
-        // Reset guess button if stuck  
         const guessBtn = document.getElementById('makeGuessBtn');
-        if (guessBtn && (guessBtn.textContent === 'Guessing...' || (guessBtn.disabled && !guessBtn.textContent.includes('Finished')))) {
+        if (guessBtn && guessBtn.textContent === 'Guessing...') {
             guessBtn.disabled = false;
             guessBtn.textContent = '🎯 Guess!';
-            guessBtn.classList.remove('loading', 'btn-loading', 'finished');
-            console.log('Auto-fixed stuck guess button');
         }
     }
     
@@ -2616,14 +2609,12 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Add global error handlers for better error recovery
     window.addEventListener('error', (event) => {
-        console.error('Global error:', event.error);
         if (typeof UI !== 'undefined') {
             UI.showNotification('An unexpected error occurred. Please try refreshing the page.', 'error', 8000);
         }
     });
     
     window.addEventListener('unhandledrejection', (event) => {
-        console.error('Unhandled promise rejection:', event.reason);
         if (typeof UI !== 'undefined') {
             UI.showNotification('A network error occurred. Please check your connection.', 'warning', 6000);
         }

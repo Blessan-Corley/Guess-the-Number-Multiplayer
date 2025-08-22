@@ -58,7 +58,6 @@ class Party {
             // Host left - party should be closed, no host transfer
             this.status = 'closed';
             this.gameState.phase = 'finished';
-            console.log(`Host left party ${this.code} - party will be closed`);
             return 'HOST_LEFT'; // Special return value
         }
 
