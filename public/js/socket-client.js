@@ -29,7 +29,6 @@ class SocketClient {
             this.setupEventListeners();
             this.startHeartbeat();
         } catch (error) {
-            console.error('Failed to initialize socket:', error);
             this.handleConnectionError(error);
         }
     }
@@ -37,7 +36,6 @@ class SocketClient {
     setupEventListeners() {
         // Connection events
         this.socket.on('connect', () => {
-            console.log('Connected to server:', this.socket.id);
             this.isConnected = true;
             this.reconnectAttempts = 0;
             if (typeof UI !== 'undefined') {
@@ -49,7 +47,6 @@ class SocketClient {
         });
 
         this.socket.on('disconnect', (reason) => {
-            console.log('Disconnected from server:', reason);
             this.isConnected = false;
             if (typeof UI !== 'undefined') {
                 if (typeof UI !== 'undefined') {
@@ -70,18 +67,15 @@ class SocketClient {
         });
 
         this.socket.on('connect_error', (error) => {
-            console.error('Connection error:', error);
             this.handleConnectionError(error);
         });
 
         // Server acknowledgment
         this.socket.on('connected', (data) => {
-            console.log('Server acknowledged connection:', data);
         });
 
         // Party management events
         this.socket.on('party_created', (data) => {
-            console.log('Party created:', data);
             this.gameState.playerId = data.player.id;
             this.gameState.partyCode = data.party.code;
             this.gameState.playerName = data.player.name;
@@ -91,7 +85,6 @@ class SocketClient {
         });
 
         this.socket.on('party_joined', (data) => {
-            console.log('Party joined:', data);
             this.gameState.playerId = data.player.id;
             this.gameState.partyCode = data.party.code;
             this.gameState.playerName = data.player.name;
@@ -101,17 +94,14 @@ class SocketClient {
         });
 
         this.socket.on('player_joined', (data) => {
-            console.log('Player joined party:', data);
             Game.handlePlayerJoined(data);
         });
 
         this.socket.on('player_left', (data) => {
-            console.log('Player left party:', data);
             Game.handlePlayerLeft(data);
         });
 
         this.socket.on('party_left', (data) => {
-            console.log('Left party:', data);
             this.gameState = {
                 playerId: null,
                 partyCode: null,
@@ -123,69 +113,56 @@ class SocketClient {
         
         // FIXED: Handle party closed due to host leaving
         this.socket.on('party_closed_host_left', (data) => {
-            console.log('Party closed - host left:', data);
             Game.handlePartyClosedHostLeft(data);
         });
         
         // FIXED: Handle settings change request response
         this.socket.on('settings_change_started', (data) => {
-            console.log('Settings change started:', data);
             Game.handleSettingsChangeStarted(data);
         });
 
         // Game flow events
         this.socket.on('settings_updated', (data) => {
-            console.log('Settings updated:', data);
             Game.handleSettingsUpdated(data);
         });
 
         this.socket.on('game_started', (data) => {
-            console.log('Game started:', data);
             Game.handleGameStarted(data);
         });
 
         this.socket.on('player_ready', (data) => {
-            console.log('Player ready:', data);
             Game.handlePlayerReady(data);
         });
 
         this.socket.on('selection_timer', (data) => {
-            console.log('Selection timer:', data);
             Game.handleSelectionTimer(data);
         });
 
         this.socket.on('playing_started', (data) => {
-            console.log('Playing phase started:', data);
             Game.handlePlayingStarted(data);
         });
 
         this.socket.on('guess_result', (data) => {
-            console.log('Guess result:', data);
             Game.handleGuessResult(data);
         });
 
         this.socket.on('opponent_guessed', (data) => {
-            console.log('Opponent made a guess:', data);
             Game.handleOpponentGuessed(data);
         });
 
         this.socket.on('round_ended', (data) => {
-            console.log('Round ended:', data);
             Game.handleRoundEnded(data);
         });
 
         this.socket.on('next_round_started', (data) => {
-            console.log('Next round started:', data);
             Game.handleNextRoundStarted(data);
         });
 
         this.socket.on('rematch_started', (data) => {
-            console.log('Rematch started:', data);
             Game.handleRematchStarted(data);
         });
 
         this.socket.on('rematch_requested', (data) => {
-            console.log('Rematch requested:', data);
             Game.handleRematchRequested(data);
         });
 
@@ -195,14 +172,12 @@ class SocketClient {
         });
 
         this.socket.on('player_disconnected', (data) => {
-            console.log('Player disconnected:', data);
             if (typeof UI !== 'undefined') {
                 UI.showNotification(`${data.playerName} disconnected`, 'warning');
             }
         });
 
         this.socket.on('player_reconnected', (data) => {
-            console.log('Player reconnected:', data);
             if (typeof UI !== 'undefined') {
                 UI.showNotification(`${data.playerName} reconnected`, 'success');
             }
@@ -210,17 +185,14 @@ class SocketClient {
 
         // New enhanced game flow events
         this.socket.on('opponent_finished_first', (data) => {
-            console.log('Opponent finished first:', data);
             Game.handleOpponentFinishedFirst(data);
         });
 
         this.socket.on('waiting_for_opponent', (data) => {
-            console.log('Waiting for opponent:', data);
             Game.handleWaitingForOpponent(data);
         });
 
         this.socket.on('player_finished', (data) => {
-            console.log('Enhanced player finished:', data);
             Game.handlePlayerFinished(data);
         });
 
@@ -231,7 +203,6 @@ class SocketClient {
 
         // Error handling
         this.socket.on('error', (data) => {
-            console.error('Server error:', data);
             
             // Hide loading overlay on any error
             if (typeof UI !== 'undefined') {
@@ -271,7 +242,6 @@ class SocketClient {
 
         // Reconnection events
         this.socket.on('reconnected', (data) => {
-            console.log('Successfully reconnected:', data);
             this.gameState.playerId = data.player.id;
             this.gameState.partyCode = data.party.code;
             this.gameState.playerName = data.player.name;
@@ -284,7 +254,6 @@ class SocketClient {
         });
 
         this.socket.on('reconnect_failed', (data) => {
-            console.error('Reconnection failed:', data);
             if (typeof UI !== 'undefined') {
                 UI.showNotification('Failed to reconnect to game', 'error');
             }
@@ -407,7 +376,6 @@ class SocketClient {
 
     // Connection management
     handleConnectionError(error) {
-        console.error('Connection error:', error);
         this.isConnected = false;
         if (typeof UI !== 'undefined') {
             UI.updateConnectionStatus('disconnected');
@@ -418,7 +386,6 @@ class SocketClient {
 
     handleReconnection() {
         if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-            console.error('Max reconnection attempts reached');
             if (typeof UI !== 'undefined') {
                 UI.showNotification('Unable to connect to server. Please refresh the page.', 'error');
             }
@@ -430,7 +397,6 @@ class SocketClient {
             UI.updateConnectionStatus('connecting');
         }
         
-        console.log(`Attempting to reconnect... (${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
         
         setTimeout(() => {
             if (!this.isConnected) {
@@ -446,7 +412,6 @@ class SocketClient {
     }
 
     attemptGameReconnection() {
-        console.log('Attempting to reconnect to game...');
         this.socket.emit('reconnect_attempt', {
             partyCode: this.gameState.partyCode,
             playerId: this.gameState.playerId
