@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings Sync Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ccc; border-radius: 8px; }
+        .success { background: #d4edda; border-color: #c3e6cb; color: #155724; }
+        .error { background: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+        .test-result { margin: 10px 0; }
+        button { padding: 10px 20px; margin: 10px 5px; }
+        input { padding: 8px; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>🎮 Multiplayer Settings Synchronization Test</h1>
+    
+    <div class="test-section">
+        <h3>Test Instructions</h3>
+        <ol>
+            <li>Open two browser tabs/windows with this application</li>
+            <li>Create a party in Tab 1 (Host)</li>
+            <li>Join the party in Tab 2 (Guest)</li>
+            <li>In Tab 1 (Host), change the range settings</li>
+            <li>Verify that Tab 2 (Guest) shows the updated range immediately</li>
+        </ol>
+    </div>
+
+    <div class="test-section">
+        <h3>✅ Expected Behaviors</h3>
+        <div class="test-result success">
+            <strong>Range Synchronization:</strong>
+            <ul>
+                <li>Host changes range from 1-100 to 10-500</li>
+                <li>Guest's UI should instantly update to show 10-500</li>
+                <li>Guest should see input fields change to 10 and 500</li>
+                <li>Guest should see notification: "Host changed range to 10-500"</li>
+                <li>Range display should update to show new difficulty level</li>
+            </ul>
+        </div>
+        
+        <div class="test-result success">
+            <strong>Edge Case Validation:</strong>
+            <ul>
+                <li>Host tries invalid range (start >= end): Should show error, range not changed</li>
+                <li>Host sets range too large (>10000 numbers): Should show warning</li>
+                <li>Host sets range too small (<2 numbers): Should auto-correct</li>
+            </ul>
+        </div>
+        
+        <div class="test-result success">
+            <strong>Game Consistency:</strong>
+            <ul>
+                <li>Both players see identical range during number selection</li>
+                <li>Both players' guess validation uses the same range limits</li>
+                <li>Secret number validation uses synchronized range</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h3>🧪 Manual Test Cases</h3>
+        
+        <h4>Test Case 1: Basic Range Change</h4>
+        <div class="test-result">
+            1. Host sets range to 50-150<br>
+            2. Expected: Guest sees 50-150 instantly<br>
+            3. Expected: Guest sees "Host changed range to 50-150" notification<br>
+            <strong>Status: </strong><span id="test1-result">❓ Not tested</span>
+        </div>
+
+        <h4>Test Case 2: Edge Case - Same Numbers</h4>
+        <div class="test-result">
+            1. Host tries to set start=100, end=100<br>
+            2. Expected: Error message, range not changed<br>
+            <strong>Status: </strong><span id="test2-result">❓ Not tested</span>
+        </div>
+
+        <h4>Test Case 3: Large Range</h4>
+        <div class="test-result">
+            1. Host sets range to 1-5000<br>
+            2. Expected: Both players see 1-5000, difficulty shows "Insane 🤯"<br>
+            <strong>Status: </strong><span id="test3-result">❓ Not tested</span>
+        </div>
+
+        <h4>Test Case 4: Game Play Consistency</h4>
+        <div class="test-result">
+            1. Host sets range to 20-80, starts game<br>
+            2. Expected: Both players can only pick secret numbers 20-80<br>
+            3. Expected: Both players can only guess numbers 20-80<br>
+            <strong>Status: </strong><span id="test4-result">❓ Not tested</span>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h3>🐛 Common Issues to Check</h3>
+        <div class="test-result error">
+            <strong>Potential Problems:</strong>
+            <ul>
+                <li>Guest doesn't see range changes immediately (sync delay)</li>
+                <li>Range validation differs between host and guest</li>
+                <li>During gameplay, players see different valid ranges</li>
+                <li>Settings revert after rematch/round changes</li>
+                <li>Input fields don't update visually for guest</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h3>📋 Test Checklist</h3>
+        <label><input type="checkbox" id="check1"> Host range changes sync to guest instantly</label><br>
+        <label><input type="checkbox" id="check2"> Guest sees appropriate notifications</label><br>
+        <label><input type="checkbox" id="check3"> Range validation works identically for both</label><br>
+        <label><input type="checkbox" id="check4"> Game logic uses synchronized settings</label><br>
+        <label><input type="checkbox" id="check5"> Settings persist through rematch</label><br>
+        <label><input type="checkbox" id="check6"> Edge cases handled properly</label><br>
+        
+        <button onclick="checkAllTests()">✅ Mark All Complete</button>
+        <button onclick="resetTests()">🔄 Reset Tests</button>
+    </div>
+
+    <div id="final-result" class="test-section" style="display:none;">
+        <h3>🎯 Final Result</h3>
+        <div id="result-message"></div>
+    </div>
+
+    <script>
+        function checkAllTests() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            let allChecked = true;
+            
+            checkboxes.forEach(cb => {
+                if (!cb.checked) allChecked = false;
+            });
+            
+            const finalResult = document.getElementById('final-result');
+            const resultMessage = document.getElementById('result-message');
+            
+            if (allChecked) {
+                finalResult.style.display = 'block';
+                finalResult.className = 'test-section success';
+                resultMessage.innerHTML = '<h4>🎉 All Tests Passed!</h4><p>Multiplayer settings synchronization is working correctly. Both players will use identical game settings in real-time.</p>';
+            } else {
+                finalResult.style.display = 'block';
+                finalResult.className = 'test-section error';
+                resultMessage.innerHTML = '<h4>⚠️ Some Tests Not Complete</h4><p>Please complete all test cases to ensure proper synchronization.</p>';
+            }
+        }
+        
+        function resetTests() {
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+            document.getElementById('final-result').style.display = 'none';
+        }
+        
+        // Auto-check for completed tests
+        document.addEventListener('change', (e) => {
+            if (e.target.type === 'checkbox') {
+                const allChecked = Array.from(document.querySelectorAll('input[type="checkbox"]')).every(cb => cb.checked);
+                if (allChecked) {
+                    setTimeout(checkAllTests, 500);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

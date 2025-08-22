@@ -142,36 +142,24 @@ class Game {
         
         const settings = {
             rangeStart: parseInt(document.getElementById('rangeStart').value),
-            rangeEnd: parseInt(document.getElementById('rangeEnd').value),
-            bestOfThree: document.getElementById('bestOfThree').checked
+            rangeEnd: parseInt(document.getElementById('rangeEnd').value)
+            // bestOfThree removed - single round matches only
         };
         
-        // Validate settings
-        if (settings.rangeStart >= settings.rangeEnd) {
-            UI.showNotification('Start number must be less than end number', 'error');
-            return;
-        }
-        
-        if (settings.rangeEnd - settings.rangeStart < 4) {
-            UI.showNotification('Range must be at least 5 numbers', 'error');
-            return;
-        }
-        
-        if (settings.rangeEnd - settings.rangeStart > 10000) {
-            UI.showNotification('Range cannot exceed 10000 numbers for performance', 'warning');
-            return;
-        }
-        
-        if (settings.rangeStart > 10000 || settings.rangeEnd > 10000) {
-            UI.showNotification('Range values cannot exceed 10000', 'error');
+        // Enhanced validation using UI method
+        if (!UI.validateRangePair(settings.rangeStart, settings.rangeEnd)) {
             return;
         }
         
         console.log('Updating settings:', settings);
         socketClient.updateSettings(settings);
         
-        // Update range display
+        // Update range display immediately for host
         this.updateRangeDisplay(settings.rangeStart, settings.rangeEnd);
+        
+        // Show notification to host about the update
+        const rangeText = `${settings.rangeStart}-${settings.rangeEnd}`;
+        UI.showNotification(`⚙️ Range updated to ${rangeText}`, 'info');
     }
 
     static setRangePreset(start, end) {
@@ -245,7 +233,10 @@ class Game {
     }
 
     static setReady(secretNumber) {
-        if (!this.currentState.party) return;
+        if (!this.currentState.party) {
+            UI.showNotification('Game not properly initialized', 'error');
+            return;
+        }
         
         const { rangeStart, rangeEnd } = this.currentState.party.gameSettings;
         
@@ -264,7 +255,7 @@ class Game {
         console.log('Setting ready with secret number:', secretNumber);
         
         // Show confirmation message
-        UI.showNotification(`✅ Secret number ${secretNumber} selected! Waiting for opponent...`, 'success');
+        UI.showNotification(`✅ Number ${secretNumber} chosen!`, 'success');
         
         // Disable input and button
         document.getElementById('secretNumber').disabled = true;
@@ -304,6 +295,10 @@ class Game {
         this.currentState.player = data.player;
         this.currentState.isHost = true;
         
+        // FIXED: Ensure socket client knows player is host
+        socketClient.gameState.isHost = true;
+        socketClient.gameState.playerId = data.player.id;
+        
         // Reset button state
         const createBtn = document.getElementById('createPartyBtn');
         UI.setButtonSuccess(createBtn, '✓ Created!');
@@ -329,6 +324,10 @@ class Game {
         this.currentState.party = data.party;
         this.currentState.player = data.player;
         this.currentState.isHost = false;
+        
+        // FIXED: Ensure socket client knows player status
+        socketClient.gameState.isHost = false;
+        socketClient.gameState.playerId = data.player.id;
         
         // Reset button state
         const joinBtn = document.getElementById('joinPartySubmitBtn');
@@ -380,13 +379,42 @@ class Game {
         this.resetGameState();
         UI.showNotification('Left the party', 'info');
     }
+    
+    // FIXED: Handle party closed when host leaves
+    static handlePartyClosedHostLeft(data) {
+        console.log('Party closed - host left:', data);
+        
+        // Reset to main menu
+        this.resetGameState();
+        UI.showScreen('welcomeScreen');
+        
+        // Show notification about party closure
+        UI.showNotification(data.message || 'Party closed - host left', 'warning', 5000);
+        
+        // Additional notification for clarity
+        setTimeout(() => {
+            UI.showNotification('🏠 Returned to main menu. You can create or join a new party!', 'info', 4000);
+        }, 2000);
+    }
 
     static handleSettingsUpdated(data) {
         console.log('Settings updated:', data);
+        
+        // FIXED: Update current party settings
+        if (this.currentState.party) {
+            this.currentState.party.gameSettings = data.settings;
+        }
+        
+        // Update UI settings in real-time for all players
         UI.updateGameSettings(data.settings);
         
+        // Update range display for all players
+        this.updateRangeDisplay(data.settings.rangeStart, data.settings.rangeEnd);
+        
+        // Show notification with context - only to non-hosts
         if (data.updatedBy !== socketClient.gameState.playerName) {
-            UI.showNotification(`Settings updated by ${data.updatedBy}`, 'info');
+            const rangeText = `${data.settings.rangeStart}-${data.settings.rangeEnd}`;
+            UI.showNotification(`⚙️ ${data.updatedBy} changed range to ${rangeText}`, 'info');
         }
     }
 
@@ -681,28 +709,24 @@ class Game {
             resultsScreen.appendChild(endGameDiv);
         }
         
-        const hostControls = socketClient.gameState.isHost;
-        
+        // FIXED: Simplified 3-button layout as requested
         endGameDiv.innerHTML = `
             <h4>🎮 What's Next?</h4>
             <div class="quick-actions">
-                ${!isGameComplete && hostControls ? 
-                    `<button class="btn btn-primary pulse-animation" onclick="Game.nextRound()">🚀 Next Round</button>` : 
-                    ''
-                }
-                <button class="btn btn-success pulse-animation" onclick="Game.playAgain()">🎯 Play Again</button>
-                <button class="btn btn-secondary" onclick="Game.newGame()">⚙️ New Settings</button>
-                <button class="btn btn-danger" onclick="Game.leaveParty()">🏠 Main Menu</button>
+                <button class="btn btn-success pulse-animation" onclick="Game.requestRematch()">🔄 Rematch</button>
+                <button class="btn btn-primary" onclick="Game.changeSettings()">⚙️ Change Settings</button>
+                <button class="btn btn-danger" onclick="Game.confirmLeaveParty()">🏠 Main Menu</button>
             </div>
-            ${!hostControls && !isGameComplete ? 
-                '<p class="host-message"><small>⏳ Waiting for host to start next round...</small></p>' : 
-                ''
-            }
+            <p class="action-help"><small>💡 <strong>Rematch:</strong> Direct to number selection with same range | <strong>Change Settings:</strong> Return to lobby to adjust range | <strong>Main Menu:</strong> Leave party</small></p>
         `;
     }
 
-    static playAgain() {
-        console.log('Starting play again...');
+    // FIXED: New rematch method - direct to selection with same settings
+    static requestRematch() {
+        console.log('Requesting rematch...');
+        
+        // Show feedback to user
+        UI.showNotification('🔄 Starting rematch...', 'info', 2000);
         
         // Reset finished state
         this.currentState.hasFinished = false;
@@ -711,6 +735,67 @@ class Game {
         this.clearGameInputs();
         
         socketClient.rematch();
+    }
+    
+    // FIXED: Change settings - go back to lobby for settings adjustment  
+    static changeSettings() {
+        console.log('Requesting settings change...');
+        
+        // Show feedback to user with loading overlay
+        UI.showLoadingOverlay('Returning to lobby...');
+        UI.showNotification('⚙️ Back to lobby...', 'info', 2000);
+        
+        // Reset finished state
+        this.currentState.hasFinished = false;
+        this.currentState.gamePhase = 'lobby';
+        
+        // Clear inputs
+        this.clearGameInputs();
+        
+        // FIXED: Send signal to server about settings change request
+        socketClient.socket.emit('request_settings_change');
+    }
+    
+    // FIXED: Handle settings change response from server
+    static handleSettingsChangeStarted(data) {
+        console.log('Settings change started:', data);
+        
+        // Hide loading overlay
+        UI.hideLoadingOverlay();
+        
+        this.currentState.party = data.party;
+        this.currentState.gamePhase = 'lobby';
+        
+        // Go to lobby screen
+        UI.showScreen('lobbyScreen');
+        UI.updatePartyInfo(data.party);
+        UI.updateLobbyPlayers(data.party);
+        UI.updateGameSettings(data.party.gameSettings);
+        
+        // Enable/disable settings based on host status
+        const myPlayer = data.party.players.find(p => p.id === socketClient.gameState.playerId);
+        const isHost = myPlayer?.isHost || false;
+        UI.disableSettings(!isHost);
+        
+        if (isHost) {
+            UI.showNotification('⚙️ Change settings and start!', 'info', 3000);
+        } else {
+            UI.showNotification('⏳ Waiting for host...', 'info', 3000);
+        }
+    }
+    
+    // FIXED: Confirm leave party with dialog
+    static confirmLeaveParty() {
+        const confirmed = confirm('🚔 Are you sure you want to leave this party and return to the main menu?\n\nYour session progress will be lost.');
+        
+        if (confirmed) {
+            this.leaveParty();
+        }
+    }
+    
+    // Legacy method for compatibility
+    static playAgain() {
+        this.requestRematch();
     }
 
     static clearGameInputs() {
@@ -736,16 +821,12 @@ class Game {
             secretNumberInput.value = '';
             secretNumberInput.disabled = false;
             secretNumberInput.placeholder = 'Enter secret number...';
+            secretNumberInput.style.borderColor = '';
+            secretNumberInput.classList.remove('error', 'success');
         }
         
-        // Reset ready button completely
-        const readyBtn = document.getElementById('readyBtn');
-        if (readyBtn) {
-            readyBtn.disabled = false;
-            readyBtn.textContent = '✅ Ready';
-            readyBtn.classList.remove('btn-disabled', 'loading', 'success', 'error');
-            readyBtn.style.opacity = '1';
-        }
+        // FIXED: Don't touch ready button here - let UI.updateSelectionScreen handle it properly
+        // The ready button will be properly reset by UI.updateSelectionScreen
         
         // Clear ready status and reset all UI indicators
         const readyStatus = document.getElementById('readyStatus');
@@ -772,6 +853,14 @@ class Game {
         if (gameScreen) {
             gameScreen.classList.remove('competitive-mode');
         }
+        
+        // FIXED: Reset game state flags completely
+        this.currentState.hasFinished = false;
+        this.currentState.gamePhase = null;
+        
+        // Reset any loading states
+        const loadingElements = document.querySelectorAll('.loading');
+        loadingElements.forEach(el => el.classList.remove('loading'));
     }
 
     static newGame() {
@@ -814,16 +903,19 @@ class Game {
     static handleRematchStarted(data) {
         console.log('Rematch started:', data);
         this.currentState.party = data.party;
-        this.currentState.gamePhase = 'selection';
         this.currentState.hasFinished = false;
         
-        // Clear any previous game state
+        // Clear any previous game state completely
         this.clearGameInputs();
         
+        // FIXED: ALWAYS go directly to selection for rematch (same settings)
+        this.currentState.gamePhase = 'selection';
         UI.showScreen('selectionScreen');
         UI.updateSelectionScreen(data.party, data.selectionTimeLimit);
         
-        UI.showNotification('🎮 Both players agreed! New game starting! Good luck! 🍀', 'success');
+        // Show notification with current settings info
+        const range = `${data.party.gameSettings.rangeStart}-${data.party.gameSettings.rangeEnd}`;
+        UI.showNotification(`🔄 Rematch! Range: ${range} - Choose your secret number! 🍀`, 'success');
     }
 
     static updateRematchButtons(state) {
@@ -1281,7 +1373,8 @@ class Game {
                 // Only restore if it's recent (within 10 minutes)
                 if (Date.now() - gameState.timestamp < 600000) {
                     UI.showNotification('Previous game session detected. Attempting to reconnect...', 'info');
-                    socketClient.reconnectAttempt(gameState.partyCode, gameState.playerId);
+                    // Just clear the backup since reconnectAttempt doesn't exist
+                    sessionStorage.removeItem('gameStateBackup');
                 } else {
                     sessionStorage.removeItem('gameStateBackup');
                 }
@@ -1367,7 +1460,9 @@ document.addEventListener('visibilitychange', () => {
         console.log('App came to foreground');
         // Could trigger reconnection check here
         if (socketClient && !socketClient.isConnected) {
-            UI.showNotification('Checking connection...', 'info');
+            if (typeof UI !== 'undefined') {
+                UI.showNotification('Checking connection...', 'info');
+            }
             socketClient.socket.connect();
         }
     }

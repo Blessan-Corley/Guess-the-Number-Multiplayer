@@ -40,19 +40,29 @@ class SocketClient {
             console.log('Connected to server:', this.socket.id);
             this.isConnected = true;
             this.reconnectAttempts = 0;
-            UI.updateConnectionStatus('connected');
-            UI.hideLoadingOverlay();
+            if (typeof UI !== 'undefined') {
+                UI.updateConnectionStatus('connected');
+                if (typeof UI !== 'undefined') {
+                UI.hideLoadingOverlay();
+            }
+            }
         });
 
         this.socket.on('disconnect', (reason) => {
             console.log('Disconnected from server:', reason);
             this.isConnected = false;
+            if (typeof UI !== 'undefined') {
+                if (typeof UI !== 'undefined') {
             UI.updateConnectionStatus('disconnected');
+        }
+            }
             
             // Attempt reconnection for certain disconnect reasons
             if (reason === 'io server disconnect') {
                 // Server initiated disconnect, don't reconnect
-                UI.showNotification('Disconnected by server', 'error');
+                if (typeof UI !== 'undefined') {
+                    UI.showNotification('Disconnected by server', 'error');
+                }
             } else {
                 // Client side disconnect, attempt reconnection
                 this.handleReconnection();
@@ -109,6 +119,18 @@ class SocketClient {
                 isHost: false
             };
             Game.handlePartyLeft(data);
+        });
+        
+        // FIXED: Handle party closed due to host leaving
+        this.socket.on('party_closed_host_left', (data) => {
+            console.log('Party closed - host left:', data);
+            Game.handlePartyClosedHostLeft(data);
+        });
+        
+        // FIXED: Handle settings change request response
+        this.socket.on('settings_change_started', (data) => {
+            console.log('Settings change started:', data);
+            Game.handleSettingsChangeStarted(data);
         });
 
         // Game flow events
@@ -174,12 +196,16 @@ class SocketClient {
 
         this.socket.on('player_disconnected', (data) => {
             console.log('Player disconnected:', data);
-            UI.showNotification(`${data.playerName} disconnected`, 'warning');
+            if (typeof UI !== 'undefined') {
+                UI.showNotification(`${data.playerName} disconnected`, 'warning');
+            }
         });
 
         this.socket.on('player_reconnected', (data) => {
             console.log('Player reconnected:', data);
-            UI.showNotification(`${data.playerName} reconnected`, 'success');
+            if (typeof UI !== 'undefined') {
+                UI.showNotification(`${data.playerName} reconnected`, 'success');
+            }
         });
 
         // New enhanced game flow events
@@ -208,7 +234,17 @@ class SocketClient {
             console.error('Server error:', data);
             
             // Hide loading overlay on any error
-            UI.hideLoadingOverlay();
+            if (typeof UI !== 'undefined') {
+                UI.hideLoadingOverlay();
+            }
+            
+            // Reset join button if it exists (for party join errors)
+            const joinBtn = document.getElementById('joinPartySubmitBtn');
+            if (joinBtn) {
+                if (typeof UI !== 'undefined') {
+                    UI.resetButton(joinBtn, '🚀 Join Party');
+                }
+            }
             
             // Show appropriate error message based on error type
             let message = data.message || 'An error occurred';
@@ -228,7 +264,9 @@ class SocketClient {
                 type = 'warning';
             }
             
-            UI.showNotification(message, type, 5000); // Show for 5 seconds for important errors
+            if (typeof UI !== 'undefined') {
+                UI.showNotification(message, type, 5000); // Show for 5 seconds for important errors
+            }
         });
 
         // Reconnection events
@@ -240,12 +278,16 @@ class SocketClient {
             this.gameState.isHost = data.player.isHost;
             
             Game.handleReconnected(data);
-            UI.showNotification('Reconnected successfully!', 'success');
+            if (typeof UI !== 'undefined') {
+                UI.showNotification('Reconnected successfully!', 'success');
+            }
         });
 
         this.socket.on('reconnect_failed', (data) => {
             console.error('Reconnection failed:', data);
-            UI.showNotification('Failed to reconnect to game', 'error');
+            if (typeof UI !== 'undefined') {
+                UI.showNotification('Failed to reconnect to game', 'error');
+            }
             Game.returnToWelcome();
         });
     }
@@ -253,36 +295,56 @@ class SocketClient {
     // Party management methods
     createParty(playerName) {
         if (!this.isConnected) {
+            if (typeof UI !== 'undefined') {
             UI.showNotification('Not connected to server', 'error');
+        }
             return;
         }
 
-        UI.showLoadingOverlay('Creating party...');
+        if (typeof UI !== 'undefined') {
+            UI.showLoadingOverlay('Creating party...');
+        }
         this.socket.emit('create_party', { playerName });
         
         // Set a timeout to prevent infinite loading
         setTimeout(() => {
             if (document.querySelector('.loading-overlay.active')) {
+                if (typeof UI !== 'undefined') {
                 UI.hideLoadingOverlay();
+            }
+                if (typeof UI !== 'undefined') {
                 UI.showNotification('⏱️ Request timed out. Please try again.', 'warning');
+            }
             }
         }, 10000); // 10 second timeout
     }
 
     joinParty(partyCode, playerName) {
         if (!this.isConnected) {
+            if (typeof UI !== 'undefined') {
             UI.showNotification('Not connected to server', 'error');
+        }
             return;
         }
 
-        UI.showLoadingOverlay('Joining party...');
+        if (typeof UI !== 'undefined') {
+            UI.showLoadingOverlay('Joining party...');
+        }
         this.socket.emit('join_party', { partyCode, playerName });
         
         // Set a timeout to prevent infinite loading
         setTimeout(() => {
             if (document.querySelector('.loading-overlay.active')) {
-                UI.hideLoadingOverlay();
-                UI.showNotification('⏱️ Request timed out. Please try again.', 'warning');
+                if (typeof UI !== 'undefined') {
+                    UI.hideLoadingOverlay();
+                    UI.showNotification('⏱️ Request timed out. Please try again.', 'warning');
+                }
+                
+                // Reset join button on timeout
+                const joinBtn = document.getElementById('joinPartySubmitBtn');
+                if (joinBtn && typeof UI !== 'undefined') {
+                    UI.resetButton(joinBtn, '🚀 Join Party');
+                }
             }
         }, 10000); // 10 second timeout
     }
@@ -347,7 +409,9 @@ class SocketClient {
     handleConnectionError(error) {
         console.error('Connection error:', error);
         this.isConnected = false;
-        UI.updateConnectionStatus('disconnected');
+        if (typeof UI !== 'undefined') {
+            UI.updateConnectionStatus('disconnected');
+        }
         UI.showNotification('Connection error. Retrying...', 'error');
         this.handleReconnection();
     }
@@ -355,12 +419,16 @@ class SocketClient {
     handleReconnection() {
         if (this.reconnectAttempts >= this.maxReconnectAttempts) {
             console.error('Max reconnection attempts reached');
-            UI.showNotification('Unable to connect to server. Please refresh the page.', 'error');
+            if (typeof UI !== 'undefined') {
+                UI.showNotification('Unable to connect to server. Please refresh the page.', 'error');
+            }
             return;
         }
 
         this.reconnectAttempts++;
-        UI.updateConnectionStatus('connecting');
+        if (typeof UI !== 'undefined') {
+            UI.updateConnectionStatus('connecting');
+        }
         
         console.log(`Attempting to reconnect... (${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
         

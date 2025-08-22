@@ -8,6 +8,11 @@ class UI {
         this.setupEnhancedUI();
         this.notificationQueue = [];
         this.maxNotifications = 3;
+        
+        // Periodic button health check for Edge/Safari compatibility
+        setInterval(() => {
+            this.ensureButtonsAreWorking();
+        }, 10000); // Check every 10 seconds
     }
 
     static setupEnhancedUI() {
@@ -17,11 +22,102 @@ class UI {
         // Setup real-time input validation
         this.setupRealTimeValidation();
         
-        // Initialize QR code functionality
-        this.loadQRLibrary();
+        // QR code functionality removed for better performance
+        
+        // Setup How to Play modal
+        this.setupHowToPlayModal();
+    }
+    
+    static setupHowToPlayModal() {
+        // Close modal events - check if elements exist
+        const closeBtn = document.getElementById('closeHowToPlay');
+        const gotItBtn = document.getElementById('gotItBtn');
+        const modal = document.getElementById('howToPlayModal');
+        
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                this.hideHowToPlay();
+            });
+        }
+        
+        if (gotItBtn) {
+            gotItBtn.addEventListener('click', () => {
+                this.hideHowToPlay();
+            });
+        }
+        
+        if (modal) {
+            // Close on overlay click
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    this.hideHowToPlay();
+                }
+            });
+        }
+        
+        // Close on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && modal && modal.style.display === 'flex') {
+                this.hideHowToPlay();
+            }
+        });
+        
+        // Handle browser navigation (back button) to close modal
+        window.addEventListener('popstate', (e) => {
+            if (modal && modal.style.display === 'flex') {
+                // Don't call hideHowToPlay to avoid infinite loop
+                modal.style.display = 'none';
+                document.body.style.overflow = ''; // Restore scroll
+            }
+        });
     }
 
     static setupEventListeners() {
+        // Remove the prevention - each tab needs its own listener
+        // if (this._gameListenerAdded) return;
+        // this._gameListenerAdded = true;
+        
+        // Simple document-level delegation for critical buttons
+        document.addEventListener('click', (e) => {
+            // Ready button
+            if (e.target.id === 'readyBtn' && !e.target.disabled) {
+                console.log('Ready button clicked');
+                const input = document.getElementById('secretNumber');
+                if (!input || !input.value) {
+                    this.showNotification('Please enter a secret number', 'error');
+                    return;
+                }
+                const num = parseInt(input.value);
+                if (isNaN(num)) {
+                    this.showNotification('Please enter a valid number', 'error');
+                    return;
+                }
+                this.setButtonLoading(e.target, 'Setting...');
+                Game.setReady(num);
+                return;
+            }
+            
+            // Guess button
+            if (e.target.id === 'makeGuessBtn' && !e.target.disabled) {
+                console.log('Guess button clicked');
+                const input = document.getElementById('guessInput');
+                if (!input || !input.value) {
+                    this.showNotification('Please enter a guess', 'error');
+                    return;
+                }
+                const num = parseInt(input.value);
+                if (isNaN(num)) {
+                    this.showNotification('Please enter a valid number', 'error');
+                    return;
+                }
+                this.setButtonLoading(e.target, 'Guessing...');
+                
+                
+                Game.makeGuess(num);
+                return;
+            }
+        });
+        
         // Game mode selection
         document.getElementById('singlePlayerBtn').addEventListener('click', () => {
             Game.selectSinglePlayer();
@@ -34,6 +130,23 @@ class UI {
         document.getElementById('startSinglePlayerBtn').addEventListener('click', () => {
             Game.startSinglePlayer();
         });
+        
+        // Single player How to Play button
+        const howToPlaySingleBtn = document.getElementById('howToPlaySingleBtn');
+        if (howToPlaySingleBtn) {
+            howToPlaySingleBtn.addEventListener('click', () => {
+                this.showHowToPlay('singleplayer');
+            });
+        }
+        
+        // Welcome screen How to Play link
+        const welcomeHowToPlay = document.getElementById('welcomeHowToPlay');
+        if (welcomeHowToPlay) {
+            welcomeHowToPlay.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.showHowToPlay('general');
+            });
+        }
 
         // Welcome screen
         document.getElementById('createPartyBtn').addEventListener('click', () => {
@@ -99,86 +212,71 @@ class UI {
                 () => Game.leaveParty()
             );
         });
+        
+        // How to Play button (multiplayer lobby)
+        const howToPlayBtn = document.getElementById('howToPlayBtn');
+        if (howToPlayBtn) {
+            howToPlayBtn.addEventListener('click', () => {
+                this.showHowToPlay('multiplayer');
+            });
+        }
 
-        // Settings change listeners with validation
-        document.getElementById('rangeStart').addEventListener('change', (e) => {
-            const start = parseInt(e.target.value);
-            const end = parseInt(document.getElementById('rangeEnd').value);
-            
-            if (start >= end) {
-                UI.showNotification('Start number must be less than end number', 'warning');
-                e.target.value = Math.max(1, end - 1);
-                return;
-            }
-            
-            Game.updateSettings();
-        });
+        // Enhanced range validation for multiplayer
+        const rangeStartEl = document.getElementById('rangeStart');
+        if (rangeStartEl) {
+            rangeStartEl.addEventListener('change', (e) => {
+                this.validateAndFixRange(e.target, 'start', 'rangeEnd', Game.updateSettings);
+            });
+        }
 
-        document.getElementById('rangeEnd').addEventListener('change', (e) => {
-            const start = parseInt(document.getElementById('rangeStart').value);
-            const end = parseInt(e.target.value);
-            
-            if (end <= start) {
-                UI.showNotification('End number must be greater than start number', 'warning');
-                e.target.value = Math.min(10000, start + 1);
-                return;
-            }
-            
-            Game.updateSettings();
-        });
+        const rangeEndEl = document.getElementById('rangeEnd');
+        if (rangeEndEl) {
+            rangeEndEl.addEventListener('change', (e) => {
+                this.validateAndFixRange(e.target, 'end', 'rangeStart', Game.updateSettings);
+            });
+        }
 
-        document.getElementById('bestOfThree').addEventListener('change', () => {
-            Game.updateSettings();
-        });
+        // Enhanced range validation for single player
+        const singleRangeStartEl = document.getElementById('singleRangeStart');
+        if (singleRangeStartEl) {
+            singleRangeStartEl.addEventListener('change', (e) => {
+                this.validateAndFixRange(e.target, 'start', 'singleRangeEnd');
+            });
+        }
+
+        const singleRangeEndEl = document.getElementById('singleRangeEnd');
+        if (singleRangeEndEl) {
+            singleRangeEndEl.addEventListener('change', (e) => {
+                this.validateAndFixRange(e.target, 'end', 'singleRangeStart');
+            });
+        }
+
+        // bestOfThree removed - no longer needed
+        const bestOfThreeEl = document.getElementById('bestOfThree');
+        if (bestOfThreeEl) {
+            bestOfThreeEl.addEventListener('change', () => {
+                Game.updateSettings();
+            });
+        }
 
         // Add input validation for range inputs
-        document.getElementById('rangeStart').addEventListener('input', (e) => {
-            const value = parseInt(e.target.value);
-            if (value < 1) e.target.value = 1;
-            if (value > 9999) e.target.value = 9999;
-        });
+        if (rangeStartEl) {
+            rangeStartEl.addEventListener('input', (e) => {
+                const value = parseInt(e.target.value);
+                if (value < 1) e.target.value = 1;
+                if (value > 9999) e.target.value = 9999;
+            });
+        }
 
-        document.getElementById('rangeEnd').addEventListener('input', (e) => {
-            const value = parseInt(e.target.value);
-            if (value < 2) e.target.value = 2;
-            if (value > 10000) e.target.value = 10000;
-        });
+        if (rangeEndEl) {
+            rangeEndEl.addEventListener('input', (e) => {
+                const value = parseInt(e.target.value);
+                if (value < 2) e.target.value = 2;
+                if (value > 10000) e.target.value = 10000;
+            });
+        }
 
-        // Selection screen
-        document.getElementById('readyBtn').addEventListener('click', () => {
-            const button = document.getElementById('readyBtn');
-            const secretNumberInput = document.getElementById('secretNumber');
-            
-            if (!this.validateInput(secretNumberInput)) {
-                this.showNotification('Please enter a valid secret number', 'error');
-                return;
-            }
-            
-            const secretNumber = parseInt(secretNumberInput.value);
-            this.setButtonLoading(button, 'Setting...');
-            Game.setReady(secretNumber);
-        });
 
-        // Game screen
-        document.getElementById('makeGuessBtn').addEventListener('click', () => {
-            const button = document.getElementById('makeGuessBtn');
-            const guessInput = document.getElementById('guessInput');
-            
-            if (!this.validateInput(guessInput)) {
-                this.showNotification('Please enter a valid guess', 'error');
-                return;
-            }
-            
-            const guess = parseInt(guessInput.value);
-            this.setButtonLoading(button, 'Guessing...');
-            
-            // Reset button after a short delay
-            setTimeout(() => {
-                this.resetButton(button, '🎯 Guess!');
-            }, 1000);
-            
-            Game.makeGuess(guess);
-        });
 
         // Results screen
         document.getElementById('nextRoundBtn').addEventListener('click', () => {
@@ -346,10 +444,48 @@ class UI {
 
     // Screen management
     static showScreen(screenId) {
+        console.log('Switching to screen:', screenId);
+        
         document.querySelectorAll('.screen').forEach(screen => {
             screen.classList.remove('active');
         });
-        document.getElementById(screenId).classList.add('active');
+        
+        const targetScreen = document.getElementById(screenId);
+        if (targetScreen) {
+            targetScreen.classList.add('active');
+            console.log('Screen', screenId, 'is now active');
+        } else {
+            console.error('Target screen not found:', screenId);
+        }
+        
+        // Reset buttons when switching screens to prevent stuck states
+        if (screenId === 'gameScreen') {
+            setTimeout(() => {
+                const guessBtn = document.getElementById('makeGuessBtn');
+                if (guessBtn) {
+                    guessBtn.disabled = false;
+                    guessBtn.textContent = '🎯 Guess!';
+                    guessBtn.classList.remove('finished', 'loading', 'btn-loading');
+                    guessBtn.style.backgroundColor = '';
+                    guessBtn.style.transform = '';
+                    console.log('Reset guess button on game screen');
+                }
+            }, 100);
+        }
+        
+        if (screenId === 'selectionScreen') {
+            setTimeout(() => {
+                const readyBtn = document.getElementById('readyBtn');
+                if (readyBtn) {
+                    readyBtn.disabled = false;
+                    readyBtn.textContent = '✅ Ready';
+                    readyBtn.classList.remove('finished', 'loading', 'btn-loading');
+                    readyBtn.style.backgroundColor = '';
+                    readyBtn.style.transform = '';
+                    console.log('Reset ready button on selection screen');
+                }
+            }, 100);
+        }
         
         // Focus management
         this.focusFirstInput(screenId);
@@ -370,6 +506,14 @@ class UI {
 
     // Enhanced notification system with queue management
     static showNotification(message, type = 'info', duration = 4000, specialStyle = null) {
+        // Ensure queue and maxNotifications are initialized
+        if (!this.notificationQueue) {
+            this.notificationQueue = [];
+        }
+        if (!this.maxNotifications) {
+            this.maxNotifications = 3;
+        }
+        
         // Add to queue if too many notifications
         if (this.getActiveNotifications().length >= this.maxNotifications) {
             this.notificationQueue.push({ message, type, duration, specialStyle });
@@ -563,9 +707,9 @@ class UI {
                     <div class="share-options">
                         <button class="btn btn-copy" onclick="UI.copyToClipboard('${partyCode}')">📋 Copy Code</button>
                         <button class="btn btn-secondary" onclick="UI.sharePartyLink('${partyCode}')">🔗 Share Link</button>
-                        <button class="btn btn-primary" onclick="UI.generateQRCode('${partyCode}')">📱 QR Code</button>
+                        <!-- QR Code removed for better performance -->
                     </div>
-                    <p class="helper-tip">💡 Tip: Your friend can scan the QR code or enter the code manually!</p>
+                    <p class="helper-tip">💡 Tip: Share the party code with your friend to join the game!</p>
                 </div>
             `;
             
@@ -594,22 +738,52 @@ class UI {
     }
 
     static updateGameSettings(settings) {
-        document.getElementById('rangeStart').value = settings.rangeStart;
-        document.getElementById('rangeEnd').value = settings.rangeEnd;
-        document.getElementById('bestOfThree').checked = settings.bestOfThree;
+        // Update multiplayer input fields for all players in real-time
+        const rangeStartEl = document.getElementById('rangeStart');
+        const rangeEndEl = document.getElementById('rangeEnd');
         
-        // Update single player settings too
-        document.getElementById('singleRangeStart').value = settings.rangeStart;
-        document.getElementById('singleRangeEnd').value = settings.rangeEnd;
+        if (rangeStartEl && rangeEndEl) {
+            rangeStartEl.value = settings.rangeStart;
+            rangeEndEl.value = settings.rangeEnd;
+            
+            // Clear any error states since these are valid values from server
+            this.clearInputState(rangeStartEl);
+            this.clearInputState(rangeEndEl);
+            
+            // Show visual feedback that settings were synced (only for non-hosts)
+            if (socketClient && !socketClient.gameState.isHost) {
+                this.showInputSuccess(rangeStartEl, 'Synced');
+                this.showInputSuccess(rangeEndEl, 'Synced');
+                
+                // Clear success feedback after 2 seconds
+                setTimeout(() => {
+                    this.clearInputState(rangeStartEl);
+                    this.clearInputState(rangeEndEl);
+                }, 2000);
+            }
+        }
         
-        // Update range display
-        Game.updateRangeDisplay(settings.rangeStart, settings.rangeEnd);
+        // Update single player settings too for consistency
+        const singleStartEl = document.getElementById('singleRangeStart');
+        const singleEndEl = document.getElementById('singleRangeEnd');
+        
+        if (singleStartEl && singleEndEl) {
+            singleStartEl.value = settings.rangeStart;
+            singleEndEl.value = settings.rangeEnd;
+        }
+        
+        // Update range display through Game class
+        if (typeof Game !== 'undefined' && Game.updateRangeDisplay) {
+            Game.updateRangeDisplay(settings.rangeStart, settings.rangeEnd);
+        }
+        
+        console.log('Settings synchronized for all players:', settings);
     }
 
     static disableSettings(disabled = true) {
         document.getElementById('rangeStart').disabled = disabled;
         document.getElementById('rangeEnd').disabled = disabled;
-        document.getElementById('bestOfThree').disabled = disabled;
+        // bestOfThree removed
         
         // Add visual feedback
         const settingsSection = document.getElementById('gameSettings');
@@ -625,98 +799,195 @@ class UI {
     // Selection screen UI
     static updateSelectionScreen(party, timeLimit) {
         const roundText = party.maxRounds > 1 ? `Round ${party.currentRound} of ${party.maxRounds}` : 'Game Round';
-        document.getElementById('selectionRoundInfo').querySelector('.round-text').textContent = roundText;
+        
+        // Safe DOM element access with null checks
+        const selectionRoundInfo = document.getElementById('selectionRoundInfo');
+        if (selectionRoundInfo) {
+            const roundTextEl = selectionRoundInfo.querySelector('.round-text');
+            if (roundTextEl) {
+                roundTextEl.textContent = roundText;
+            }
+        }
         
         const rangeDisplay = `${party.gameSettings.rangeStart} - ${party.gameSettings.rangeEnd}`;
-        document.getElementById('selectionRangeDisplay').textContent = rangeDisplay;
+        const selectionRangeDisplay = document.getElementById('selectionRangeDisplay');
+        if (selectionRangeDisplay) {
+            selectionRangeDisplay.textContent = rangeDisplay;
+        }
         
         const secretNumberInput = document.getElementById('secretNumber');
-        secretNumberInput.min = party.gameSettings.rangeStart;
-        secretNumberInput.max = party.gameSettings.rangeEnd;
-        secretNumberInput.value = '';
-        secretNumberInput.disabled = false;
-        secretNumberInput.placeholder = `Choose ${rangeDisplay}`;
+        if (secretNumberInput) {
+            secretNumberInput.min = party.gameSettings.rangeStart;
+            secretNumberInput.max = party.gameSettings.rangeEnd;
+            secretNumberInput.value = '';
+            secretNumberInput.disabled = false;
+            secretNumberInput.placeholder = `Choose ${rangeDisplay}`;
+        }
         
-        // Update range hints
-        document.getElementById('secretNumberRange').textContent = `(${rangeDisplay})`;
-        document.getElementById('secretNumberHint').innerHTML = `💡 Choose wisely - your opponent will try to guess this number!`;
+        // Update range hints with null checks
+        const secretNumberRange = document.getElementById('secretNumberRange');
+        if (secretNumberRange) {
+            secretNumberRange.textContent = `(${rangeDisplay})`;
+        }
+        
+        const secretNumberHint = document.getElementById('secretNumberHint');
+        if (secretNumberHint) {
+            secretNumberHint.innerHTML = `💡 Pick a good number!`;
+        }
         
         // Add range hint
         const selectionMessage = document.getElementById('selectionMessage');
-        selectionMessage.innerHTML = `
-            <strong>🎯 Choose your secret number between ${rangeDisplay}</strong><br>
-            <small>💡 Think strategically! Not too obvious, not too random.</small>
-        `;
-        selectionMessage.className = 'message info enhanced';
+        if (selectionMessage) {
+            selectionMessage.innerHTML = `
+                <strong>🎯 Pick a number: ${rangeDisplay}</strong><br>
+                <small>💡 Make it tricky!</small>
+            `;
+            selectionMessage.className = 'message info enhanced';
+        }
         
         // FIXED: Ensure button is properly reset for all new games/rounds/rematches
         const readyBtn = document.getElementById('readyBtn');
-        readyBtn.disabled = false;
-        readyBtn.textContent = '✅ Ready';
-        readyBtn.classList.remove('btn-disabled', 'loading', 'success', 'error');
-        readyBtn.style.opacity = '1';
+        if (readyBtn) {
+            readyBtn.disabled = false;
+            readyBtn.textContent = '✅ Ready';
+            readyBtn.classList.remove('btn-disabled', 'loading', 'success', 'error');
+            readyBtn.style.opacity = '1';
+            readyBtn.style.pointerEvents = 'auto';
+            readyBtn.style.cursor = 'pointer';
+            
+            // Re-attach event listener if it was lost
+            if (!readyBtn._eventListenerAttached) {
+                console.log('Re-attaching ready button event listener');
+                
+                // Ensure we have the bound function
+                if (!this.handleReadyClick) {
+                    this.handleReadyClick = (e) => {
+                        console.log('Ready button clicked!', e);
+                        const button = document.getElementById('readyBtn');
+                        const secretNumberInput = document.getElementById('secretNumber');
+                        
+                        if (!button || !secretNumberInput) {
+                            console.error('Required elements not found:', { button, secretNumberInput });
+                            return;
+                        }
+                        
+                        if (button.disabled) {
+                            console.log('Ready button is disabled, ignoring click');
+                            return;
+                        }
+                        
+                        if (!this.validateInput(secretNumberInput)) {
+                            this.showNotification('Please enter a valid secret number', 'error');
+                            return;
+                        }
+                        
+                        const secretNumber = parseInt(secretNumberInput.value);
+                        console.log('Setting ready with secret number:', secretNumber);
+                        this.setButtonLoading(button, 'Setting...');
+                        Game.setReady(secretNumber);
+                    };
+                }
+                
+                readyBtn.addEventListener('click', this.handleReadyClick);
+                readyBtn._eventListenerAttached = true;
+                console.log('Ready button event listener re-attached in updateSelectionScreen');
+            }
+            
+            console.log('Ready button state after reset:', {
+                disabled: readyBtn.disabled,
+                pointerEvents: readyBtn.style.pointerEvents,
+                cursor: readyBtn.style.cursor,
+                opacity: readyBtn.style.opacity,
+                classList: readyBtn.classList.toString()
+            });
+        } else {
+            console.error('Ready button not found in updateSelectionScreen!');
+        }
         
         // Clear ready status completely
-        document.getElementById('readyStatus').textContent = '';
-        document.getElementById('readyStatus').innerHTML = '';
+        const readyStatus = document.getElementById('readyStatus');
+        if (readyStatus) {
+            readyStatus.textContent = '';
+            readyStatus.innerHTML = '';
+        }
         
         // Clear any previous timeout/interval from button reset
-        if (readyBtn._resetTimeout) {
+        if (readyBtn && readyBtn._resetTimeout) {
             clearTimeout(readyBtn._resetTimeout);
             delete readyBtn._resetTimeout;
         }
         
         // Focus on input
-        setTimeout(() => secretNumberInput.focus(), 200);
+        if (secretNumberInput) {
+            setTimeout(() => secretNumberInput.focus(), 200);
+        }
         
         // Add input validation with toast messages
-        this.setupSecretNumberValidation(secretNumberInput, party.gameSettings.rangeStart, party.gameSettings.rangeEnd);
+        if (secretNumberInput) {
+            this.setupSecretNumberValidation(secretNumberInput, party.gameSettings.rangeStart, party.gameSettings.rangeEnd);
+        }
     }
 
     static updateSelectionTimer(timeLeft) {
-        document.getElementById('selectionTimer').textContent = timeLeft;
+        const selectionTimer = document.getElementById('selectionTimer');
+        if (selectionTimer) {
+            selectionTimer.textContent = timeLeft;
+        }
         
         // Add urgency styling and sound
-        const timer = document.getElementById('selectionTimer');
-        if (timeLeft <= 10) {
-            timer.style.color = '#ff6b6b';
-            timer.style.animation = 'pulse 0.5s infinite';
-            
-            // Add urgent warning
-            if (timeLeft === 10) {
-                this.showNotification('⚠️ Only 10 seconds left to choose!', 'warning', 2000);
-            } else if (timeLeft === 5) {
-                this.showNotification('⚠️ 5 seconds remaining!', 'warning', 1000);
+        if (selectionTimer) {
+            if (timeLeft <= 10) {
+                selectionTimer.style.color = '#ff6b6b';
+                selectionTimer.style.animation = 'pulse 0.5s infinite';
+                
+                // Add urgent warning
+                if (timeLeft === 10) {
+                    this.showNotification('⚠️ 10 seconds left!', 'warning', 2000);
+                } else if (timeLeft === 5) {
+                    this.showNotification('⚠️ 5 seconds!', 'warning', 1000);
+                }
+            } else if (timeLeft <= 20) {
+                selectionTimer.style.color = '#ffc107';
+                selectionTimer.style.animation = 'none';
+            } else {
+                selectionTimer.style.color = '#4CAF50';
+                selectionTimer.style.animation = 'none';
             }
-        } else if (timeLeft <= 20) {
-            timer.style.color = '#ffc107';
-            timer.style.animation = 'none';
-        } else {
-            timer.style.color = '#ff6b6b';
-            timer.style.animation = 'none';
         }
     }
 
     static updateReadyStatus(playerId, playerName, allReady) {
         const statusElement = document.getElementById('readyStatus');
+        if (!statusElement) return;
         
         if (playerId === socketClient.gameState.playerId) {
-            statusElement.innerHTML = '✅ You are ready! Waiting for opponent...<br><small>💡 Get ready for the guessing battle!</small>';
-            document.getElementById('readyBtn').disabled = true;
-            document.getElementById('readyBtn').textContent = '✅ Ready!';
+            statusElement.innerHTML = '✅ Ready! Waiting for opponent...<br><small>🎮 Game starting soon!</small>';
+            const readyBtn = document.getElementById('readyBtn');
+            if (readyBtn) {
+                readyBtn.disabled = true;
+                readyBtn.textContent = '✅ Ready!';
+            }
         } else {
-            statusElement.innerHTML = `⏳ ${playerName} is ready!<br><small>🎯 Choose your number quickly!</small>`;
+            statusElement.innerHTML = `⏳ ${playerName} is ready!<br><small>🎯 Pick your number!</small>`;
         }
         
         if (allReady) {
-            statusElement.innerHTML = '🚀 Both players ready! Starting game...<br><small>🔥 Let the battle begin!</small>';
+            statusElement.innerHTML = '🚀 Both ready! Starting game...<br><small>🔥 Let\'s play!</small>';
         }
     }
 
     // Game screen UI with enhanced feedback
     static updateGameScreen(party) {
         const roundText = party.maxRounds > 1 ? `Round ${party.currentRound} of ${party.maxRounds}` : 'Game Round';
-        document.getElementById('gameRoundInfo').querySelector('.round-text').textContent = roundText;
+        
+        // Safe DOM access for game round info
+        const gameRoundInfo = document.getElementById('gameRoundInfo');
+        if (gameRoundInfo) {
+            const roundTextEl = gameRoundInfo.querySelector('.round-text');
+            if (roundTextEl) {
+                roundTextEl.textContent = roundText;
+            }
+        }
         
         const players = party.players;
         const myPlayer = players.find(p => p.id === socketClient.gameState.playerId);
@@ -727,15 +998,41 @@ class UI {
             const myWins = myPlayer.wins || 0;
             const opponentWins = opponent.wins || 0;
             
-            // Enhanced win display with session context
-            document.getElementById('myBattleName').innerHTML = `${myPlayer.name} <small>(You) - Session: ${myWins} wins</small>`;
-            document.getElementById('opponentBattleName').innerHTML = `${opponent.name} <small>(Opponent) - Session: ${opponentWins} wins</small>`;
+            // Enhanced win display with session context - show X out of Y format
+            const totalRoundsPlayed = myWins + opponentWins;
+            const myWinDisplay = totalRoundsPlayed > 0 ? `${myWins} out of ${totalRoundsPlayed} won` : `${myWins} wins`;
+            const opponentWinDisplay = totalRoundsPlayed > 0 ? `${opponentWins} out of ${totalRoundsPlayed} won` : `${opponentWins} wins`;
+            
+            // Safe DOM updates for player names
+            const myBattleName = document.getElementById('myBattleName');
+            if (myBattleName) {
+                myBattleName.innerHTML = `${myPlayer.name} <small>(You) - Session: ${myWinDisplay}</small>`;
+            }
+            
+            const opponentBattleName = document.getElementById('opponentBattleName');
+            if (opponentBattleName) {
+                opponentBattleName.innerHTML = `${opponent.name} <small>(Opponent) - Session: ${opponentWinDisplay}</small>`;
+            }
             
             // Update stats with better real-time tracking
-            document.getElementById('myAttempts').textContent = myPlayer.attempts || 0;
-            document.getElementById('myWins').textContent = myWins;
-            document.getElementById('opponentAttempts').textContent = opponent.attempts || 0;
-            document.getElementById('opponentWins').textContent = opponentWins;
+            const myAttempts = document.getElementById('myAttempts');
+            if (myAttempts) {
+                myAttempts.textContent = myPlayer.attempts || 0;
+            }
+            
+            const myWinsEl = document.getElementById('myWins');
+            if (myWinsEl) {
+                myWinsEl.textContent = myWins;
+            }
+            
+            const opponentAttempts = document.getElementById('opponentAttempts');
+            if (opponentAttempts) {
+                opponentAttempts.textContent = opponent.attempts || 0;
+            }
+            const opponentWinsEl = document.getElementById('opponentWins');
+            if (opponentWinsEl) {
+                opponentWinsEl.textContent = opponentWins;
+            }
             
             // Add session performance indicator
             const winDifference = myWins - opponentWins;
@@ -779,11 +1076,15 @@ class UI {
         guessInput.placeholder = `Guess ${party.gameSettings.rangeStart}-${party.gameSettings.rangeEnd}`;
         guessInput.disabled = false;
         
-        // Enable guess button
+        // Enable guess button and reset any stuck states
         const guessBtn = document.getElementById('makeGuessBtn');
-        guessBtn.disabled = false;
-        guessBtn.textContent = '🎯 Guess!';
-        guessBtn.classList.remove('finished');
+        if (guessBtn) {
+            guessBtn.disabled = false;
+            guessBtn.textContent = '🎯 Guess!';
+            guessBtn.classList.remove('finished', 'loading', 'btn-loading');
+            guessBtn.style.backgroundColor = '';
+            guessBtn.style.transform = '';
+        }
         
         // Update range display
         const guessRangeEl = document.getElementById('guessRange');
@@ -798,8 +1099,11 @@ class UI {
         setTimeout(() => guessInput.focus(), 300);
         
         // Clear message and history
-        document.getElementById('gameMessage').textContent = `🎯 Find your opponent's secret number between ${party.gameSettings.rangeStart} and ${party.gameSettings.rangeEnd}!`;
-        document.getElementById('gameMessage').className = 'message info';
+        const gameMessage = document.getElementById('gameMessage');
+        if (gameMessage) {
+            gameMessage.textContent = `🎯 Guess the number: ${party.gameSettings.rangeStart}-${party.gameSettings.rangeEnd}`;
+            gameMessage.className = 'message info';
+        }
         this.clearGuessHistory();
     }
 
@@ -945,9 +1249,10 @@ class UI {
             
             document.getElementById('myFinalAttempts').textContent = myPlayer.attempts;
             document.getElementById('opponentFinalAttempts').textContent = opponent.attempts;
-            // Enhanced session win tracking display
-            document.getElementById('myTotalWins').textContent = `${myPlayer.wins} session wins`;
-            document.getElementById('opponentTotalWins').textContent = `${opponent.wins} session wins`;
+            // Enhanced session win tracking display - show X out of Y format
+            const totalRoundsPlayed = myPlayer.wins + opponent.wins;
+            document.getElementById('myTotalWins').textContent = `${myPlayer.wins} out of ${totalRoundsPlayed} rounds won`;
+            document.getElementById('opponentTotalWins').textContent = `${opponent.wins} out of ${totalRoundsPlayed} rounds won`;
             
             // Add session summary
             const totalRounds = myPlayer.wins + opponent.wins;
@@ -991,18 +1296,20 @@ class UI {
         
         // Enhanced final message
         let message;
+        const totalRoundsPlayed = myPlayer.wins + opponent.wins;
+        
         if (isGameComplete) {
             if (gameWinner && gameWinner.id === socketClient.gameState.playerId) {
-                message = `🎊 Fantastic! You won ${myPlayer.wins} out of ${party.maxRounds} rounds! You're the champion!`;
+                message = `🎊 You won ${myPlayer.wins} out of ${totalRoundsPlayed} rounds! Champion!`;
             } else if (gameWinner) {
-                message = `Good effort! Your opponent won ${opponent.wins} out of ${party.maxRounds} rounds. Great game though!`;
+                message = `Good game! Your opponent won ${opponent.wins} out of ${totalRoundsPlayed} rounds.`;
             } else {
-                message = `Incredible! You both won ${myPlayer.wins} rounds each! What a match!`;
+                message = `Incredible! You both won ${myPlayer.wins} rounds each!`;
             }
         } else {
             message = isWinner ? 
-                `🔥 Excellent! You found the number in ${myPlayer.attempts} attempts! Ready for the next round?` :
-                `Your opponent found your number in ${opponent.attempts} attempts. Don't worry, you'll get them next round!`;
+                `🔥 You found it in ${myPlayer.attempts} attempts! Nice!` :
+                `Opponent found it in ${opponent.attempts} attempts. Next round!`;
         }
         
         document.getElementById('finalResultMessage').textContent = message;
@@ -1057,6 +1364,163 @@ class UI {
             card.appendChild(badge);
         }
     }
+    
+    // How to Play Modal System
+    static showHowToPlay(mode = 'multiplayer') {
+        const modal = document.getElementById('howToPlayModal');
+        const content = document.getElementById('howToPlayContent');
+        
+        if (!modal || !content) {
+            console.warn('How to Play modal elements not found');
+            return;
+        }
+        
+        // Set content based on mode
+        if (mode === 'multiplayer') {
+            content.innerHTML = this.getMultiplayerGuide();
+        } else if (mode === 'singleplayer') {
+            content.innerHTML = this.getSinglePlayerGuide();
+        } else {
+            content.innerHTML = this.getGeneralGuide();
+        }
+        
+        // Add history entry for proper back button handling
+        if (history.pushState) {
+            history.pushState({ modal: 'howToPlay' }, '', window.location.href);
+        }
+        
+        // Show modal
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden'; // Prevent background scroll
+    }
+    
+    static hideHowToPlay() {
+        const modal = document.getElementById('howToPlayModal');
+        if (modal && modal.style.display === 'flex') {
+            modal.style.display = 'none';
+            document.body.style.overflow = ''; // Restore scroll
+        }
+    }
+    
+    static getMultiplayerGuide() {
+        return `
+            <h3>🎯 Multiplayer Number Guessing</h3>
+            <p>Challenge your friend in an exciting head-to-head number guessing battle!</p>
+            
+            <h4>🏠 Getting Started</h4>
+            <ol>
+                <li><strong>Create Party:</strong> Host creates a 6-digit party code</li>
+                <li><strong>Join Party:</strong> Friend enters the party code to join</li>
+                <li><strong>Adjust Settings:</strong> Host can change the number range (1-10000)</li>
+                <li><strong>Start Game:</strong> When both players are ready!</li>
+            </ol>
+            
+            <h4>🎲 How to Play</h4>
+            <ol>
+                <li><strong>Choose Secret:</strong> Each player picks a secret number (30 seconds)</li>
+                <li><strong>Guess Battle:</strong> Take turns guessing each other's number</li>
+                <li><strong>Get Hints:</strong> Receive smart feedback (too high/low, close/far)</li>
+                <li><strong>First to Win:</strong> First player to find the opponent's number wins!</li>
+            </ol>
+            
+            <h4>🏆 After Each Game</h4>
+            <ul>
+                <li><strong>Rematch:</strong> Play again with same settings</li>
+                <li><strong>Change Settings:</strong> Adjust number range and start new game</li>
+                <li><strong>Session Wins:</strong> Track your victories in this party!</li>
+            </ul>
+            
+            <div class="tip">
+                <strong>💡 Pro Tips:</strong>
+                <ul>
+                    <li>Choose tricky numbers (not too obvious like 50 or 100)</li>
+                    <li>Use the feedback wisely - "close" means you're getting warm!</li>
+                    <li>Larger ranges = more challenging and strategic gameplay</li>
+                    <li>Host controls all settings and can kick off new games</li>
+                </ul>
+            </div>
+        `;
+    }
+    
+    static getSinglePlayerGuide() {
+        return `
+            <h3>🤖 Single Player vs AI Bot</h3>
+            <p>Test your guessing skills against our smart AI opponents!</p>
+            
+            <h4>⚙️ Setup Your Game</h4>
+            <ol>
+                <li><strong>Choose Range:</strong> Set start and end numbers (1-10000)</li>
+                <li><strong>Pick Difficulty:</strong> Easy, Medium, or Hard AI opponent</li>
+                <li><strong>Start Playing:</strong> Jump right into the action!</li>
+            </ol>
+            
+            <h4>🎲 Gameplay</h4>
+            <ol>
+                <li><strong>Secret Numbers:</strong> You and the AI each pick secret numbers</li>
+                <li><strong>Taking Turns:</strong> Alternate guessing each other's numbers</li>
+                <li><strong>Smart Feedback:</strong> Get helpful hints after each guess</li>
+                <li><strong>First to Find:</strong> Winner is first to discover the secret number!</li>
+            </ol>
+            
+            <h4>🏆 AI Difficulty Levels</h4>
+            <ul>
+                <li><strong>Easy:</strong> AI makes random guesses - good for beginners</li>
+                <li><strong>Medium:</strong> AI uses basic strategy - balanced challenge</li>
+                <li><strong>Hard:</strong> AI uses optimal strategy - prepare for a battle!</li>
+            </ul>
+            
+            <div class="tip">
+                <strong>💡 Strategy Tips:</strong>
+                <ul>
+                    <li>Start with numbers in the middle of your range</li>
+                    <li>Use binary search approach: eliminate half the possibilities each guess</li>
+                    <li>Pay attention to "very close" hints - you're almost there!</li>
+                    <li>Practice on Easy mode, then challenge yourself with harder AIs</li>
+                </ul>
+            </div>
+        `;
+    }
+    
+    static getGeneralGuide() {
+        return `
+            <h3>🎯 Welcome to Number Guesser!</h3>
+            <p>Choose your adventure - challenge friends or battle our AI!</p>
+            
+            <h4>👥 Multiplayer Mode</h4>
+            <ul>
+                <li><strong>Create Party:</strong> Generate a 6-digit code for friends to join</li>
+                <li><strong>Join Party:</strong> Enter a friend's party code to play together</li>
+                <li><strong>Head-to-Head:</strong> Both players pick secret numbers and guess each other's</li>
+                <li><strong>Session Wins:</strong> Track victories throughout your gaming session</li>
+            </ul>
+            
+            <h4>🤖 Single Player Mode</h4>
+            <ul>
+                <li><strong>Choose Difficulty:</strong> Easy, Medium, or Hard AI opponents</li>
+                <li><strong>Custom Ranges:</strong> Set your preferred number range (1-10000)</li>
+                <li><strong>Strategic Play:</strong> Use smart feedback to optimize your guessing</li>
+                <li><strong>Perfect Practice:</strong> Hone your skills before challenging friends</li>
+            </ul>
+            
+            <h4>🎮 Game Mechanics</h4>
+            <ul>
+                <li><strong>Secret Selection:</strong> Pick a number within the chosen range</li>
+                <li><strong>Smart Feedback:</strong> Get hints like "too high", "close!", "very close!"</li>
+                <li><strong>Win Condition:</strong> First to guess the opponent's number wins</li>
+                <li><strong>Quick Rounds:</strong> Fast-paced gameplay keeps the excitement high</li>
+            </ul>
+            
+            <div class="tip">
+                <strong>💡 Quick Start Tips:</strong>
+                <ul>
+                    <li>New to number guessing? Start with <strong>Single Player Easy mode</strong></li>
+                    <li>Want to challenge friends? Click <strong>Multiplayer → Create Party</strong></li>
+                    <li>Each mode has detailed guides available when you need them</li>
+                    <li>Have fun and may the best guesser win! 🏆</li>
+                </ul>
+            </div>
+        `;
+    }
 
     static updatePerformanceBadge(elementId, performance, isWinner) {
         const badge = document.getElementById(elementId);
@@ -1099,6 +1563,9 @@ class UI {
         document.querySelectorAll('.pulse-animation').forEach(el => {
             el.classList.remove('pulse-animation');
         });
+        
+        // Clean up all timers and prevent memory leaks
+        this.cleanup();
     }
 
     // Animation helpers
@@ -1299,6 +1766,10 @@ class UI {
         });
         
         notification.addEventListener('mouseleave', () => {
+            // Clear any existing timeout first
+            if (notification.dataset.timeoutId) {
+                clearTimeout(notification.dataset.timeoutId);
+            }
             const newTimeoutId = setTimeout(() => {
                 this.removeNotification(notification);
             }, 2000); // Shorter delay after hover
@@ -1325,9 +1796,22 @@ class UI {
     }
     
     static processNotificationQueue() {
-        if (this.notificationQueue.length > 0 && this.getActiveNotifications().length < this.maxNotifications) {
-            const next = this.notificationQueue.shift();
-            this.displayNotification(next.message, next.type, next.duration, next.specialStyle);
+        // Ensure queue and maxNotifications are initialized
+        if (!this.notificationQueue) {
+            this.notificationQueue = [];
+        }
+        if (!this.maxNotifications) {
+            this.maxNotifications = 3;
+        }
+        
+        // Double-check queue exists and has length property
+        if (this.notificationQueue && Array.isArray(this.notificationQueue) && this.notificationQueue.length > 0) {
+            if (this.getActiveNotifications().length < this.maxNotifications) {
+                const next = this.notificationQueue.shift();
+                if (next) {
+                    this.displayNotification(next.message, next.type, next.duration, next.specialStyle);
+                }
+            }
         }
     }
     
@@ -1343,86 +1827,24 @@ class UI {
         this.notificationQueue = [];
     }
 
-    // QR Code functionality
-    static loadQRLibrary() {
-        // Load QR code library if not already loaded
-        if (window.QRCode) {
-            return Promise.resolve();
+    // Cleanup method to clear all timers and prevent memory leaks
+    static cleanup() {
+        // Clear all notification timers
+        this.clearAllNotifications();
+        
+        // Clear any ready button timeouts
+        const readyBtn = document.getElementById('readyBtn');
+        if (readyBtn && readyBtn._resetTimeout) {
+            clearTimeout(readyBtn._resetTimeout);
+            delete readyBtn._resetTimeout;
         }
         
-        return new Promise((resolve, reject) => {
-            const script = document.createElement('script');
-            script.src = 'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js';
-            script.onload = resolve;
-            script.onerror = reject;
-            document.head.appendChild(script);
-        });
+        // Clear notification queue
+        this.notificationQueue = [];
     }
-    
-    static generateQRCode(partyCode) {
-        const url = `${window.location.origin}${window.location.pathname}?join=${partyCode}`;
-        
-        this.loadQRLibrary().then(() => {
-            const canvas = document.createElement('canvas');
-            window.QRCode.toCanvas(canvas, url, {
-                width: 200,
-                margin: 2,
-                color: {
-                    dark: '#1a1a2e',
-                    light: '#ffffff'
-                }
-            }, (error) => {
-                if (error) {
-                    console.error('QR Code generation failed:', error);
-                    return;
-                }
-                
-                this.showQRCodeModal(canvas, partyCode, url);
-            });
-        }).catch(() => {
-            // Fallback to just showing the URL
-            this.showNotification('QR code unavailable, but you can share this link: ' + url, 'info', 8000);
-        });
-    }
-    
-    static showQRCodeModal(canvas, partyCode, url) {
-        // Remove existing QR modal
-        const existingModal = document.querySelector('.qr-modal');
-        if (existingModal) {
-            existingModal.remove();
-        }
-        
-        const modal = document.createElement('div');
-        modal.className = 'confirm-dialog qr-modal';
-        modal.innerHTML = `
-            <div class="confirm-overlay"></div>
-            <div class="confirm-content qr-code-container">
-                <h4>🎮 Share Party Code</h4>
-                <div class="party-code-display">${partyCode}</div>
-                <div class="qr-code"></div>
-                <p class="qr-share-text">Scan this QR code or share the party code</p>
-                <div class="confirm-buttons">
-                    <button class="btn btn-primary" onclick="UI.copyToClipboard('${partyCode}')">📋 Copy Code</button>
-                    <button class="btn btn-secondary" onclick="UI.copyToClipboard('${url}')">🔗 Copy Link</button>
-                    <button class="btn btn-danger qr-close">Close</button>
-                </div>
-            </div>
-        `;
-        
-        // Add the canvas
-        modal.querySelector('.qr-code').appendChild(canvas);
-        
-        document.body.appendChild(modal);
-        
-        // Add event listeners
-        modal.querySelector('.qr-close').onclick = () => modal.remove();
-        modal.querySelector('.confirm-overlay').onclick = () => modal.remove();
-        
-        // Focus the close button
-        setTimeout(() => {
-            modal.querySelector('.qr-close').focus();
-        }, 100);
-    }
+
+    // QR Code functionality removed for better performance and reliability
+    // Users can simply copy and share the party code
 
     // Enhanced input validation
     static setupRealTimeValidation() {
@@ -1509,33 +1931,36 @@ class UI {
     
     static validateGameNumber(input) {
         const value = parseInt(input.value);
-        const screen = input.closest('.screen');
         
         if (!value && input.value !== '0') {
             this.clearInputState(input);
             return false;
         }
         
-        // Get current game range
+        // Get current game range from game state if available
         let min = 1, max = 100;
-        if (screen) {
-            const rangeDisplay = screen.querySelector('[id*="Range"]');
-            if (rangeDisplay) {
-                const rangeText = rangeDisplay.textContent;
-                const matches = rangeText.match(/(\d+).*?(\d+)/);
-                if (matches) {
-                    min = parseInt(matches[1]);
-                    max = parseInt(matches[2]);
-                }
+        
+        if (typeof Game !== 'undefined' && Game.currentState && Game.currentState.party) {
+            min = Game.currentState.party.gameSettings.rangeStart;
+            max = Game.currentState.party.gameSettings.rangeEnd;
+        } else {
+            // Fallback: try to get from range inputs
+            const rangeStartEl = document.getElementById('rangeStart');
+            const rangeEndEl = document.getElementById('rangeEnd');
+            if (rangeStartEl && rangeEndEl) {
+                min = parseInt(rangeStartEl.value) || 1;
+                max = parseInt(rangeEndEl.value) || 100;
             }
         }
+        
+        // Validation complete
         
         if (value < min || value > max) {
             this.showInputError(input, `Number must be between ${min} and ${max}`);
             return false;
         }
         
-        this.showInputSuccess(input, 'Number is in valid range');
+        this.clearInputState(input); // Clear any previous error state
         return true;
     }
     
@@ -1557,6 +1982,107 @@ class UI {
         
         this.clearInputState(input);
         return true;
+    }
+
+    // Comprehensive range validation with edge case handling
+    static validateAndFixRange(input, type, otherInputId, callback = null) {
+        const value = parseInt(input.value);
+        const otherInput = document.getElementById(otherInputId);
+        
+        if (!otherInput) {
+            console.warn(`Other input ${otherInputId} not found`);
+            return;
+        }
+        
+        const otherValue = parseInt(otherInput.value);
+        
+        // Edge case 1: Invalid numbers
+        if (isNaN(value) || value < 1) {
+            this.showNotification('Please enter a valid number (minimum 1)', 'error');
+            input.value = type === 'start' ? 1 : 2;
+            this.showInputError(input, 'Invalid number');
+            return;
+        }
+        
+        if (isNaN(otherValue) || otherValue < 1) {
+            this.showNotification('Please set both start and end numbers', 'warning');
+            return;
+        }
+        
+        // Edge case 2: Numbers too large
+        if (value > 10000) {
+            this.showNotification('Maximum number is 10000', 'warning');
+            input.value = 10000;
+            this.showInputError(input, 'Too large');
+            return;
+        }
+        
+        // Edge case 3: Start >= End
+        if (type === 'start' && value >= otherValue) {
+            if (value === otherValue) {
+                this.showNotification('Start and end cannot be the same!', 'error');
+                input.value = Math.max(1, otherValue - 1);
+            } else {
+                this.showNotification('Start must be less than end', 'warning');
+                input.value = Math.max(1, otherValue - 1);
+            }
+            this.showInputError(input, 'Invalid range');
+            return;
+        }
+        
+        // Edge case 4: End <= Start  
+        if (type === 'end' && value <= otherValue) {
+            if (value === otherValue) {
+                this.showNotification('Start and end cannot be the same!', 'error');
+                input.value = Math.min(10000, otherValue + 1);
+            } else {
+                this.showNotification('End must be greater than start', 'warning');
+                input.value = Math.min(10000, otherValue + 1);
+            }
+            this.showInputError(input, 'Invalid range');
+            return;
+        }
+        
+        // Edge case 5: Range too small (less than 2 numbers)
+        const rangeSize = type === 'start' ? otherValue - value + 1 : value - otherValue + 1;
+        if (rangeSize < 2) {
+            this.showNotification('Range must have at least 2 numbers', 'warning');
+            if (type === 'start') {
+                input.value = Math.max(1, otherValue - 1);
+            } else {
+                input.value = Math.min(10000, otherValue + 1);
+            }
+            this.showInputError(input, 'Range too small');
+            return;
+        }
+        
+        // Edge case 6: Range too large (more than 10000 numbers)
+        if (rangeSize > 10000) {
+            this.showNotification('Range too large! Maximum 10000 numbers', 'warning');
+            if (type === 'start') {
+                input.value = Math.max(1, otherValue - 9999);
+            } else {
+                input.value = Math.min(10000, otherValue + 9999);
+            }
+            this.showInputError(input, 'Range too large');
+            return;
+        }
+        
+        // All validation passed!
+        this.clearInputState(input);
+        this.clearInputState(otherInput);
+        
+        // Show success feedback
+        const actualStart = type === 'start' ? value : otherValue;
+        const actualEnd = type === 'start' ? otherValue : value;
+        const actualSize = actualEnd - actualStart + 1;
+        
+        this.showNotification(`✅ Range: ${actualStart}-${actualEnd} (${actualSize} numbers)`, 'success', 2000);
+        
+        // Call callback if provided (for multiplayer settings update)
+        if (callback && typeof callback === 'function') {
+            callback();
+        }
     }
     
     static showInputError(input, message) {
@@ -1598,6 +2124,177 @@ class UI {
         if (hint) {
             hint.remove();
         }
+    }
+    
+    // Ensure ready button is functional (debugging helper)
+    static ensureReadyButtonFunctional() {
+        const readyBtn = document.getElementById('readyBtn');
+        if (!readyBtn) {
+            console.error('Ready button not found!');
+            return;
+        }
+        
+        console.log('Checking ready button state:', {
+            exists: !!readyBtn,
+            disabled: readyBtn.disabled,
+            pointerEvents: readyBtn.style.pointerEvents,
+            cursor: readyBtn.style.cursor,
+            opacity: readyBtn.style.opacity,
+            display: getComputedStyle(readyBtn).display,
+            visibility: getComputedStyle(readyBtn).visibility,
+            zIndex: getComputedStyle(readyBtn).zIndex
+        });
+        
+        // Test if click event fires
+        readyBtn.addEventListener('click', function testClick() {
+            console.log('TEST: Ready button click detected!');
+            readyBtn.removeEventListener('click', testClick);
+        }, { once: true });
+        
+        // Add visual feedback for debugging
+        readyBtn.style.border = '2px solid lime';
+        setTimeout(() => {
+            readyBtn.style.border = '';
+        }, 2000);
+    }
+    
+    // Ensure guess button is functional (debugging helper)
+    static ensureGuessButtonFunctional() {
+        const guessBtn = document.getElementById('makeGuessBtn');
+        if (!guessBtn) {
+            console.error('Guess button not found!');
+            return;
+        }
+        
+        console.log('Checking guess button state:', {
+            exists: !!guessBtn,
+            disabled: guessBtn.disabled,
+            pointerEvents: guessBtn.style.pointerEvents,
+            cursor: guessBtn.style.cursor,
+            opacity: guessBtn.style.opacity,
+            display: getComputedStyle(guessBtn).display,
+            visibility: getComputedStyle(guessBtn).visibility,
+            zIndex: getComputedStyle(guessBtn).zIndex
+        });
+        
+        // Re-attach event listener if it was lost
+        if (!guessBtn._eventListenerAttached) {
+            console.log('Re-attaching guess button event listener');
+            
+            // Ensure we have the bound function
+            if (!this.handleGuessClick) {
+                this.handleGuessClick = (e) => {
+                    console.log('Guess button clicked!', e);
+                    const button = document.getElementById('makeGuessBtn');
+                    const guessInput = document.getElementById('guessInput');
+                    
+                    if (!button || !guessInput) {
+                        console.error('Required elements not found:', { button, guessInput });
+                        return;
+                    }
+                    
+                    if (button.disabled) {
+                        console.log('Guess button is disabled, ignoring click');
+                        return;
+                    }
+                    
+                    if (!this.validateInput(guessInput)) {
+                        this.showNotification('Please enter a valid guess', 'error');
+                        return;
+                    }
+                    
+                    const guess = parseInt(guessInput.value);
+                    console.log('Making guess:', guess);
+                    this.setButtonLoading(button, 'Guessing...');
+                    
+                    setTimeout(() => {
+                        this.resetButton(button, '🎯 Guess!');
+                    }, 1000);
+                    
+                    Game.makeGuess(guess);
+                };
+            }
+            
+            guessBtn.addEventListener('click', this.handleGuessClick);
+            guessBtn._eventListenerAttached = true;
+            console.log('Guess button event listener re-attached');
+        }
+        
+        // Test if click event fires
+        guessBtn.addEventListener('click', function testClick() {
+            console.log('TEST: Guess button click detected!');
+            guessBtn.removeEventListener('click', testClick);
+        }, { once: true });
+        
+        // Add visual feedback for debugging
+        guessBtn.style.border = '2px solid orange';
+        setTimeout(() => {
+            guessBtn.style.border = '';
+        }, 2000);
+    }
+    
+    
+    // Ensure buttons are in working state (cross-browser compatibility)
+    static ensureButtonsAreWorking() {
+        // Reset ready button if stuck
+        const readyBtn = document.getElementById('readyBtn');
+        if (readyBtn && (readyBtn.textContent === 'Setting...' || (readyBtn.disabled && readyBtn.textContent !== '✅ Ready!'))) {
+            readyBtn.disabled = false;
+            readyBtn.textContent = '✅ Ready';
+            readyBtn.classList.remove('loading', 'btn-loading');
+            console.log('Auto-fixed stuck ready button');
+        }
+        
+        // Reset guess button if stuck  
+        const guessBtn = document.getElementById('makeGuessBtn');
+        if (guessBtn && (guessBtn.textContent === 'Guessing...' || (guessBtn.disabled && !guessBtn.textContent.includes('Finished')))) {
+            guessBtn.disabled = false;
+            guessBtn.textContent = '🎯 Guess!';
+            guessBtn.classList.remove('loading', 'btn-loading', 'finished');
+            console.log('Auto-fixed stuck guess button');
+        }
+    }
+    
+    // Comprehensive range pair validation used by Game.updateSettings
+    static validateRangePair(startValue, endValue) {
+        // Check for valid numbers
+        if (isNaN(startValue) || isNaN(endValue)) {
+            this.showNotification('Please enter valid numbers', 'error');
+            return false;
+        }
+        
+        // Check minimum values
+        if (startValue < 1 || endValue < 1) {
+            this.showNotification('Numbers must be at least 1', 'error');
+            return false;
+        }
+        
+        // Check maximum values
+        if (startValue > 10000 || endValue > 10000) {
+            this.showNotification('Maximum value is 10000', 'error');
+            return false;
+        }
+        
+        // Start must be less than end
+        if (startValue >= endValue) {
+            this.showNotification('Start must be less than end', 'error');
+            return false;
+        }
+        
+        // Minimum range size
+        const rangeSize = endValue - startValue + 1;
+        if (rangeSize < 2) {
+            this.showNotification('Range must have at least 2 numbers', 'error');
+            return false;
+        }
+        
+        // Maximum range size
+        if (rangeSize > 10000) {
+            this.showNotification('Range too large (max 10000 numbers)', 'warning');
+            return false;
+        }
+        
+        return true;
     }
 }
 
@@ -1916,4 +2613,19 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Check for auto-join from URL
     UI.checkAutoJoin();
+    
+    // Add global error handlers for better error recovery
+    window.addEventListener('error', (event) => {
+        console.error('Global error:', event.error);
+        if (typeof UI !== 'undefined') {
+            UI.showNotification('An unexpected error occurred. Please try refreshing the page.', 'error', 8000);
+        }
+    });
+    
+    window.addEventListener('unhandledrejection', (event) => {
+        console.error('Unhandled promise rejection:', event.reason);
+        if (typeof UI !== 'undefined') {
+            UI.showNotification('A network error occurred. Please check your connection.', 'warning', 6000);
+        }
+    });
 });
