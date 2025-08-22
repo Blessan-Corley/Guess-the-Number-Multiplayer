@@ -8,7 +8,7 @@ A modern, real-time multiplayer number guessing game built with Node.js and Sock
 - **Real-time multiplayer** - Instant synchronization across devices
 - **Smart AI opponent** - Multiple difficulty levels for single-player
 - **Dynamic ranges** - Play with numbers from 1-10000
-- **Best of 3 rounds** - Tournament-style matches
+- **Single round matches** - Quick and engaging gameplay
 - **Intelligent feedback** - Context-aware hints (close/far, high/low)
 - **Session tracking** - Win counts and performance stats
 

@@ -42,6 +42,26 @@ class PartyService {
             throw new Error('Invalid host name');
         }
 
+        // FIXED: Clean up any existing mappings for this socket
+        // This ensures proper host status regardless of previous party membership
+        const existingPlayerId = this.socketToPlayer.get(hostSocketId);
+        if (existingPlayerId) {
+            const existingPartyCode = this.playerToParty.get(existingPlayerId);
+            if (existingPartyCode) {
+                // Remove from previous party if it exists
+                const existingParty = this.parties.get(existingPartyCode);
+                if (existingParty) {
+                    existingParty.removePlayer(existingPlayerId);
+                    if (existingParty.isEmpty()) {
+                        this.parties.delete(existingPartyCode);
+                    }
+                }
+            }
+            // Clean up old mappings
+            this.playerToParty.delete(existingPlayerId);
+            this.socketToPlayer.delete(hostSocketId);
+        }
+
         const partyCode = this.generatePartyCode();
         const hostPlayer = new Player(hostSocketId, hostName);
         const party = new Party(partyCode, hostPlayer);
@@ -52,7 +72,7 @@ class PartyService {
         this.stats.totalPartiesCreated++;
         this.stats.totalPlayersJoined++;
 
-        console.log(`Party created: ${partyCode} by ${hostName} (${hostSocketId})`);
+        console.log(`Party created: ${partyCode} by ${hostName} (${hostSocketId}) - ALWAYS HOST`);
         return party;
     }
 
@@ -71,12 +91,22 @@ class PartyService {
             throw new Error('Party is full');
         }
 
-        // Check if player is already in a party
+        // FIXED: Clean up any existing mappings for this socket
         const existingPlayerId = this.socketToPlayer.get(playerSocketId);
         if (existingPlayerId) {
             const existingPartyCode = this.playerToParty.get(existingPlayerId);
             if (existingPartyCode && existingPartyCode !== partyCode.toUpperCase()) {
-                throw new Error('Player is already in another party');
+                // Remove from previous party
+                const existingParty = this.parties.get(existingPartyCode);
+                if (existingParty) {
+                    existingParty.removePlayer(existingPlayerId);
+                    if (existingParty.isEmpty()) {
+                        this.parties.delete(existingPartyCode);
+                    }
+                }
+                // Clean up old mappings
+                this.playerToParty.delete(existingPlayerId);
+                this.socketToPlayer.delete(playerSocketId);
             }
         }
 
@@ -109,20 +139,21 @@ class PartyService {
         }
 
         const player = party.getPlayer(playerId);
-        party.removePlayer(playerId);
+        const wasHost = player.isHost;
+        const removeResult = party.removePlayer(playerId);
 
         // Clean up mappings
         this.playerToParty.delete(playerId);
         this.socketToPlayer.delete(socketId);
 
-        // If party is empty, remove it
-        if (party.isEmpty()) {
+        // FIXED: If host left or party is empty, remove party completely
+        if (removeResult === 'HOST_LEFT' || party.isEmpty()) {
             this.parties.delete(partyCode);
-            console.log(`Party deleted: ${partyCode} (empty)`);
+            console.log(`Party deleted: ${partyCode} (${removeResult === 'HOST_LEFT' ? 'host left' : 'empty'})`);
         }
 
         console.log(`Player left: ${player?.name || 'Unknown'} (${socketId}) from Party ${partyCode}`);
-        return { party, player, partyCode };
+        return { party, player, partyCode, wasHost };
     }
 
     // Get party by code

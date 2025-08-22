@@ -14,101 +14,24 @@
   "categories": ["games", "entertainment", "social"],
   "icons": [
     {
-      "src": "/assets/icon-72x72.png",
-      "sizes": "72x72",
-      "type": "image/png",
-      "purpose": "maskable any"
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     },
     {
-      "src": "/assets/icon-96x96.png",
-      "sizes": "96x96",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/assets/icon-128x128.png",
-      "sizes": "128x128",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/assets/icon-144x144.png",
-      "sizes": "144x144",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/assets/icon-152x152.png",
-      "sizes": "152x152",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/assets/icon-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/assets/icon-384x384.png",
-      "sizes": "384x384",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/assets/icon-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable any"
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "/assets/screenshot-1.png",
-      "sizes": "540x720",
-      "type": "image/png",
-      "form_factor": "narrow"
-    },
-    {
-      "src": "/assets/screenshot-2.png",
-      "sizes": "720x540",
-      "type": "image/png",
-      "form_factor": "wide"
+      "src": "/favicon.ico",
+      "sizes": "32x32",
+      "type": "image/x-icon"
     }
   ],
   "features": [
     "Real-time multiplayer gameplay",
     "Party code system for easy joining",
-    "Best of 3 rounds option",
+    "Single round matches",
     "Mobile-optimized interface",
     "Offline capability",
     "Progressive Web App"
-  ],
-  "shortcuts": [
-    {
-      "name": "Create Party",
-      "short_name": "Create",
-      "description": "Start a new game party",
-      "url": "/?action=create",
-      "icons": [
-        {
-          "src": "/assets/shortcut-create.png",
-          "sizes": "96x96"
-        }
-      ]
-    },
-    {
-      "name": "Join Party",
-      "short_name": "Join",
-      "description": "Join an existing game",
-      "url": "/?action=join",
-      "icons": [
-        {
-          "src": "/assets/shortcut-join.png",
-          "sizes": "96x96"
-        }
-      ]
-    }
   ],
   "prefer_related_applications": false,
   "related_applications": [],

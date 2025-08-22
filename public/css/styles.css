@@ -1598,32 +1598,7 @@ body::before {
     }
 }
 
-/* QR Code Styles */
-.qr-code-container {
-    background: rgba(255, 255, 255, 0.95);
-    padding: 20px;
-    border-radius: 15px;
-    text-align: center;
-    margin: 20px 0;
-    border: 2px solid rgba(79, 172, 254, 0.3);
-}
-
-.qr-code-container h4 {
-    color: #1a1a2e;
-    margin-bottom: 15px;
-    font-weight: 600;
-}
-
-.qr-code {
-    margin: 15px 0;
-    display: inline-block;
-}
-
-.qr-share-text {
-    color: #666;
-    font-size: 0.9rem;
-    margin-top: 10px;
-}
+/* QR Code functionality removed for better performance */
 
 /* Input Validation Styles */
 .input-field.error {
@@ -1776,7 +1751,8 @@ body::before {
     .connection-status {
         top: 10px;
         right: 10px;
-        left: 10px;
+        left: auto;
+        max-width: calc(50vw - 10px);
         text-align: center;
     }
 
@@ -2634,4 +2610,182 @@ body {
 .game-footer:hover::before {
     background: linear-gradient(90deg, transparent, rgba(79, 172, 254, 0.8), transparent);
     opacity: 1; 
+}
+
+/* How to Play Modal */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
+}
+
+.modal-content {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    max-width: 600px;
+    max-height: 80vh;
+    width: 90%;
+    overflow: hidden;
+    animation: slideUp 0.3s ease;
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    padding: 20px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    margin: 0;
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 2rem;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+
+.modal-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: rotate(90deg);
+}
+
+.modal-body {
+    padding: 30px;
+    color: #e0e6ed;
+    line-height: 1.6;
+    overflow-y: auto;
+    max-height: 400px;
+}
+
+.modal-body h3 {
+    color: #4facfe;
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+}
+
+.modal-body h4 {
+    color: #00f2fe;
+    margin-bottom: 10px;
+    margin-top: 20px;
+    font-size: 1rem;
+}
+
+.modal-body ol, .modal-body ul {
+    margin: 15px 0;
+    padding-left: 25px;
+}
+
+.modal-body li {
+    margin-bottom: 8px;
+}
+
+.modal-body .tip {
+    background: rgba(79, 172, 254, 0.1);
+    border-left: 4px solid #4facfe;
+    padding: 15px;
+    margin: 20px 0;
+    border-radius: 5px;
+}
+
+.modal-body .tip strong {
+    color: #4facfe;
+}
+
+.modal-footer {
+    padding: 20px 30px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: right;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { 
+        opacity: 0;
+        transform: translateY(50px) scale(0.9);
+    }
+    to { 
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Responsive modal */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95%;
+        max-height: 90vh;
+    }
+    
+    .modal-body {
+        padding: 20px;
+        max-height: 60vh;
+    }
+    
+    .modal-header, .modal-footer {
+        padding: 15px 20px;
+    }
+}
+
+/* Welcome help link */
+.welcome-help {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.help-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #4facfe;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: 20px;
+    background: rgba(79, 172, 254, 0.1);
+    border: 1px solid rgba(79, 172, 254, 0.3);
+    transition: all 0.3s ease;
+}
+
+.help-link:hover {
+    background: rgba(79, 172, 254, 0.2);
+    border-color: rgba(79, 172, 254, 0.5);
+    color: #00f2fe;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(79, 172, 254, 0.2);
+}
+
+.help-link:active {
+    transform: translateY(0);
 }

@@ -5,7 +5,7 @@ class Player {
         this.id = uuidv4();
         this.socketId = socketId;
         this.name = name.trim().substring(0, 20); // Limit name length
-        this.isHost = false;
+        this.isHost = false; // ALWAYS starts as false - Party constructor will set to true for host
         this.isConnected = true;
         this.isReady = false;
         this.secretNumber = null;
@@ -49,13 +49,23 @@ class Player {
         this.hasFinished = false;  // Reset finished status
         this.finishedAt = null;    // Reset finished timestamp
         this.wantsRematch = false; // Reset rematch flag
+        
+        // FIXED: Ensure player can participate in new round
+        this.isConnected = true;
         this.updateActivity();
     }
 
-    // Reset player state for new game
+    // Reset player state for new game (preserves session wins)
     resetForNewGame() {
         this.resetForNewRound();
-        this.wins = 0;
+        // FIXED: Don't reset wins here - they should persist for entire party session
+        // wins only reset when party is destroyed, not for rematches
+    }
+
+    // Reset player state when party is destroyed (clears session wins)
+    resetForNewSession() {
+        this.resetForNewRound();
+        this.wins = 0; // Only reset wins when starting a completely new session
     }
 
     // Make a guess

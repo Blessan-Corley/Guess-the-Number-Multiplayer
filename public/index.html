@@ -13,6 +13,7 @@
     
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Number Guesser">
@@ -34,6 +35,9 @@
                     <div class="emoji-large">🎮</div>
                     <h2>Welcome to the Number Guessing Challenge!</h2>
                     <p>Challenge your friends or play against our smart AI bot.</p>
+                    <div class="welcome-help">
+                        <a href="#" id="welcomeHowToPlay" class="help-link">🎮 How to Play</a>
+                    </div>
                 </div>
 
                 <div class="input-group">
@@ -88,7 +92,10 @@
                             </select>
                         </div>
                     </div>
-                    <button class="btn btn-success" id="startSinglePlayerBtn" type="button">🎮 Start Single Player</button>
+                    <div class="button-group">
+                        <button class="btn btn-success" id="startSinglePlayerBtn" type="button">🎮 Start Single Player</button>
+                        <button class="btn btn-secondary" id="howToPlaySingleBtn" type="button">❓ How to Play</button>
+                    </div>
                 </div>
             </section>
 
@@ -147,13 +154,7 @@
                             <button type="button" class="btn btn-preset" onclick="Game.setRangePreset(1, 10000)">1-10000 (Legendary)</button>
                         </div>
                     </div>
-                    <div class="checkbox-group">
-                        <label class="checkbox-label">
-                            <input type="checkbox" id="bestOfThree" class="checkbox">
-                            <span class="checkmark"></span>
-                            Best of 3 Rounds
-                        </label>
-                    </div>
+                    <!-- Best of 3 removed for simpler multiplayer experience -->
                     <div class="range-info">
                         <small>💡 Current range: <span id="currentRangeDisplay">1 to 100</span> (<span id="rangeSize">100</span> numbers)</small>
                     </div>
@@ -161,6 +162,7 @@
 
                 <div class="button-group">
                     <button class="btn btn-success" id="startGameBtn" type="button" disabled>⏳ Waiting for player...</button>
+                    <button class="btn btn-secondary" id="howToPlayBtn" type="button">❓ How to Play</button>
                     <button class="btn btn-danger" id="leaveLobbyBtn" type="button">🚪 Leave Party</button>
                 </div>
             </section>
@@ -324,11 +326,27 @@
         </div>
     </div>
 
+    <!-- How to Play Modal -->
+    <div class="modal-overlay" id="howToPlayModal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="howToPlayTitle">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="howToPlayTitle">🎮 How to Play</h2>
+                <button class="modal-close" id="closeHowToPlay" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-body" id="howToPlayContent">
+                <!-- Content will be populated by JavaScript based on game mode -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="gotItBtn">Got it! 🚀</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="/socket.io/socket.io.js"></script>
-    <script src="/js/socket-client.js"></script>
-    <script src="/js/ui.js"></script>
-    <script src="/js/single-player.js"></script>
-    <script src="/js/game.js"></script>
+    <script src="/js/socket-client.js?v=1.1"></script>
+    <script src="/js/ui.js?v=1.1"></script>
+    <script src="/js/single-player.js?v=1.1"></script>
+    <script src="/js/game.js?v=1.1"></script>
 </body>
 </html>

@@ -15,8 +15,8 @@ class Party {
         this.gameSettings = {
             rangeStart: config.DEFAULT_RANGE_START,
             rangeEnd: config.DEFAULT_RANGE_END,
-            bestOfThree: false,
             selectionTimeLimit: config.SELECTION_TIME_LIMIT
+            // bestOfThree removed - single round matches only
         };
         this.gameState = {
             phase: 'lobby', // lobby, selection, playing, results
@@ -53,12 +53,13 @@ class Party {
 
         this.players.delete(playerId);
         
-        // If host leaves, assign new host or mark party for deletion
-        if (playerId === this.hostId && this.players.size > 0) {
-            const remainingPlayers = Array.from(this.players.values());
-            const newHost = remainingPlayers[0];
-            newHost.isHost = true;
-            this.hostId = newHost.id;
+        // FIXED: If host leaves, close the entire party
+        if (playerId === this.hostId) {
+            // Host left - party should be closed, no host transfer
+            this.status = 'closed';
+            this.gameState.phase = 'finished';
+            console.log(`Host left party ${this.code} - party will be closed`);
+            return 'HOST_LEFT'; // Special return value
         }
 
         this.updateActivity();
@@ -140,10 +141,8 @@ class Party {
             this.gameSettings.rangeEnd = settings.rangeEnd;
         }
 
-        if (settings.bestOfThree !== undefined) {
-            this.gameSettings.bestOfThree = Boolean(settings.bestOfThree);
-            this.maxRounds = this.gameSettings.bestOfThree ? 3 : 1;
-        }
+        // bestOfThree setting removed - always single round
+        this.maxRounds = 1;
 
         this.updateActivity();
         return this.gameSettings;
@@ -417,19 +416,22 @@ class Party {
             throw new Error('Need at least 2 players for rematch');
         }
 
-        // Reset game state
+        // FIXED: Direct rematch goes to selection phase
         this.currentRound = 1;
         this.gameState = {
-            phase: 'selection',
+            phase: 'selection', // Direct to selection for rematch
             selectionTimer: null,
             winnerId: null,
             roundResults: []
         };
-        this.status = 'selecting';
+        this.status = 'selecting'; // Direct to selecting
 
-        // Reset all players
+        // FIXED: Reset all players but preserve host status
         this.players.forEach(player => {
+            const wasHost = player.isHost;
             player.resetForNewGame();
+            player.isHost = wasHost; // Preserve host status
+            player.wantsRematch = false; // Clear rematch flag
         });
 
         this.updateActivity();

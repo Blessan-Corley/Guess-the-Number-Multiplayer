@@ -39,6 +39,9 @@ class SocketService {
         socket.on('make_guess', (data) => this.handleMakeGuess(socket, data));
         socket.on('next_round', () => this.handleNextRound(socket));
         socket.on('rematch', () => this.handleRematch(socket));
+        
+        // FIXED: Handle settings change requests  
+        socket.on('request_settings_change', () => this.handleSettingsChangeRequest(socket));
 
         // Communication events
         socket.on('player_typing', (data) => this.handlePlayerTyping(socket, data));
@@ -170,7 +173,7 @@ class SocketService {
             const result = this.partyService.leaveParty(socket.id);
             if (!result) return;
 
-            const { party, player, partyCode } = result;
+            const { party, player, partyCode, wasHost } = result;
 
             // Leave socket room
             socket.leave(partyCode);
@@ -183,26 +186,26 @@ class SocketService {
                 }
             }
 
-            // If game is in progress and player leaves, end game immediately
-            if (party && !party.isEmpty() && party.gameState.phase === 'playing') {
-                const remainingPlayer = Array.from(party.players.values())[0];
-                
-                // Notify remaining player they won by default
-                this.io.to(partyCode).emit('game_ended_by_leave', {
-                    winner: remainingPlayer.getPublicInfo(),
-                    leftPlayer: player.getPublicInfo(),
-                    message: `${player.name} left the game. ${remainingPlayer.name} wins by default!`
+            // FIXED: If host leaves, close entire party
+            if (wasHost || player.isHost) {
+                // Notify all remaining players that party is closed
+                this.io.to(partyCode).emit('party_closed_host_left', {
+                    hostName: player.name,
+                    message: `🚔 ${player.name} (host) left the party. Party has been closed.`
                 });
+                
+                // Clear any timers
+                this.clearSelectionTimer(partyCode);
+                
+                console.log(`Host ${player.name} left party ${partyCode} - party closed`);
             } else if (!party.isEmpty()) {
-                // Notify remaining players
+                // Regular player left
                 this.io.to(partyCode).emit('player_left', {
                     party: party.getPublicInfo(),
-                    leftPlayer: player.getPublicInfo()
+                    leftPlayer: player.getPublicInfo(),
+                    message: `${player.name} left the party`
                 });
             }
-
-            // Clear any selection timer for this party
-            this.clearSelectionTimer(partyCode);
 
             // Confirm to leaving player
             socket.emit('party_left', { partyCode });
@@ -511,15 +514,16 @@ class SocketService {
                 party.players.forEach(p => p.wantsRematch = false);
 
                 // Reset finished players tracking
-                this.finishedPlayers.set(party.code, new Set());
+                this.finishedPlayers.delete(party.code); // Clear completely
 
-                // Start selection timer
+                // FIXED: Start selection immediately for direct rematch
                 this.startSelectionTimer(party);
 
-                // Notify all players
+                // Notify all players - ALWAYS direct to selection for rematch
                 this.io.to(party.code).emit('rematch_started', {
                     party: party.getDetailedState(),
                     selectionTimeLimit: config.SELECTION_TIME_LIMIT
+                    // No flag needed - rematch ALWAYS goes to selection
                 });
             } else {
                 // Notify about rematch request
@@ -532,6 +536,51 @@ class SocketService {
 
         } catch (error) {
             console.error('Error handling rematch:', error);
+            socket.emit('error', { message: error.message });
+        }
+    }
+    
+    // FIXED: Handle settings change request - return to lobby
+    handleSettingsChangeRequest(socket) {
+        try {
+            const party = this.partyService.getPartyBySocket(socket.id);
+            if (!party) {
+                socket.emit('error', { message: 'Party not found' });
+                return;
+            }
+
+            const player = party.getPlayerBySocketId(socket.id);
+            if (!player) {
+                socket.emit('error', { message: 'Player not found' });
+                return;
+            }
+
+            // Reset party to lobby state
+            party.gameState.phase = 'lobby';
+            party.status = 'waiting';
+            
+            // Reset players for new game
+            party.players.forEach(p => {
+                p.resetForNewRound();
+                p.wantsRematch = false;
+            });
+
+            // Clear finished players tracking
+            this.finishedPlayers.delete(party.code);
+
+            // Clear any selection timer
+            this.clearSelectionTimer(party.code);
+
+            // Notify all players to go to lobby
+            this.io.to(party.code).emit('settings_change_started', {
+                party: party.getDetailedState(),
+                message: `${player.name} requested settings change`
+            });
+
+            console.log(`Settings change requested by ${player.name} in party ${party.code}`);
+
+        } catch (error) {
+            console.error('Error handling settings change:', error);
             socket.emit('error', { message: error.message });
         }
     }
