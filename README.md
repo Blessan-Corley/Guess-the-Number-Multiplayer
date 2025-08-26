@@ -61,7 +61,7 @@ npm start
 ## 🎮 How to Play
 
 1. **Create/Join Party** - Share a 6-digit code with friends
-2. **Choose Settings** - Set number range (1-10000) and game mode
+2. **Choose Settings** - Set number range as you like between (1-10000) and game mode
 3. **Select Secret** - Pick your number strategically  
 4. **Battle Phase** - Guess opponent's number with smart feedback
 5. **Win & Repeat** - Track session wins and play again
@@ -125,3 +125,5 @@ Game settings in `config/config.js`:
 - Production deployment skills
 
 *Built with ❤️ for competitive number guessing fun!* 🎮✨
+
+*If you find any bugs in the game feels free to open issue*
