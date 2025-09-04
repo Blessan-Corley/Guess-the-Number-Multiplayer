@@ -1,6 +1,6 @@
 # 🎯 Number Guesser - Real-time Multiplayer Game
 
-A modern, real-time multiplayer number guessing game built with Node.js and Socket.IO. Challenge friends in exciting brain battles with smart AI feedback and beautiful UI.
+A real-time multiplayer number guessing game built with Node.js and Socket.IO. Challenge friends in exciting brain battles with smart AI feedback and beautiful UI.
 
 ## ✨ Key Features
 
@@ -14,14 +14,14 @@ A modern, real-time multiplayer number guessing game built with Node.js and Sock
 
 ### 🛠️ Technical Highlights
 - **WebSocket communication** - Zero-lag real-time gameplay
-- **Progressive Web App** - Install on any device
+- **Progressive Web App** - Install on any device as an app
 - **Mobile-first design** - Responsive and touch-friendly
 - **Auto-reconnection** - Handles network interruptions gracefully  
 - **Party code system** - Easy friend invitations with 6-digit codes
 - **Clean architecture** - Modular MVC design for maintainability
 
 ### 🎨 User Experience
-- **Professional UI/UX** - Modern gradients and smooth animations
+- **Smooth UI/UX** - Modern gradients and smooth animations
 - **Visual feedback** - Win badges, difficulty indicators, and performance tracking
 - **Accessibility features** - Screen reader support and keyboard navigation
 - **Cross-platform** - Works on desktop, tablet, and mobile
@@ -124,6 +124,6 @@ Game settings in `config/config.js`:
 - Multiplayer game architecture
 - Production deployment skills
 
-*Built with ❤️ for competitive number guessing fun!* 🎮✨
+*Built with ❤️ for friends who needs fun!* 🎮✨
 
 *If you find any bugs in the game feels free to open issue*
