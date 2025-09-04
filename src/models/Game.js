@@ -6,7 +6,7 @@ class Game {
         this.messageGenerator = require('../utils/messageGenerator');
     }
 
-    // Generate feedback message for a guess
+    
     generateFeedback(guess, target, rangeStart, rangeEnd) {
         if (guess === target) {
             return {
@@ -18,8 +18,8 @@ class Game {
 
         const difference = Math.abs(guess - target);
         const range = rangeEnd - rangeStart;
-        const closeThreshold = Math.max(1, Math.floor(range * 0.1)); // 10% of range
-        const veryCloseThreshold = Math.max(1, Math.floor(range * 0.05)); // 5% of range
+        const closeThreshold = Math.max(1, Math.floor(range * 0.1)); 
+        const veryCloseThreshold = Math.max(1, Math.floor(range * 0.05)); 
 
         let messageType;
         let messageKey;
@@ -46,7 +46,7 @@ class Game {
         };
     }
 
-    // Calculate game statistics
+    
     calculateGameStats(players) {
         const stats = {
             totalAttempts: 0,
@@ -90,7 +90,7 @@ class Game {
             stats.averageAttempts = Math.round(stats.totalAttempts / players.length * 100) / 100;
         }
 
-        // Find most and least accurate players based on average attempts
+        
         if (playerAttempts.length > 1) {
             playerAttempts.sort((a, b) => a.attempts - b.attempts);
             stats.mostAccuratePlayer = playerAttempts[0];
@@ -100,13 +100,13 @@ class Game {
         return stats;
     }
 
-    // Determine optimal number of attempts for a given range
+    
     calculateOptimalAttempts(rangeStart, rangeEnd) {
         const rangeSize = rangeEnd - rangeStart + 1;
         return Math.ceil(Math.log2(rangeSize));
     }
 
-    // Evaluate player performance
+    
     evaluatePerformance(player, rangeStart, rangeEnd) {
         const optimalAttempts = this.calculateOptimalAttempts(rangeStart, rangeEnd);
         const actualAttempts = player.attempts;
@@ -140,7 +140,7 @@ class Game {
         };
     }
 
-    // Generate round summary
+    
     generateRoundSummary(roundResult, gameSettings) {
         const { players, winnerId, winnerAttempts } = roundResult;
         const winner = players.find(p => p.id === winnerId);
@@ -175,12 +175,12 @@ class Game {
         };
     }
 
-    // Generate game summary (for completed games)
+    
     generateGameSummary(party) {
         const { roundResults, gameSettings } = party.gameState;
         const players = Array.from(party.players.values());
         
-        // Calculate overall winner
+        
         const winCounts = new Map();
         roundResults.forEach(result => {
             winCounts.set(result.winnerId, (winCounts.get(result.winnerId) || 0) + 1);
@@ -195,10 +195,10 @@ class Game {
             }
         });
 
-        // Calculate game statistics
+        
         const gameStats = this.calculateGameStats(players);
 
-        // Generate round summaries
+        
         const roundSummaries = roundResults.map(result => 
             this.generateRoundSummary(result, gameSettings)
         );
@@ -227,7 +227,7 @@ class Game {
         };
     }
 
-    // Validate game move
+    
     validateMove(playerId, guess) {
         const player = this.party.getPlayer(playerId);
         if (!player) {
@@ -247,10 +247,10 @@ class Game {
         return validation;
     }
 
-    // Get game hints (if implemented in future)
+    
     getHint(playerId, targetNumber, previousGuesses) {
-        // This could be extended to provide strategic hints
-        // For now, just return basic range information
+        
+        
         
         if (previousGuesses.length === 0) {
             return {
@@ -281,11 +281,11 @@ class Game {
         }
     }
 
-    // Generate achievement notifications
+    
     checkAchievements(player, gameResult) {
         const achievements = [];
 
-        // First game achievement
+        
         if (player.stats.totalGames === 1) {
             achievements.push({
                 id: 'first_game',
@@ -295,7 +295,7 @@ class Game {
             });
         }
 
-        // Perfect game (1 attempt win)
+        
         if (gameResult.isWin && player.attempts === 1) {
             achievements.push({
                 id: 'perfect_game',
@@ -305,7 +305,7 @@ class Game {
             });
         }
 
-        // Win streak
+        
         if (player.wins >= 3) {
             achievements.push({
                 id: 'win_streak',
@@ -315,7 +315,7 @@ class Game {
             });
         }
 
-        // Efficient player (consistently low attempts)
+        
         if (player.stats.averageAttempts <= 3 && player.stats.totalGames >= 3) {
             achievements.push({
                 id: 'efficient_player',

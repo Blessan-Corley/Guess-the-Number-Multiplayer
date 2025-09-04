@@ -1,7 +1,7 @@
 const config = require('../../config/config');
 
 class Validators {
-    // Validate party code
+    
     static validatePartyCode(code) {
         const errors = [];
         
@@ -28,7 +28,7 @@ class Validators {
         };
     }
 
-    // Validate player name
+    
     static validatePlayerName(name) {
         const errors = [];
         
@@ -51,7 +51,7 @@ class Validators {
                 errors.push('Player name can only contain letters, numbers, spaces, hyphens, and underscores');
             }
             
-            // Check for inappropriate content (basic filter)
+            
             const inappropriateWords = ['admin', 'bot', 'system', 'server', 'null', 'undefined'];
             if (inappropriateWords.some(word => cleanName.toLowerCase().includes(word))) {
                 errors.push('Player name contains restricted words');
@@ -65,7 +65,7 @@ class Validators {
         };
     }
 
-    // Validate number guess
+    
     static validateGuess(guess, rangeStart, rangeEnd) {
         const errors = [];
         
@@ -92,12 +92,12 @@ class Validators {
         };
     }
 
-    // Validate secret number
+    
     static validateSecretNumber(number, rangeStart, rangeEnd) {
         return this.validateGuess(number, rangeStart, rangeEnd);
     }
 
-    // Validate game range
+    
     static validateGameRange(rangeStart, rangeEnd) {
         const errors = [];
         
@@ -141,7 +141,7 @@ class Validators {
         };
     }
 
-    // Validate game settings
+    
     static validateGameSettings(settings) {
         const errors = [];
         const cleanSettings = {};
@@ -185,7 +185,7 @@ class Validators {
         };
     }
 
-    // Validate socket data
+    
     static validateSocketData(data, requiredFields = []) {
         const errors = [];
         
@@ -207,7 +207,7 @@ class Validators {
         };
     }
 
-    // Validate reconnection data
+    
     static validateReconnectionData(data) {
         const errors = [];
         
@@ -236,7 +236,7 @@ class Validators {
         };
     }
 
-    // Sanitize HTML to prevent XSS
+    
     static sanitizeHtml(input) {
         if (typeof input !== 'string') return input;
         
@@ -246,21 +246,21 @@ class Validators {
             .replace(/>/g, '&gt;')
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&#x27;')
-            .replace(/\//g, '&#x2F;');
+            .replace(/\
     }
 
-    // Rate limiting validation
+    
     static validateRateLimit(socketId, action, rateLimits = new Map()) {
         const now = Date.now();
         const key = `${socketId}_${action}`;
         const lastAction = rateLimits.get(key);
         
         const cooldowns = {
-            'create_party': 30000, // 30 seconds
-            'join_party': 5000,    // 5 seconds
-            'make_guess': 1000,    // 1 second
-            'start_game': 10000,   // 10 seconds
-            'rematch': 5000        // 5 seconds
+            'create_party': 30000, 
+            'join_party': 5000,    
+            'make_guess': 1000,    
+            'start_game': 10000,   
+            'rematch': 5000        
         };
         
         const cooldown = cooldowns[action] || 1000;
@@ -277,7 +277,7 @@ class Validators {
         return { valid: true };
     }
 
-    // Validate IP address format
+    
     static validateIPAddress(ip) {
         const ipv4Regex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
         const ipv6Regex = /^(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$/;
@@ -285,7 +285,7 @@ class Validators {
         return ipv4Regex.test(ip) || ipv6Regex.test(ip);
     }
 
-    // Validate session data
+    
     static validateSession(sessionData) {
         const errors = [];
         
@@ -316,25 +316,25 @@ class Validators {
         };
     }
 
-    // Comprehensive input validation
+    
     static validateInput(input, rules) {
         const errors = [];
         let cleanValue = input;
         
-        // Required check
+        
         if (rules.required && (input === null || input === undefined || input === '')) {
             errors.push(`${rules.field || 'Field'} is required`);
             return { valid: false, errors, cleanValue: null };
         }
         
-        // Type check
+        
         if (input !== null && input !== undefined && rules.type) {
             if (typeof input !== rules.type) {
                 errors.push(`${rules.field || 'Field'} must be of type ${rules.type}`);
             }
         }
         
-        // String validations
+        
         if (typeof input === 'string') {
             cleanValue = input.trim();
             
@@ -355,7 +355,7 @@ class Validators {
             }
         }
         
-        // Number validations
+        
         if (typeof input === 'number') {
             if (rules.min !== undefined && input < rules.min) {
                 errors.push(`${rules.field || 'Field'} must be at least ${rules.min}`);
@@ -377,7 +377,7 @@ class Validators {
         };
     }
 
-    // Batch validation
+    
     static validateBatch(data, validationRules) {
         const results = {};
         const allErrors = [];

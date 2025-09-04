@@ -11,7 +11,7 @@ class SinglePlayerGame {
             rangeStart: 1,
             rangeEnd: 100,
             botDifficulty: 'medium',
-            gamePhase: 'setup', // setup, playing, finished
+            gamePhase: 'setup', 
             playerGuessHistory: [],
             botGuessHistory: [],
             botStrategy: {
@@ -119,28 +119,28 @@ class SinglePlayerGame {
         this.gameState.botDifficulty = botDifficulty;
         this.gameState.gamePhase = 'selection';
         
-        // FIXED: Don't auto-generate player's secret number - let user choose
-        this.gameState.playerSecretNumber = null; // Will be set when player chooses
+        
+        this.gameState.playerSecretNumber = null; 
         this.gameState.botSecretNumber = this.generateRandomNumber(rangeStart, rangeEnd);
         
-        // Initialize bot strategy
+        
         this.initializeBotStrategy();
         
-        // Reset stats
+        
         this.gameState.playerAttempts = 0;
         this.gameState.botAttempts = 0;
         this.gameState.playerGuessHistory = [];
         this.gameState.botGuessHistory = [];
         
-        // Show selection screen instead of going directly to game
+        
         this.showSinglePlayerSelection();
     }
 
     showSinglePlayerSelection() {
-        // Show selection screen for single player
+        
         UI.showScreen('selectionScreen');
         
-        // Update round info for single player
+        
         document.getElementById('selectionRoundInfo').querySelector('.round-text').textContent = 'Single Player vs Bot';
         
         const rangeDisplay = `${this.gameState.rangeStart} - ${this.gameState.rangeEnd}`;
@@ -153,7 +153,7 @@ class SinglePlayerGame {
         secretNumberInput.disabled = false;
         secretNumberInput.placeholder = `Choose ${rangeDisplay}`;
         
-        // Update selection message for single player
+        
         const selectionMessage = document.getElementById('selectionMessage');
         selectionMessage.innerHTML = `
             <strong>🎯 Choose your secret number between ${rangeDisplay}</strong><br>
@@ -161,16 +161,16 @@ class SinglePlayerGame {
         `;
         selectionMessage.className = 'message info enhanced';
         
-        // Reset ready button for single player
+        
         const readyBtn = document.getElementById('readyBtn');
         readyBtn.disabled = false;
         readyBtn.textContent = '✅ Start Game';
         readyBtn.onclick = () => this.setPlayerReady();
         
-        // Clear ready status
+        
         document.getElementById('readyStatus').innerHTML = '';
         
-        // Focus on input
+        
         setTimeout(() => secretNumberInput.focus(), 200);
         
         UI.showNotification('🤖 Choose your secret number! The AI bot will try to guess it.', 'info', 4000);
@@ -180,60 +180,60 @@ class SinglePlayerGame {
         const secretNumberInput = document.getElementById('secretNumber');
         const secretNumber = parseInt(secretNumberInput.value);
         
-        // Validate input
+        
         if (!secretNumber || secretNumber < this.gameState.rangeStart || secretNumber > this.gameState.rangeEnd) {
             UI.showNotification(`⚠️ Please enter a number between ${this.gameState.rangeStart} and ${this.gameState.rangeEnd}`, 'error');
             secretNumberInput.focus();
             return;
         }
         
-        // Set the player's secret number
+        
         this.gameState.playerSecretNumber = secretNumber;
         
-        // Disable input and update button
+        
         secretNumberInput.disabled = true;
         const readyBtn = document.getElementById('readyBtn');
         readyBtn.disabled = true;
         readyBtn.textContent = '✅ Starting Game...';
         
-        // Update status
+        
         document.getElementById('readyStatus').innerHTML = `✅ Your secret number: ${secretNumber}<br><small>🤖 Starting game with AI bot...</small>`;
         
         UI.showNotification(`✅ Secret number ${secretNumber} selected! Starting game...`, 'success');
         
-        // Start the actual game after a short delay
+        
         setTimeout(() => {
             this.showSinglePlayerGame();
         }, 2000);
     }
 
     showSinglePlayerGame() {
-        // Add single player mode class to container
+        
         document.querySelector('.game-container').classList.add('single-player-mode');
         
         UI.showScreen('gameScreen');
         
-        // Update round info
+        
         document.getElementById('gameRoundInfo').querySelector('.round-text').textContent = 'Single Player vs Bot';
         
-        // Update player info
+        
         document.getElementById('myBattleName').textContent = this.gameState.playerName;
         document.getElementById('opponentBattleName').innerHTML = `
             <div class="bot-avatar">🤖</div>
             AI Bot (${this.gameState.botDifficulty})
         `;
         
-        // Update stats
+        
         document.getElementById('myAttempts').textContent = this.gameState.playerAttempts;
         document.getElementById('myWins').textContent = this.gameState.playerWins;
         document.getElementById('opponentAttempts').textContent = this.gameState.botAttempts;
         document.getElementById('opponentWins').textContent = this.gameState.botWins;
         
-        // Update targets
+        
         document.getElementById('myTarget').textContent = this.gameState.playerSecretNumber;
         document.getElementById('opponentTarget').textContent = '???';
         
-        // Setup guess input
+        
         const guessInput = document.getElementById('guessInput');
         guessInput.min = this.gameState.rangeStart;
         guessInput.max = this.gameState.rangeEnd;
@@ -241,14 +241,14 @@ class SinglePlayerGame {
         guessInput.placeholder = `Guess Bot's number (${this.gameState.rangeStart}-${this.gameState.rangeEnd})`;
         guessInput.focus();
         
-        // Clear game message and history
+        
         document.getElementById('gameMessage').textContent = `🤖 Bot has picked a number between ${this.gameState.rangeStart} and ${this.gameState.rangeEnd}. Can you find it?`;
         document.getElementById('gameMessage').className = 'message info';
         UI.clearGuessHistory();
         
         this.gameState.gamePhase = 'playing';
         
-        // Bot starts thinking after a delay
+        
         setTimeout(() => {
             this.botMakeGuess();
         }, 2000);
@@ -259,17 +259,17 @@ class SinglePlayerGame {
         
         this.gameState.playerAttempts++;
         
-        // Generate feedback
+        
         const feedback = this.generateFeedback(guess, this.gameState.botSecretNumber);
         
-        // Add to history
+        
         this.gameState.playerGuessHistory.push({
             attempt: this.gameState.playerAttempts,
             guess: guess,
             feedback: feedback
         });
         
-        // Update UI
+        
         document.getElementById('myAttempts').textContent = this.gameState.playerAttempts;
         UI.showGameMessage(feedback.message, feedback.type);
         UI.addGuessToHistory(guess, {
@@ -279,13 +279,13 @@ class SinglePlayerGame {
             direction: feedback.direction
         });
         
-        // Check if player won
+        
         if (feedback.isCorrect) {
             this.endGame('player');
             return;
         }
         
-        // Continue bot thinking
+        
         setTimeout(() => {
             this.botMakeGuess();
         }, this.botThinkingTime[this.gameState.botDifficulty]);
@@ -309,20 +309,20 @@ class SinglePlayerGame {
                 break;
         }
         
-        // Check if bot won
+        
         const isCorrect = botGuess === this.gameState.playerSecretNumber;
         
-        // Add to bot history
+        
         this.gameState.botGuessHistory.push({
             attempt: this.gameState.botAttempts,
             guess: botGuess,
             isCorrect: isCorrect
         });
         
-        // Update UI
+        
         document.getElementById('opponentAttempts').textContent = this.gameState.botAttempts;
         
-        // Show bot's guess
+        
         const botMessage = isCorrect ? 
             `🤖 Bot found your number ${this.gameState.playerSecretNumber} in ${this.gameState.botAttempts} attempts! 🎯` :
             `🤖 Bot guessed ${botGuess} (Attempt ${this.gameState.botAttempts})`;
@@ -332,19 +332,19 @@ class SinglePlayerGame {
         if (isCorrect) {
             this.endGame('bot');
         } else {
-            // Update bot strategy based on feedback
+            
             this.updateBotStrategy(botGuess, this.gameState.playerSecretNumber);
         }
     }
 
-    // Bot Strategies
+    
     botEasyStrategy() {
-        // Random guessing
+        
         return this.generateRandomNumber(this.gameState.rangeStart, this.gameState.rangeEnd);
     }
 
     botMediumStrategy() {
-        // Narrowing range but not optimal
+        
         const { min, max } = this.gameState.botStrategy;
         const range = max - min + 1;
         
@@ -352,14 +352,14 @@ class SinglePlayerGame {
             return min;
         }
         
-        // Use binary search with some randomness
+        
         const mid = Math.floor((min + max) / 2);
         const randomOffset = Math.floor(Math.random() * Math.min(3, range)) - 1;
         return Math.max(min, Math.min(max, mid + randomOffset));
     }
 
     botHardStrategy() {
-        // Optimal binary search
+        
         const { min, max } = this.gameState.botStrategy;
         return Math.floor((min + max) / 2);
     }
@@ -394,7 +394,7 @@ class SinglePlayerGame {
         const difference = Math.abs(guess - target);
         const range = this.gameState.rangeEnd - this.gameState.rangeStart + 1;
         
-        // IMPROVED: Smart thresholds matching server-side logic
+        
         let veryCloseThreshold, closeThreshold;
         
         if (range <= 20) {
@@ -457,7 +457,7 @@ class SinglePlayerGame {
             this.gameState.botWins++;
         }
         
-        // Show results
+        
         this.showSinglePlayerResults(winner);
     }
 
@@ -466,12 +466,12 @@ class SinglePlayerGame {
         
         const isPlayerWinner = winner === 'player';
         
-        // Update result display
+        
         document.getElementById('resultEmoji').textContent = isPlayerWinner ? '🎉' : '🤖';
         document.getElementById('resultTitle').textContent = isPlayerWinner ? 
             '🎉 You Won!' : '🤖 Bot Won!';
         
-        // Update player results
+        
         document.getElementById('myResultName').textContent = this.gameState.playerName;
         document.getElementById('opponentResultName').innerHTML = `🤖 AI Bot (${this.gameState.botDifficulty})`;
         
@@ -480,7 +480,7 @@ class SinglePlayerGame {
         document.getElementById('myTotalWins').textContent = this.gameState.playerWins;
         document.getElementById('opponentTotalWins').textContent = this.gameState.botWins;
         
-        // Performance evaluation
+        
         const optimalAttempts = Math.ceil(Math.log2(this.gameState.rangeEnd - this.gameState.rangeStart + 1));
         let playerPerformance = 'Good Try!';
         let botPerformance = 'AI Performance';
@@ -500,13 +500,13 @@ class SinglePlayerGame {
         document.getElementById('myPerformance').textContent = playerPerformance;
         document.getElementById('opponentPerformance').textContent = botPerformance;
         
-        // Highlight winner
+        
         const myCard = document.getElementById('myResultCard');
         const opponentCard = document.getElementById('opponentResultCard');
         myCard.classList.toggle('winner', isPlayerWinner);
         opponentCard.classList.toggle('winner', !isPlayerWinner);
         
-        // Final message
+        
         let message;
         if (isPlayerWinner) {
             message = `Congratulations! You beat the ${this.gameState.botDifficulty} bot in ${this.gameState.playerAttempts} attempts!`;
@@ -517,46 +517,46 @@ class SinglePlayerGame {
         document.getElementById('finalResultMessage').textContent = message;
         document.getElementById('finalResultMessage').className = `message ${isPlayerWinner ? 'success' : 'info'}`;
         
-        // Hide multiplayer buttons, show single player actions
+        
         document.getElementById('nextRoundBtn').style.display = 'none';
         
-        // Update rematch button for single player
+        
         const rematchBtn = document.getElementById('rematchBtn');
         rematchBtn.textContent = '🔄 Play Again';
         rematchBtn.onclick = () => this.rematch();
         
-        // Update leave button
+        
         const leaveBtn = document.getElementById('leaveResultsBtn');
         leaveBtn.textContent = '🏠 Main Menu';
         leaveBtn.onclick = () => this.returnToMenu();
     }
 
     rematch() {
-        // Reset game state but keep wins
+        
         this.gameState.playerAttempts = 0;
         this.gameState.botAttempts = 0;
         this.gameState.playerGuessHistory = [];
         this.gameState.botGuessHistory = [];
         this.gameState.gamePhase = 'selection';
         
-        // FIXED: Don't auto-generate new secret numbers - let user choose again
-        this.gameState.playerSecretNumber = null; // User must choose
+        
+        this.gameState.playerSecretNumber = null; 
         this.gameState.botSecretNumber = this.generateRandomNumber(this.gameState.rangeStart, this.gameState.rangeEnd);
         
-        // Reset bot strategy
+        
         this.initializeBotStrategy();
         
-        // Show selection screen again
+        
         this.showSinglePlayerSelection();
         
         UI.showNotification('New game! Choose your secret number again! 🎮', 'success');
     }
 
     returnToMenu() {
-        // Remove single player mode class
+        
         document.querySelector('.game-container').classList.remove('single-player-mode');
         
-        // Reset game state
+        
         this.gameState = {
             playerName: '',
             playerSecretNumber: null,
@@ -579,7 +579,7 @@ class SinglePlayerGame {
             }
         };
         
-        // Reset UI
+        
         UI.showScreen('welcomeScreen');
         UI.clearInputs();
     }
@@ -589,8 +589,8 @@ class SinglePlayerGame {
     }
 }
 
-// Initialize single player game
+
 const singlePlayerGame = new SinglePlayerGame();
 
-// Make it globally available
+
 window.singlePlayerGame = singlePlayerGame;

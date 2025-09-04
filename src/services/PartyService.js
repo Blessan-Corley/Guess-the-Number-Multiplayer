@@ -4,9 +4,9 @@ const config = require('../../config/config');
 
 class PartyService {
     constructor() {
-        this.parties = new Map(); // partyCode -> Party
-        this.playerToParty = new Map(); // playerId -> partyCode
-        this.socketToPlayer = new Map(); // socketId -> playerId
+        this.parties = new Map(); 
+        this.playerToParty = new Map(); 
+        this.socketToPlayer = new Map(); 
         this.stats = {
             totalPartiesCreated: 0,
             totalPlayersJoined: 0,
@@ -14,7 +14,7 @@ class PartyService {
         };
     }
 
-    // Generate unique party code
+    
     generatePartyCode() {
         let code;
         let attempts = 0;
@@ -36,19 +36,19 @@ class PartyService {
         return code;
     }
 
-    // Create a new party
+    
     createParty(hostSocketId, hostName) {
         if (!hostName || typeof hostName !== 'string') {
             throw new Error('Invalid host name');
         }
 
-        // FIXED: Clean up any existing mappings for this socket
-        // This ensures proper host status regardless of previous party membership
+        
+        
         const existingPlayerId = this.socketToPlayer.get(hostSocketId);
         if (existingPlayerId) {
             const existingPartyCode = this.playerToParty.get(existingPlayerId);
             if (existingPartyCode) {
-                // Remove from previous party if it exists
+                
                 const existingParty = this.parties.get(existingPartyCode);
                 if (existingParty) {
                     existingParty.removePlayer(existingPlayerId);
@@ -57,7 +57,7 @@ class PartyService {
                     }
                 }
             }
-            // Clean up old mappings
+            
             this.playerToParty.delete(existingPlayerId);
             this.socketToPlayer.delete(hostSocketId);
         }
@@ -75,7 +75,7 @@ class PartyService {
         return party;
     }
 
-    // Join an existing party
+    
     joinParty(partyCode, playerSocketId, playerName) {
         if (!partyCode || !playerName) {
             throw new Error('Party code and player name are required');
@@ -90,12 +90,12 @@ class PartyService {
             throw new Error('Party is full');
         }
 
-        // FIXED: Clean up any existing mappings for this socket
+        
         const existingPlayerId = this.socketToPlayer.get(playerSocketId);
         if (existingPlayerId) {
             const existingPartyCode = this.playerToParty.get(existingPlayerId);
             if (existingPartyCode && existingPartyCode !== partyCode.toUpperCase()) {
-                // Remove from previous party
+                
                 const existingParty = this.parties.get(existingPartyCode);
                 if (existingParty) {
                     existingParty.removePlayer(existingPlayerId);
@@ -103,7 +103,7 @@ class PartyService {
                         this.parties.delete(existingPartyCode);
                     }
                 }
-                // Clean up old mappings
+                
                 this.playerToParty.delete(existingPlayerId);
                 this.socketToPlayer.delete(playerSocketId);
             }
@@ -119,7 +119,7 @@ class PartyService {
         return { party, player };
     }
 
-    // Leave a party
+    
     leaveParty(socketId) {
         const playerId = this.socketToPlayer.get(socketId);
         if (!playerId) {
@@ -140,11 +140,11 @@ class PartyService {
         const wasHost = player.isHost;
         const removeResult = party.removePlayer(playerId);
 
-        // Clean up mappings
+        
         this.playerToParty.delete(playerId);
         this.socketToPlayer.delete(socketId);
 
-        // FIXED: If host left or party is empty, remove party completely
+        
         if (removeResult === 'HOST_LEFT' || party.isEmpty()) {
             this.parties.delete(partyCode);
         }
@@ -152,13 +152,13 @@ class PartyService {
         return { party, player, partyCode, wasHost };
     }
 
-    // Get party by code
+    
     getParty(partyCode) {
         if (!partyCode) return null;
         return this.parties.get(partyCode.toUpperCase());
     }
 
-    // Get party by socket ID
+    
     getPartyBySocket(socketId) {
         const playerId = this.socketToPlayer.get(socketId);
         if (!playerId) return null;
@@ -169,7 +169,7 @@ class PartyService {
         return this.parties.get(partyCode);
     }
 
-    // Get player by socket ID
+    
     getPlayerBySocket(socketId) {
         const playerId = this.socketToPlayer.get(socketId);
         if (!playerId) return null;
@@ -183,7 +183,7 @@ class PartyService {
         return party.getPlayer(playerId);
     }
 
-    // Handle player reconnection
+    
     reconnectPlayer(socketId, partyCode, playerId) {
         const party = this.getParty(partyCode);
         if (!party) {
@@ -195,25 +195,25 @@ class PartyService {
             return { success: false, error: 'Player not found in party' };
         }
 
-        // Update mappings
+        
         const oldSocketId = player.socketId;
         this.socketToPlayer.delete(oldSocketId);
         this.socketToPlayer.set(socketId, playerId);
 
-        // Update player
+        
         player.updateSocketId(socketId);
 
         return { success: true, party, player };
     }
 
-    // Clean up inactive parties
+    
     cleanupInactiveParties() {
         let cleanedCount = 0;
         const now = Date.now();
 
         for (const [partyCode, party] of this.parties.entries()) {
             if (party.isInactive() || party.isEmpty()) {
-                // Clean up all players in the party
+                
                 party.players.forEach(player => {
                     this.playerToParty.delete(player.id);
                     this.socketToPlayer.delete(player.socketId);
@@ -227,7 +227,7 @@ class PartyService {
         return cleanedCount;
     }
 
-    // Clean up disconnected players
+    
     cleanupDisconnectedPlayer(socketId) {
         const playerId = this.socketToPlayer.get(socketId);
         if (!playerId) return null;
@@ -242,24 +242,24 @@ class PartyService {
         if (player) {
             player.setConnected(false);
             
-            // If player is disconnected for too long, remove them
+            
             setTimeout(() => {
                 const currentPlayer = party.getPlayer(playerId);
                 if (currentPlayer && !currentPlayer.isConnected) {
                     this.leaveParty(socketId);
                 }
-            }, 60000); // 1 minute grace period
+            }, 60000); 
         }
 
         return { party, player, partyCode };
     }
 
-    // Get all active parties
+    
     getActiveParties() {
         return Array.from(this.parties.values()).filter(party => !party.isEmpty());
     }
 
-    // Get party statistics
+    
     getStats() {
         const activeParties = this.getActiveParties();
         const activePlayers = activeParties.reduce((total, party) => total + party.players.size, 0);
@@ -273,37 +273,37 @@ class PartyService {
         };
     }
 
-    // Get active parties count
+    
     getActivePartiesCount() {
         return this.getActiveParties().length;
     }
 
-    // Get active players count
+    
     getActivePlayersCount() {
         return this.getActiveParties().reduce((total, party) => total + party.players.size, 0);
     }
 
-    // Get total parties created
+    
     getTotalPartiesCreated() {
         return this.stats.totalPartiesCreated;
     }
 
-    // Get total players count
+    
     getTotalPlayersCount() {
         return this.stats.totalPlayersJoined;
     }
 
-    // Get games completed count
+    
     getGamesCompletedCount() {
         return this.stats.gamesCompleted;
     }
 
-    // Record game completion
+    
     recordGameCompletion() {
         this.stats.gamesCompleted++;
     }
 
-    // Validate party code format
+    
     validatePartyCode(code) {
         if (!code || typeof code !== 'string') {
             return { valid: false, error: 'Party code must be a string' };
@@ -320,7 +320,7 @@ class PartyService {
         return { valid: true };
     }
 
-    // Validate player name
+    
     validatePlayerName(name) {
         if (!name || typeof name !== 'string') {
             return { valid: false, error: 'Player name must be a string' };
@@ -342,7 +342,7 @@ class PartyService {
         return { valid: true, name: trimmedName };
     }
 
-    // Get detailed party info for debugging
+    
     getPartyDetails(partyCode) {
         const party = this.getParty(partyCode);
         if (!party) return null;
@@ -371,7 +371,7 @@ class PartyService {
         };
     }
 
-    // Broadcast to all players in a party
+    
     broadcastToParty(partyCode, event, data, io) {
         const party = this.getParty(partyCode);
         if (!party) return false;
@@ -385,7 +385,7 @@ class PartyService {
         return true;
     }
 
-    // Broadcast to specific player in party
+    
     sendToPlayer(playerId, event, data, io) {
         const partyCode = this.playerToParty.get(playerId);
         if (!partyCode) return false;
@@ -400,12 +400,12 @@ class PartyService {
         return true;
     }
 
-    // Check if socket is in any party
+    
     isSocketInParty(socketId) {
         return this.socketToPlayer.has(socketId);
     }
 
-    // Get all parties for admin/monitoring
+    
     getAllParties() {
         return Array.from(this.parties.entries()).map(([code, party]) => ({
             code,
@@ -413,7 +413,7 @@ class PartyService {
         }));
     }
 
-    // Emergency cleanup - remove all parties and players
+    
     emergencyCleanup() {
         const partyCount = this.parties.size;
         const playerCount = this.playerToParty.size;
@@ -425,7 +425,7 @@ class PartyService {
         return { partiesRemoved: partyCount, playersRemoved: playerCount };
     }
 
-    // Get system health info
+    
     getSystemHealth() {
         const activeParties = this.getActiveParties();
         const memoryUsage = process.memoryUsage();

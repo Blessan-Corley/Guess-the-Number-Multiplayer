@@ -5,7 +5,7 @@ class MessageGenerator {
         this.messages = config.GAME_MESSAGES;
     }
 
-    // Get random message from a category
+    
     getRandomMessage(category) {
         const messageArray = this.messages[category];
         if (!messageArray || messageArray.length === 0) {
@@ -15,7 +15,7 @@ class MessageGenerator {
         return messageArray[Math.floor(Math.random() * messageArray.length)];
     }
 
-    // Get default message if category not found
+    
     getDefaultMessage(category) {
         const defaults = {
             'TOO_HIGH': '📈 Too high! Try a lower number.',
@@ -29,7 +29,7 @@ class MessageGenerator {
         return defaults[category] || '🎯 Keep trying!';
     }
 
-    // Get contextual message based on game state
+    
     getContextualMessage(context) {
         const contextMessages = {
             gameStart: [
@@ -98,7 +98,7 @@ class MessageGenerator {
         return messages[Math.floor(Math.random() * messages.length)];
     }
 
-    // Get encouraging message based on attempt count
+    
     getEncouragementMessage(attempts, optimalAttempts) {
         if (attempts === 1) {
             return "🍀 First try! Incredible luck or skill?";
@@ -113,7 +113,7 @@ class MessageGenerator {
         }
     }
 
-    // Get celebration message for wins
+    
     getCelebrationMessage(winType = 'normal') {
         const celebrations = {
             normal: [
@@ -150,7 +150,7 @@ class MessageGenerator {
         return messages[Math.floor(Math.random() * messages.length)];
     }
 
-    // Get trash talk messages (friendly)
+    
     getTrashTalkMessage() {
         return [
             "😏 Feeling confident, are we?",
@@ -164,7 +164,7 @@ class MessageGenerator {
         ][Math.floor(Math.random() * 8)];
     }
 
-    // Get waiting messages
+    
     getWaitingMessage(context = 'general') {
         const waitingMessages = {
             general: [
@@ -194,7 +194,7 @@ class MessageGenerator {
         return messages[Math.floor(Math.random() * messages.length)];
     }
 
-    // Get error messages (user-friendly)
+    
     getErrorMessage(errorType) {
         const errorMessages = {
             invalidGuess: [
@@ -235,7 +235,7 @@ class MessageGenerator {
         return messages[Math.floor(Math.random() * messages.length)];
     }
 
-    // Get personalized message based on player performance
+    
     getPersonalizedMessage(player) {
         const { wins, attempts, stats } = player;
         const winRate = stats.totalGames > 0 ? (stats.totalWins / stats.totalGames) * 100 : 0;
@@ -253,7 +253,7 @@ class MessageGenerator {
         }
     }
 
-    // Format message with variables
+    
     formatMessage(template, variables = {}) {
         let message = template;
         
@@ -265,28 +265,32 @@ class MessageGenerator {
         return message;
     }
 
-    // Get seasonal or special event messages
+    
     getSpecialMessage() {
         const now = new Date();
         const month = now.getMonth();
         const day = now.getDate();
 
-        // New Year
+        
         if (month === 0 && day === 1) {
             return "🎊 Happy New Year! Let's start with some number guessing!";
         }
         
-        // Christmas season
+        if (month === 8 && day === 15) {
+            return "🎆 Happy Independence Day! Celebrate with some fun guessing!";
+        }
+        if (month === 11 && day === 31) {
+            return "🎉 Happy New Year's Eve! End the year with a perfect guess!";
+        }
         if (month === 11 && day >= 20) {
             return "🎄 Holiday spirit is in the air! Ho ho ho!";
         }
         
-        // Halloween
         if (month === 9 && day === 31) {
             return "🎃 Spooky number guessing! Boo!";
         }
         
-        // Regular motivational message
+        
         return this.getContextualMessage('gameStart');
     }
 }

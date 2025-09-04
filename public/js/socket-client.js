@@ -34,7 +34,7 @@ class SocketClient {
     }
 
     setupEventListeners() {
-        // Connection events
+        
         this.socket.on('connect', () => {
             this.isConnected = true;
             this.reconnectAttempts = 0;
@@ -54,14 +54,14 @@ class SocketClient {
         }
             }
             
-            // Attempt reconnection for certain disconnect reasons
+            
             if (reason === 'io server disconnect') {
-                // Server initiated disconnect, don't reconnect
+                
                 if (typeof UI !== 'undefined') {
                     UI.showNotification('Disconnected by server', 'error');
                 }
             } else {
-                // Client side disconnect, attempt reconnection
+                
                 this.handleReconnection();
             }
         });
@@ -70,11 +70,11 @@ class SocketClient {
             this.handleConnectionError(error);
         });
 
-        // Server acknowledgment
+        
         this.socket.on('connected', (data) => {
         });
 
-        // Party management events
+        
         this.socket.on('party_created', (data) => {
             this.gameState.playerId = data.player.id;
             this.gameState.partyCode = data.party.code;
@@ -111,17 +111,17 @@ class SocketClient {
             Game.handlePartyLeft(data);
         });
         
-        // FIXED: Handle party closed due to host leaving
+        
         this.socket.on('party_closed_host_left', (data) => {
             Game.handlePartyClosedHostLeft(data);
         });
         
-        // FIXED: Handle settings change request response
+        
         this.socket.on('settings_change_started', (data) => {
             Game.handleSettingsChangeStarted(data);
         });
 
-        // Game flow events
+        
         this.socket.on('settings_updated', (data) => {
             Game.handleSettingsUpdated(data);
         });
@@ -166,7 +166,7 @@ class SocketClient {
             Game.handleRematchRequested(data);
         });
 
-        // Communication events
+        
         this.socket.on('player_typing', (data) => {
             Game.handlePlayerTyping(data);
         });
@@ -183,7 +183,7 @@ class SocketClient {
             }
         });
 
-        // New enhanced game flow events
+        
         this.socket.on('opponent_finished_first', (data) => {
             Game.handleOpponentFinishedFirst(data);
         });
@@ -196,20 +196,20 @@ class SocketClient {
             Game.handlePlayerFinished(data);
         });
 
-        // Heartbeat
+        
         this.socket.on('heartbeat_ack', (data) => {
-            // Server acknowledged heartbeat
+            
         });
 
-        // Error handling
+        
         this.socket.on('error', (data) => {
             
-            // Hide loading overlay on any error
+            
             if (typeof UI !== 'undefined') {
                 UI.hideLoadingOverlay();
             }
             
-            // Reset join button if it exists (for party join errors)
+            
             const joinBtn = document.getElementById('joinPartySubmitBtn');
             if (joinBtn) {
                 if (typeof UI !== 'undefined') {
@@ -217,7 +217,7 @@ class SocketClient {
                 }
             }
             
-            // Show appropriate error message based on error type
+            
             let message = data.message || 'An error occurred';
             let type = 'error';
             
@@ -236,11 +236,11 @@ class SocketClient {
             }
             
             if (typeof UI !== 'undefined') {
-                UI.showNotification(message, type, 5000); // Show for 5 seconds for important errors
+                UI.showNotification(message, type, 5000); 
             }
         });
 
-        // Reconnection events
+        
         this.socket.on('reconnected', (data) => {
             this.gameState.playerId = data.player.id;
             this.gameState.partyCode = data.party.code;
@@ -261,7 +261,7 @@ class SocketClient {
         });
     }
 
-    // Party management methods
+    
     createParty(playerName) {
         if (!this.isConnected) {
             if (typeof UI !== 'undefined') {
@@ -275,7 +275,7 @@ class SocketClient {
         }
         this.socket.emit('create_party', { playerName });
         
-        // Set a timeout to prevent infinite loading
+        
         setTimeout(() => {
             if (document.querySelector('.loading-overlay.active')) {
                 if (typeof UI !== 'undefined') {
@@ -285,7 +285,7 @@ class SocketClient {
                 UI.showNotification('⏱️ Request timed out. Please try again.', 'warning');
             }
             }
-        }, 10000); // 10 second timeout
+        }, 10000); 
     }
 
     joinParty(partyCode, playerName) {
@@ -301,7 +301,7 @@ class SocketClient {
         }
         this.socket.emit('join_party', { partyCode, playerName });
         
-        // Set a timeout to prevent infinite loading
+        
         setTimeout(() => {
             if (document.querySelector('.loading-overlay.active')) {
                 if (typeof UI !== 'undefined') {
@@ -309,13 +309,13 @@ class SocketClient {
                     UI.showNotification('⏱️ Request timed out. Please try again.', 'warning');
                 }
                 
-                // Reset join button on timeout
+                
                 const joinBtn = document.getElementById('joinPartySubmitBtn');
                 if (joinBtn && typeof UI !== 'undefined') {
                     UI.resetButton(joinBtn, '🚀 Join Party');
                 }
             }
-        }, 10000); // 10 second timeout
+        }, 10000); 
     }
 
     leaveParty() {
@@ -330,7 +330,7 @@ class SocketClient {
         this.socket.emit('update_settings', settings);
     }
 
-    // Game flow methods
+    
     startGame() {
         if (!this.isConnected || !this.gameState.isHost) return;
         
@@ -361,7 +361,7 @@ class SocketClient {
         this.socket.emit('rematch');
     }
 
-    // Communication methods
+    
     sendTyping(isTyping) {
         if (!this.isConnected) return;
         
@@ -374,7 +374,7 @@ class SocketClient {
         this.socket.emit('heartbeat');
     }
 
-    // Connection management
+    
     handleConnectionError(error) {
         this.isConnected = false;
         if (typeof UI !== 'undefined') {
@@ -401,10 +401,10 @@ class SocketClient {
         setTimeout(() => {
             if (!this.isConnected) {
                 if (this.gameState.partyCode && this.gameState.playerId) {
-                    // Attempt to reconnect to existing game
+                    
                     this.attemptGameReconnection();
                 } else {
-                    // General reconnection
+                    
                     this.socket.connect();
                 }
             }
@@ -419,7 +419,7 @@ class SocketClient {
     }
 
     startHeartbeat() {
-        // Send heartbeat every 30 seconds
+        
         this.heartbeatInterval = setInterval(() => {
             this.sendHeartbeat();
         }, 30000);
@@ -432,7 +432,7 @@ class SocketClient {
         }
     }
 
-    // Utility methods
+    
     getGameState() {
         return { ...this.gameState };
     }
@@ -445,7 +445,7 @@ class SocketClient {
         return this.gameState.isHost;
     }
 
-    // Cleanup
+    
     disconnect() {
         this.stopHeartbeat();
         if (this.socket) {
@@ -453,7 +453,7 @@ class SocketClient {
         }
     }
 
-    // Debug methods
+    
     getConnectionStatus() {
         return {
             connected: this.isConnected,
@@ -464,8 +464,8 @@ class SocketClient {
     }
 }
 
-// Initialize socket client
+
 const socketClient = new SocketClient();
 
-// Make it globally available
+
 window.socketClient = socketClient;

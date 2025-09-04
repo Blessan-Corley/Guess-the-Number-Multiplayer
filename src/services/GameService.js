@@ -7,7 +7,7 @@ class GameService {
         this.partyService = partyService;
     }
 
-    // Generate feedback for a guess - IMPROVED: Better range-appropriate thresholds
+    
     generateFeedback(guess, target, rangeStart, rangeEnd) {
         if (guess === target) {
             return {
@@ -20,29 +20,29 @@ class GameService {
         const difference = Math.abs(guess - target);
         const range = rangeEnd - rangeStart + 1;
         
-        // IMPROVED: Smart thresholds that scale better with range size
+        
         let veryCloseThreshold, closeThreshold;
         
         if (range <= 20) {
-            // Small range: Very tight thresholds
+            
             veryCloseThreshold = 1;
             closeThreshold = 2;
         } else if (range <= 50) {
-            // Small-medium range
+            
             veryCloseThreshold = 2;
             closeThreshold = 4;
         } else if (range <= 100) {
-            // Classic range
+            
             veryCloseThreshold = 3;
             closeThreshold = 8;
         } else if (range <= 500) {
-            // Large range: Adaptive thresholds
-            veryCloseThreshold = Math.max(5, Math.ceil(range * 0.015)); // 1.5%
-            closeThreshold = Math.max(10, Math.ceil(range * 0.04)); // 4%
+            
+            veryCloseThreshold = Math.max(5, Math.ceil(range * 0.015)); 
+            closeThreshold = Math.max(10, Math.ceil(range * 0.04)); 
         } else {
-            // Very large range: Even more adaptive
-            veryCloseThreshold = Math.max(8, Math.ceil(range * 0.012)); // 1.2%
-            closeThreshold = Math.max(20, Math.ceil(range * 0.035)); // 3.5%
+            
+            veryCloseThreshold = Math.max(8, Math.ceil(range * 0.012)); 
+            closeThreshold = Math.max(20, Math.ceil(range * 0.035)); 
         }
 
         let messageType;
@@ -70,13 +70,13 @@ class GameService {
         };
     }
 
-    // Calculate optimal number of attempts for a range
+    
     calculateOptimalAttempts(rangeStart, rangeEnd) {
         const rangeSize = rangeEnd - rangeStart + 1;
         return Math.ceil(Math.log2(rangeSize));
     }
 
-    // Evaluate player performance
+    
     evaluatePerformance(attempts, rangeStart, rangeEnd) {
         const optimalAttempts = this.calculateOptimalAttempts(rangeStart, rangeEnd);
         
@@ -116,7 +116,7 @@ class GameService {
         };
     }
 
-    // Generate round summary
+    
     generateRoundSummary(roundResult, gameSettings) {
         const { winnerId, winnerName, winnerAttempts, players } = roundResult;
         const winner = players.find(p => p.id === winnerId);
@@ -153,12 +153,12 @@ class GameService {
         };
     }
 
-    // Generate game summary for completed games
+    
     generateGameSummary(party) {
         const { roundResults } = party.gameState;
         const players = Array.from(party.players.values());
         
-        // Calculate overall winner
+        
         const winCounts = new Map();
         roundResults.forEach(result => {
             winCounts.set(result.winnerId, (winCounts.get(result.winnerId) || 0) + 1);
@@ -173,11 +173,11 @@ class GameService {
             }
         });
 
-        // Calculate game statistics
+        
         const totalAttempts = players.reduce((sum, player) => sum + player.stats.totalAttempts, 0);
         const averageAttempts = players.length > 0 ? totalAttempts / players.length : 0;
 
-        // Generate round summaries
+        
         const roundSummaries = roundResults.map(result => 
             this.generateRoundSummary(result, party.gameSettings)
         );
@@ -211,7 +211,7 @@ class GameService {
         };
     }
 
-    // Get overall performance rating for a player
+    
     getOverallPerformanceRating(player, gameSettings) {
         if (player.stats.totalGames === 0) {
             return { rating: 'new_player', message: 'Welcome to the game!' };
@@ -241,14 +241,14 @@ class GameService {
         return { rating, message };
     }
 
-    // Calculate achievements for players
+    
     calculateAchievements(players, party) {
         const achievements = [];
 
         players.forEach(player => {
             const playerAchievements = [];
 
-            // First game achievement
+            
             if (player.stats.totalGames === 1) {
                 playerAchievements.push({
                     id: 'first_game',
@@ -258,7 +258,7 @@ class GameService {
                 });
             }
 
-            // Perfect game (1 attempt win)
+            
             if (player.stats.bestScore === 1) {
                 playerAchievements.push({
                     id: 'perfect_game',
@@ -268,7 +268,7 @@ class GameService {
                 });
             }
 
-            // Win streak
+            
             if (player.wins >= 3) {
                 playerAchievements.push({
                     id: 'win_streak',
@@ -278,7 +278,7 @@ class GameService {
                 });
             }
 
-            // Efficient player
+            
             if (player.stats.averageAttempts <= 3 && player.stats.totalGames >= 3) {
                 playerAchievements.push({
                     id: 'efficient_player',
@@ -288,7 +288,7 @@ class GameService {
                 });
             }
 
-            // Veteran player
+            
             if (player.stats.totalGames >= 10) {
                 playerAchievements.push({
                     id: 'veteran',
@@ -310,7 +310,7 @@ class GameService {
         return achievements;
     }
 
-    // Validate game move
+    
     validateMove(party, playerId, guess) {
         const player = party.getPlayer(playerId);
         if (!player) {
@@ -330,7 +330,7 @@ class GameService {
         return validation;
     }
 
-    // Get strategic hint for a player
+    
     getStrategicHint(player, targetNumber, gameSettings) {
         const { guessHistory } = player;
         const { rangeStart, rangeEnd } = gameSettings;
@@ -370,7 +370,7 @@ class GameService {
         }
     }
 
-    // Calculate game difficulty based on range
+    
     calculateDifficulty(rangeStart, rangeEnd) {
         const rangeSize = rangeEnd - rangeStart + 1;
         const optimalAttempts = this.calculateOptimalAttempts(rangeStart, rangeEnd);
@@ -401,7 +401,7 @@ class GameService {
         };
     }
 
-    // Generate motivational messages
+    
     getMotivationalMessage(player, context = 'general') {
         const messages = {
             general: [
@@ -438,21 +438,21 @@ class GameService {
         return messageArray[Math.floor(Math.random() * messageArray.length)];
     }
 
-    // Process game end and generate final statistics
+    
     processGameEnd(party) {
         const gameSummary = this.generateGameSummary(party);
         
-        // Update player statistics
+        
         party.players.forEach(player => {
             player.updateStats();
         });
 
-        // Log game completion
+        
 
         return gameSummary;
     }
 
-    // Get real-time game statistics
+    
     getGameStatistics(party) {
         const players = Array.from(party.players.values());
         const currentRound = party.currentRound;
@@ -482,7 +482,7 @@ class GameService {
         };
     }
 
-    // Predict game outcome based on current state
+    
     predictOutcome(party) {
         const players = Array.from(party.players.values());
         
@@ -490,7 +490,7 @@ class GameService {
             return { prediction: 'unknown', confidence: 0 };
         }
 
-        // Simple prediction based on current attempts
+        
         const playersByAttempts = players.sort((a, b) => a.attempts - b.attempts);
         const leader = playersByAttempts[0];
         const attemptDifference = playersByAttempts[1].attempts - leader.attempts;
@@ -511,11 +511,11 @@ class GameService {
         };
     }
 
-    // Real-time feedback enhancement
+    
     getContextualFeedback(guess, target, previousGuesses, gameSettings) {
         const baseFeedback = this.generateFeedback(guess, target, gameSettings.rangeStart, gameSettings.rangeEnd);
         
-        // Add contextual information based on guess history
+        
         if (previousGuesses.length > 0) {
             const lastGuess = previousGuesses[previousGuesses.length - 1];
             const improvement = Math.abs(lastGuess.guess - target) - Math.abs(guess - target);
@@ -535,7 +535,7 @@ class GameService {
         return baseFeedback;
     }
 
-    // Smart range suggestions for next game
+    
     suggestNextGameRange(party) {
         const completedGames = party.stats.gamesCompleted;
         const averageAttempts = party.players.size > 0 ? 
@@ -544,13 +544,13 @@ class GameService {
         let suggestedRange;
         
         if (averageAttempts <= 3) {
-            // Players are very efficient, increase difficulty
+            
             suggestedRange = { start: 1, end: Math.min(1000, (party.gameSettings.rangeEnd - party.gameSettings.rangeStart + 1) * 2) };
         } else if (averageAttempts >= 10) {
-            // Players are struggling, decrease difficulty
+            
             suggestedRange = { start: 1, end: Math.max(20, Math.floor((party.gameSettings.rangeEnd - party.gameSettings.rangeStart + 1) / 2)) };
         } else {
-            // Current difficulty is good
+            
             suggestedRange = { start: party.gameSettings.rangeStart, end: party.gameSettings.rangeEnd };
         }
         
