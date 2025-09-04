@@ -1,43 +1,43 @@
 module.exports = {
-    // Server Configuration
+    
     PORT: process.env.PORT || 3000,
     NODE_ENV: process.env.NODE_ENV || 'development',
     
-    // Game Configuration
+    
     PARTY_CODE_LENGTH: 6,
     MAX_PLAYERS_PER_PARTY: 2,
-    SELECTION_TIME_LIMIT: 30, // seconds
-    INACTIVITY_TIMEOUT: 10 * 60 * 1000, // 10 minutes in milliseconds
-    CLEANUP_INTERVAL: process.env.CLEANUP_INTERVAL || 5 * 60 * 1000, // 5 minutes
+    SELECTION_TIME_LIMIT: 30, 
+    INACTIVITY_TIMEOUT: 10 * 60 * 1000, 
+    CLEANUP_INTERVAL: process.env.CLEANUP_INTERVAL || 5 * 60 * 1000, 
     
-    // Game Rules
+    
     DEFAULT_RANGE_START: 1,
     DEFAULT_RANGE_END: 100,
-    MAX_RANGE_SIZE: 10000, // Increased from 1000 to 10000
-    MIN_RANGE_SIZE: 5, // Reduced from 10 to 5 for more flexibility
+    MAX_RANGE_SIZE: 10000, 
+    MIN_RANGE_SIZE: 5, 
     
-    // Socket Configuration
-    SOCKET_TIMEOUT: 60000, // 60 seconds
-    PING_INTERVAL: 25000, // 25 seconds
-    PING_TIMEOUT: 60000, // 60 seconds
     
-    // Rate Limiting
+    SOCKET_TIMEOUT: 60000, 
+    PING_INTERVAL: 25000, 
+    PING_TIMEOUT: 60000, 
+    
+    
     MAX_PARTIES_PER_IP: 5,
-    PARTY_CREATION_COOLDOWN: 30000, // 30 seconds
+    PARTY_CREATION_COOLDOWN: 30000, 
     
-    // Logging
+    
     LOG_LEVEL: process.env.LOG_LEVEL || 'info',
     ENABLE_DEBUG: process.env.NODE_ENV === 'development',
     
-    // Security
+    
     CORS_ORIGINS: process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : ['*'],
     
-    // Performance
+    
     ENABLE_COMPRESSION: true,
     ENABLE_CACHING: true,
-    CACHE_DURATION: 3600, // 1 hour in seconds
+    CACHE_DURATION: 3600, 
     
-    // Game Messages - IMPROVED: More variety and competitive spirit
+    
     GAME_MESSAGES: {
         TOO_HIGH: [
             "🔥 Way too high! Come back down to earth!",
@@ -121,7 +121,7 @@ module.exports = {
         ]
     },
     
-    // Development Configuration
+    
     DEV_OPTIONS: {
         AUTO_FILL_PLAYERS: process.env.NODE_ENV === 'development',
         REDUCED_TIMERS: process.env.NODE_ENV === 'development',

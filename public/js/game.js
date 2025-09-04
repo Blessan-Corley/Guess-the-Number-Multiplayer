@@ -6,19 +6,19 @@ class Game {
             player: null,
             gamePhase: null,
             isHost: false,
-            gameMode: null, // 'single' or 'multiplayer'
-            hasFinished: false // Track if current player has finished
+            gameMode: null, 
+            hasFinished: false 
         };
         
     }
 
-    // Game Mode Selection
+    
     static selectSinglePlayer() {
         this.currentState.gameMode = 'single';
         document.getElementById('multiplayerOptions').style.display = 'none';
         document.getElementById('singlePlayerOptions').style.display = 'block';
         
-        // Update button states
+        
         document.getElementById('singlePlayerBtn').classList.add('active');
         document.getElementById('multiplayerBtn').classList.remove('active');
     }
@@ -28,7 +28,7 @@ class Game {
         document.getElementById('singlePlayerOptions').style.display = 'none';
         document.getElementById('multiplayerOptions').style.display = 'block';
         
-        // Update button states
+        
         document.getElementById('multiplayerBtn').classList.add('active');
         document.getElementById('singlePlayerBtn').classList.remove('active');
     }
@@ -42,7 +42,7 @@ class Game {
         if (!this.validatePlayerName(playerName)) return;
         if (!this.validateSinglePlayerRange(rangeStart, rangeEnd)) return;
         
-        // Start single player game
+        
         singlePlayerGame.startGame(playerName, rangeStart, rangeEnd, botDifficulty);
         this.trackUserAction('single_player_start', { botDifficulty, range: `${rangeStart}-${rangeEnd}` });
     }
@@ -72,7 +72,7 @@ class Game {
             return;
         }
         
-        // Handle multiplayer guess - check if player has already finished
+        
         if (this.currentState.hasFinished) {
             UI.showNotification('You have already found the number! Wait for your opponent.', 'warning');
             return;
@@ -87,11 +87,11 @@ class Game {
             return;
         }
         
-        // Just send the guess - UI already handled input clearing and button state
+        
         socketClient.makeGuess(guess);
     }
 
-    // Party Management
+    
     static createParty(playerName) {
         if (!this.validatePlayerName(playerName)) return;
         
@@ -107,12 +107,12 @@ class Game {
 
     static leaveParty() {
         
-        // Reset finished state
+        
         this.currentState.hasFinished = false;
         
         socketClient.leaveParty();
         
-        // Clear URL parameters
+        
         if (window.history && window.history.replaceState) {
             window.history.replaceState({}, document.title, window.location.pathname);
         }
@@ -124,20 +124,20 @@ class Game {
         const settings = {
             rangeStart: parseInt(document.getElementById('rangeStart').value),
             rangeEnd: parseInt(document.getElementById('rangeEnd').value)
-            // bestOfThree removed - single round matches only
+            
         };
         
-        // Enhanced validation using UI method
+        
         if (!UI.validateRangePair(settings.rangeStart, settings.rangeEnd)) {
             return;
         }
         
         socketClient.updateSettings(settings);
         
-        // Update range display immediately for host
+        
         this.updateRangeDisplay(settings.rangeStart, settings.rangeEnd);
         
-        // Show notification to host about the update
+        
         const rangeText = `${settings.rangeStart}-${settings.rangeEnd}`;
         UI.showNotification(`⚙️ Range updated to ${rangeText}`, 'info');
     }
@@ -151,10 +151,10 @@ class Game {
         document.getElementById('rangeStart').value = start;
         document.getElementById('rangeEnd').value = end;
         
-        // Update display immediately
+        
         this.updateRangeDisplay(start, end);
         
-        // Trigger settings update
+        
         this.updateSettings();
     }
 
@@ -162,7 +162,7 @@ class Game {
         const rangeSize = end - start + 1;
         document.getElementById('currentRangeDisplay').textContent = `${start} to ${end}`;
         
-        // Enhanced difficulty classification with more levels
+        
         let difficultyText = '';
         let difficultyClass = '';
         
@@ -193,7 +193,7 @@ class Game {
         rangeSizeElement.textContent = rangeSize + difficultyText;
         rangeSizeElement.className = `range-size ${difficultyClass}`;
         
-        // Show optimal attempts estimate
+        
         const optimalAttempts = Math.ceil(Math.log2(rangeSize));
         const rangeInfo = document.querySelector('.range-info small');
         if (rangeInfo) {
@@ -201,7 +201,7 @@ class Game {
         }
     }
 
-    // Game Flow
+    
     static startGame() {
         if (!socketClient.isHost()) {
             UI.showNotification('Only the host can start the game', 'error');
@@ -219,7 +219,7 @@ class Game {
         
         const { rangeStart, rangeEnd } = this.currentState.party.gameSettings;
         
-        // Enhanced validation
+        
         if (isNaN(secretNumber) || !Number.isInteger(secretNumber)) {
             UI.showNotification('Please enter a valid whole number', 'error');
             return;
@@ -232,10 +232,10 @@ class Game {
         }
         
         
-        // Show confirmation message
+        
         UI.showNotification(`✅ Number ${secretNumber} chosen!`, 'success');
         
-        // Disable input and button
+        
         document.getElementById('secretNumber').disabled = true;
         document.getElementById('readyBtn').disabled = true;
         document.getElementById('readyBtn').textContent = '✅ Ready!';
@@ -250,7 +250,7 @@ class Game {
         }
         
         
-        // Reset finished state
+        
         this.currentState.hasFinished = false;
         
         socketClient.nextRound();
@@ -258,23 +258,23 @@ class Game {
 
     static rematch() {
         
-        // Reset finished state
+        
         this.currentState.hasFinished = false;
         
         socketClient.rematch();
     }
 
-    // Event Handlers
+    
     static handlePartyCreated(data) {
         this.currentState.party = data.party;
         this.currentState.player = data.player;
         this.currentState.isHost = true;
         
-        // FIXED: Ensure socket client knows player is host
+        
         socketClient.gameState.isHost = true;
         socketClient.gameState.playerId = data.player.id;
         
-        // Reset button state
+        
         const createBtn = document.getElementById('createPartyBtn');
         UI.setButtonSuccess(createBtn, '✓ Created!');
         
@@ -288,7 +288,7 @@ class Game {
         
         UI.showNotification(`🎉 Party ${data.party.code} created! Share it with your friend.`, 'success');
         
-        // Auto-copy party code to clipboard
+        
         setTimeout(() => {
             UI.copyToClipboard(data.party.code);
         }, 1000);
@@ -299,11 +299,11 @@ class Game {
         this.currentState.player = data.player;
         this.currentState.isHost = false;
         
-        // FIXED: Ensure socket client knows player status
+        
         socketClient.gameState.isHost = false;
         socketClient.gameState.playerId = data.player.id;
         
-        // Reset button state
+        
         const joinBtn = document.getElementById('joinPartySubmitBtn');
         UI.setButtonSuccess(joinBtn, '✓ Joined!');
         
@@ -312,10 +312,10 @@ class Game {
         UI.updatePartyInfo(data.party);
         UI.updateLobbyPlayers(data.party);
         UI.updateGameSettings(data.party.gameSettings);
-        UI.disableSettings(true); // Non-host cannot change settings
+        UI.disableSettings(true); 
         
         document.getElementById('lobbyPartyCode').textContent = data.party.code;
-        document.getElementById('startGameBtn').style.display = 'none'; // Only host can start
+        document.getElementById('startGameBtn').style.display = 'none'; 
         
         UI.showNotification(`🎉 Joined party ${data.party.code}! Wait for the host to start.`, 'success');
     }
@@ -325,7 +325,7 @@ class Game {
         UI.updateLobbyPlayers(data.party);
         UI.showNotification(`${data.newPlayer.name} joined the party! 🎉`, 'success');
         
-        // Remove invitation helper if it exists
+        
         const helperDiv = document.getElementById('invitation-helper');
         if (helperDiv) {
             helperDiv.remove();
@@ -337,7 +337,7 @@ class Game {
         UI.updateLobbyPlayers(data.party);
         UI.showNotification(`${data.leftPlayer.name} left the party`, 'warning');
         
-        // Disable start button if not enough players
+        
         if (data.party.players.length < 2) {
             const startBtn = document.getElementById('startGameBtn');
             startBtn.disabled = true;
@@ -351,17 +351,17 @@ class Game {
         UI.showNotification('Left the party', 'info');
     }
     
-    // FIXED: Handle party closed when host leaves
+    
     static handlePartyClosedHostLeft(data) {
         
-        // Reset to main menu
+        
         this.resetGameState();
         UI.showScreen('welcomeScreen');
         
-        // Show notification about party closure
+        
         UI.showNotification(data.message || 'Party closed - host left', 'warning', 5000);
         
-        // Additional notification for clarity
+        
         setTimeout(() => {
             UI.showNotification('🏠 Returned to main menu. You can create or join a new party!', 'info', 4000);
         }, 2000);
@@ -369,18 +369,18 @@ class Game {
 
     static handleSettingsUpdated(data) {
         
-        // FIXED: Update current party settings
+        
         if (this.currentState.party) {
             this.currentState.party.gameSettings = data.settings;
         }
         
-        // Update UI settings in real-time for all players
+        
         UI.updateGameSettings(data.settings);
         
-        // Update range display for all players
+        
         this.updateRangeDisplay(data.settings.rangeStart, data.settings.rangeEnd);
         
-        // Show notification with context - only to non-hosts
+        
         if (data.updatedBy !== socketClient.gameState.playerName) {
             const rangeText = `${data.settings.rangeStart}-${data.settings.rangeEnd}`;
             UI.showNotification(`⚙️ ${data.updatedBy} changed range to ${rangeText}`, 'info');
@@ -422,13 +422,13 @@ class Game {
     }
 
     static handleGuessResult(data) {
-        // Update attempts count
+        
         UI.updateGameStats(data.attempts, null);
         
-        // Show feedback message
+        
         UI.showGameMessage(data.feedback.message, data.feedback.type);
         
-        // Add to guess history
+        
         UI.addGuessToHistory(data.guess, {
             attempts: data.attempts,
             isCorrect: data.isCorrect,
@@ -436,13 +436,13 @@ class Game {
             direction: data.feedback.direction
         });
         
-        // If correct, mark as finished and disable further guessing
+        
         if (data.isCorrect) {
             this.currentState.hasFinished = true;
             
             UI.showGameMessage(`🎉 Excellent! You found the number in ${data.attempts} attempts! Now wait for your opponent...`, 'success');
             
-            // Disable further guessing for this player
+            
             const guessInput = document.getElementById('guessInput');
             const guessBtn = document.getElementById('makeGuessBtn');
             
@@ -452,13 +452,13 @@ class Game {
             guessBtn.textContent = '✅ Finished!';
             guessBtn.classList.add('finished');
             
-            // Show opponent's target number since you've found theirs
+            
             document.getElementById('opponentTarget').innerHTML = `<span class="revealed-number">${data.guess}</span>`;
             
-            // Play success sound if available
+            
             this.playSound('success');
         } else {
-            // Focus back to input for next guess
+            
             setTimeout(() => {
                 const guessInput = document.getElementById('guessInput');
                 if (!guessInput.disabled) {
@@ -470,7 +470,7 @@ class Game {
 
     static handlePlayerFinished(data) {
         
-        // Show notification about who finished with context
+        
         if (data.playerId === socketClient.gameState.playerId) {
             if (data.isFirstToFinish) {
                 UI.showNotification(`🎯 Excellent! You found it first in ${data.attempts} attempts! Waiting for opponent to finish...`, 'success', 4000);
@@ -485,18 +485,18 @@ class Game {
             }
         }
         
-        // Update opponent's attempts display
+        
         if (data.playerId !== socketClient.gameState.playerId) {
             UI.updateGameStats(null, data.attempts);
         }
     }
 
-    // Handle when opponent finishes first with competitive messaging
+    
     static handleOpponentFinishedFirst(data) {
         
         const { opponentName, opponentAttempts, yourAttempts, attemptsToWin } = data;
         
-        // Show competitive message
+        
         UI.showNotification(
             `${opponentName} found it in ${opponentAttempts} attempts! You have ${yourAttempts} attempts so far. Find it in ${attemptsToWin} or fewer to win!`, 
             'warning', 
@@ -504,26 +504,26 @@ class Game {
             'competitive'
         );
         
-        // Update game message with pressure
+        
         UI.showGameMessage(
             `🏁 FINAL SPRINT! You need to find it in ${attemptsToWin} or fewer attempts to beat ${opponentName}!`, 
             'warning'
         );
         
-        // Add visual urgency
+        
         const gameScreen = document.getElementById('gameScreen');
         gameScreen.classList.add('competitive-mode');
         
-        // Update opponent card to show they finished
+        
         document.getElementById('opponentTarget').innerHTML = `<span class="finished-indicator">✅ Found it!</span>`;
     }
 
-    // Handle waiting for opponent after finishing first
+    
     static handleWaitingForOpponent(data) {
         
         UI.showNotification(data.message, 'success', 5000);
         
-        // Disable further input
+        
         const guessInput = document.getElementById('guessInput');
         const guessBtn = document.getElementById('makeGuessBtn');
         
@@ -533,10 +533,10 @@ class Game {
         guessBtn.textContent = '✅ Waiting...';
         guessBtn.classList.add('finished');
         
-        // Update game message
+        
         UI.showGameMessage(`🏆 You finished first! Waiting for your opponent to complete...`, 'success');
         
-        // Show opponent's current attempts if available
+        
         if (data.opponentAttempts) {
             setTimeout(() => {
                 UI.showNotification(`Your opponent has ${data.opponentAttempts} attempts so far...`, 'info', 3000);
@@ -546,13 +546,13 @@ class Game {
 
     static handleGameEndedByLeave(data) {
         
-        // Reset finished state
+        
         this.currentState.hasFinished = false;
         
-        // Show immediate win screen
+        
         UI.showScreen('resultsScreen');
         
-        // Update result display
+        
         document.getElementById('resultEmoji').textContent = '🏆';
         document.getElementById('resultTitle').textContent = 'Victory by Default! 🏆';
         
@@ -564,7 +564,7 @@ class Game {
         document.getElementById('myTotalWins').textContent = (this.currentState.player?.wins || 0) + 1;
         document.getElementById('opponentTotalWins').textContent = 0;
         
-        // Highlight winner
+        
         const myCard = document.getElementById('myResultCard');
         const opponentCard = document.getElementById('opponentResultCard');
         myCard.classList.add('winner');
@@ -573,7 +573,7 @@ class Game {
         document.getElementById('finalResultMessage').textContent = data.message;
         document.getElementById('finalResultMessage').className = 'message success';
         
-        // Hide next round button since game ended by leave
+        
         document.getElementById('nextRoundBtn').style.display = 'none';
         
         UI.showNotification('Your opponent left the game. You win by default! 🏆', 'success');
@@ -581,15 +581,15 @@ class Game {
 
     static handleOpponentGuessed(data) {
         
-        // Use the enhanced updateGameStats function for better real-time display
+        
         UI.updateGameStats(null, data.attempts);
         
-        // Show notification based on correctness
+        
         if (data.isCorrect) {
             UI.showNotification(`💥 ${data.opponentName} found your number! The round is over.`, 'warning');
         } else {
-            // Show attempt updates more frequently for better engagement
-            if (data.attempts % 2 === 0 || data.attempts <= 5) { // Every 2nd guess or first 5 guesses
+            
+            if (data.attempts % 2 === 0 || data.attempts <= 5) { 
                 UI.showNotification(`${data.opponentName}: ${data.attempts} attempts so far...`, 'info', 2000);
             }
         }
@@ -600,14 +600,14 @@ class Game {
         this.currentState.gamePhase = 'results';
         this.currentState.hasFinished = false;
         
-        // Remove competitive mode styling
+        
         const gameScreen = document.getElementById('gameScreen');
         gameScreen.classList.remove('competitive-mode');
         
         UI.showScreen('resultsScreen');
         UI.updateResultsScreen(data.roundResult, data.isGameComplete, data.gameWinner, data.party, data.additionalData);
         
-        // Show detailed win reason notification
+        
         const isWinner = data.roundResult.winner.id === socketClient.gameState.playerId;
         const additionalData = data.additionalData || {};
         let message = '';
@@ -638,7 +638,7 @@ class Game {
         
         UI.showNotification(message, isWinner ? 'success' : 'warning', 6000, isWinner ? 'victory' : null);
         
-        // Show additional context messages
+        
         if (additionalData.earlyEnd) {
             setTimeout(() => {
                 UI.showNotification(`⚡ Game ended early - no point continuing when victory is impossible!`, 'info', 4000);
@@ -649,14 +649,14 @@ class Game {
             }, 2000);
         }
         
-        // Show end game options after a delay
+        
         setTimeout(() => {
             this.showEndGameOptions(data.isGameComplete);
         }, 3000);
     }
 
     static showEndGameOptions(isGameComplete) {
-        // Add end game actions to results screen if not already present
+        
         const resultsScreen = document.getElementById('resultsScreen');
         let endGameDiv = document.getElementById('endGameActions');
         
@@ -667,7 +667,7 @@ class Game {
             resultsScreen.appendChild(endGameDiv);
         }
         
-        // FIXED: Simplified 3-button layout as requested
+        
         endGameDiv.innerHTML = `
             <h4>🎮 What's Next?</h4>
             <div class="quick-actions">
@@ -679,55 +679,55 @@ class Game {
         `;
     }
 
-    // FIXED: New rematch method - direct to selection with same settings
+    
     static requestRematch() {
         
-        // Show feedback to user
+        
         UI.showNotification('🔄 Starting rematch...', 'info', 2000);
         
-        // Reset finished state
+        
         this.currentState.hasFinished = false;
         
-        // Clear any previous game state
+        
         this.clearGameInputs();
         
         socketClient.rematch();
     }
     
-    // FIXED: Change settings - go back to lobby for settings adjustment  
+    
     static changeSettings() {
         
-        // Show feedback to user with loading overlay
+        
         UI.showLoadingOverlay('Returning to lobby...');
         UI.showNotification('⚙️ Back to lobby...', 'info', 2000);
         
-        // Reset finished state
+        
         this.currentState.hasFinished = false;
         this.currentState.gamePhase = 'lobby';
         
-        // Clear inputs
+        
         this.clearGameInputs();
         
-        // FIXED: Send signal to server about settings change request
+        
         socketClient.socket.emit('request_settings_change');
     }
     
-    // FIXED: Handle settings change response from server
+    
     static handleSettingsChangeStarted(data) {
         
-        // Hide loading overlay
+        
         UI.hideLoadingOverlay();
         
         this.currentState.party = data.party;
         this.currentState.gamePhase = 'lobby';
         
-        // Go to lobby screen
+        
         UI.showScreen('lobbyScreen');
         UI.updatePartyInfo(data.party);
         UI.updateLobbyPlayers(data.party);
         UI.updateGameSettings(data.party.gameSettings);
         
-        // Enable/disable settings based on host status
+        
         const myPlayer = data.party.players.find(p => p.id === socketClient.gameState.playerId);
         const isHost = myPlayer?.isHost || false;
         UI.disableSettings(!isHost);
@@ -739,7 +739,7 @@ class Game {
         }
     }
     
-    // FIXED: Confirm leave party with dialog
+    
     static confirmLeaveParty() {
         const confirmed = confirm('🚔 Are you sure you want to leave this party and return to the main menu?\n\nYour session progress will be lost.');
         
@@ -748,13 +748,13 @@ class Game {
         }
     }
     
-    // Legacy method for compatibility
+    
     static playAgain() {
         this.requestRematch();
     }
 
     static clearGameInputs() {
-        // Clear guess input
+        
         const guessInput = document.getElementById('guessInput');
         if (guessInput) {
             guessInput.value = '';
@@ -762,7 +762,7 @@ class Game {
             guessInput.placeholder = 'Enter your guess...';
         }
         
-        // Reset guess button
+        
         const guessBtn = document.getElementById('makeGuessBtn');
         if (guessBtn) {
             guessBtn.disabled = false;
@@ -770,7 +770,7 @@ class Game {
             guessBtn.classList.remove('finished');
         }
         
-        // FIXED: Clear selection inputs properly for rematches
+        
         const secretNumberInput = document.getElementById('secretNumber');
         if (secretNumberInput) {
             secretNumberInput.value = '';
@@ -780,46 +780,46 @@ class Game {
             secretNumberInput.classList.remove('error', 'success');
         }
         
-        // FIXED: Don't touch ready button here - let UI.updateSelectionScreen handle it properly
-        // The ready button will be properly reset by UI.updateSelectionScreen
         
-        // Clear ready status and reset all UI indicators
+        
+        
+        
         const readyStatus = document.getElementById('readyStatus');
         if (readyStatus) {
             readyStatus.textContent = '';
             readyStatus.innerHTML = '';
         }
         
-        // Reset attempts counters to 0
+        
         UI.updateGameStats(0, 0);
         
-        // Clear guess history display
+        
         UI.clearGuessHistory();
         
-        // Reset game messages
+        
         const gameMessage = document.getElementById('gameMessage');
         if (gameMessage) {
             gameMessage.textContent = '';
             gameMessage.className = 'message';
         }
         
-        // Remove any competitive styling
+        
         const gameScreen = document.getElementById('gameScreen');
         if (gameScreen) {
             gameScreen.classList.remove('competitive-mode');
         }
         
-        // FIXED: Reset game state flags completely
+        
         this.currentState.hasFinished = false;
         this.currentState.gamePhase = null;
         
-        // Reset any loading states
+        
         const loadingElements = document.querySelectorAll('.loading');
         loadingElements.forEach(el => el.classList.remove('loading'));
     }
 
     static newGame() {
-        // Return to lobby for new game with same players
+        
         if (socketClient.isHost()) {
             UI.showNotification('Returning to lobby for new game setup...', 'info');
             this.currentState.hasFinished = false;
@@ -843,11 +843,11 @@ class Game {
     static handleRematchRequested(data) {
         
         if (data.playerId === socketClient.gameState.playerId) {
-            // I requested the rematch
+            
             UI.showNotification('🔄 Rematch requested! Waiting for opponent to agree...', 'info', 3000);
             this.updateRematchButtons('waiting');
         } else {
-            // Opponent requested rematch
+            
             UI.showNotification(`${data.requestedBy} wants a rematch! Click "Play Again" to agree.`, 'info', 5000);
             this.updateRematchButtons('requested');
         }
@@ -857,15 +857,15 @@ class Game {
         this.currentState.party = data.party;
         this.currentState.hasFinished = false;
         
-        // Clear any previous game state completely
+        
         this.clearGameInputs();
         
-        // FIXED: ALWAYS go directly to selection for rematch (same settings)
+        
         this.currentState.gamePhase = 'selection';
         UI.showScreen('selectionScreen');
         UI.updateSelectionScreen(data.party, data.selectionTimeLimit);
         
-        // Show notification with current settings info
+        
         const range = `${data.party.gameSettings.rangeStart}-${data.party.gameSettings.rangeEnd}`;
         UI.showNotification(`🔄 Rematch! Range: ${range} - Choose your secret number! 🍀`, 'success');
     }
@@ -896,14 +896,14 @@ class Game {
     }
 
     static handlePlayerTyping(data) {
-        // Could show typing indicators here in the future
+        
     }
 
     static handleReconnected(data) {
         this.currentState.party = data.party;
         this.currentState.player = data.player;
         
-        // Navigate to appropriate screen based on game phase
+        
         const phase = data.party.phase;
         switch (phase) {
             case 'lobby':
@@ -922,7 +922,7 @@ class Game {
                 break;
             case 'results':
                 UI.showScreen('resultsScreen');
-                // Would need to reconstruct results screen state
+                
                 break;
             default:
                 UI.showScreen('welcomeScreen');
@@ -931,7 +931,7 @@ class Game {
         UI.showNotification('Reconnected successfully! 🔄', 'success');
     }
 
-    // Validation Methods
+    
     static validatePlayerName(name) {
         if (!name || name.trim().length === 0) {
             UI.showNotification('Please enter your name', 'error');
@@ -970,7 +970,7 @@ class Game {
         return true;
     }
 
-    // Utility Methods
+    
     static resetGameState() {
         this.currentState = {
             screen: 'welcome',
@@ -997,9 +997,9 @@ class Game {
         };
     }
 
-    // Sound system (optional, can be enhanced)
+    
     static playSound(type) {
-        // Simple sound system using Web Audio API
+        
         try {
             const audioContext = new (window.AudioContext || window.webkitAudioContext)();
             const oscillator = audioContext.createOscillator();
@@ -1008,7 +1008,7 @@ class Game {
             oscillator.connect(gainNode);
             gainNode.connect(audioContext.destination);
             
-            // Different sounds for different events
+            
             switch (type) {
                 case 'success':
                     oscillator.frequency.value = 800;
@@ -1016,7 +1016,7 @@ class Game {
                     gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
                     break;
                 case 'win':
-                    // Play ascending notes
+                    
                     [523, 659, 784, 1047].forEach((freq, i) => {
                         const osc = audioContext.createOscillator();
                         const gain = audioContext.createGain();
@@ -1028,7 +1028,7 @@ class Game {
                         osc.start(audioContext.currentTime + i * 0.2);
                         osc.stop(audioContext.currentTime + i * 0.2 + 0.3);
                     });
-                    return; // Don't execute the rest for win sound
+                    return; 
                 case 'lose':
                     oscillator.frequency.value = 200;
                     gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
@@ -1046,7 +1046,7 @@ class Game {
         }
     }
 
-    // Debug Methods
+    
     static debugInfo() {
         return {
             gameState: this.getGameState(),
@@ -1064,7 +1064,7 @@ class Game {
         socketClient.socket.connect();
     }
 
-    // Performance tracking
+    
     static trackUserAction(action, data = {}) {
         const event = {
             action,
@@ -1074,7 +1074,7 @@ class Game {
         };
         
         
-        // Could send to analytics service here
+        
         if (window.gtag) {
             window.gtag('event', action, {
                 game_state: this.currentState.screen,
@@ -1083,10 +1083,10 @@ class Game {
         }
     }
 
-    // Error handling
+    
     static handleError(error, context = 'Unknown', buttonId = null) {
         
-        // Reset button state if provided
+        
         if (buttonId) {
             const button = document.getElementById(buttonId);
             if (button) {
@@ -1096,12 +1096,12 @@ class Game {
         
         let userMessage = 'An unexpected error occurred';
         
-        // Provide user-friendly error messages
+        
         if (error.message) {
             if (error.message.includes('network') || error.message.includes('connection')) {
                 userMessage = 'Connection error. Please check your internet connection.';
             } else if (error.message.includes('party') || error.message.includes('Party')) {
-                userMessage = error.message; // Party-related errors are usually user-friendly
+                userMessage = error.message; 
             } else if (error.message.includes('validation') || error.message.includes('invalid')) {
                 userMessage = 'Invalid input. Please check your entry and try again.';
             }
@@ -1109,7 +1109,7 @@ class Game {
         
         UI.showNotification(userMessage, 'error');
         
-        // Track errors for debugging
+        
         this.trackUserAction('error', {
             error: error.message,
             context,
@@ -1117,21 +1117,21 @@ class Game {
         });
     }
 
-    // Keyboard shortcuts and accessibility
+    
     static setupAccessibility() {
-        // Add keyboard navigation
+        
         document.addEventListener('keydown', (e) => {
-            // Tab navigation enhancements could go here
+            
             if (e.key === 'Tab') {
-                // Ensure proper focus management
+                
                 this.manageFocus();
             }
             
-            // Quick actions with keyboard shortcuts
+            
             if (e.ctrlKey || e.metaKey) {
                 switch (e.key) {
                     case 'c':
-                        // Ctrl+C to copy party code if on lobby screen
+                        
                         const lobbyScreen = document.getElementById('lobbyScreen');
                         if (lobbyScreen.classList.contains('active')) {
                             const partyCode = document.getElementById('lobbyPartyCode').textContent;
@@ -1145,12 +1145,12 @@ class Game {
             }
         });
         
-        // Add screen reader announcements
+        
         this.announceScreenChanges();
     }
 
     static manageFocus() {
-        // Ensure focus is properly managed when switching screens
+        
         const activeScreen = document.querySelector('.screen.active');
         if (activeScreen) {
             const firstInput = activeScreen.querySelector('input:not([disabled]), button:not([disabled])');
@@ -1161,7 +1161,7 @@ class Game {
     }
 
     static announceScreenChanges() {
-        // Create aria-live region for screen reader announcements
+        
         const announcer = document.createElement('div');
         announcer.setAttribute('aria-live', 'polite');
         announcer.setAttribute('aria-atomic', 'true');
@@ -1172,7 +1172,7 @@ class Game {
         announcer.style.overflow = 'hidden';
         document.body.appendChild(announcer);
         
-        // Announce screen changes
+        
         const observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
                 if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
@@ -1185,13 +1185,13 @@ class Game {
             });
         });
         
-        // Observe all screens
+        
         document.querySelectorAll('.screen').forEach(screen => {
             observer.observe(screen, { attributes: true });
         });
     }
 
-    // Game statistics and analytics
+    
     static recordGameStart() {
         this.gameStartTime = Date.now();
         this.trackUserAction('game_start', {
@@ -1210,7 +1210,7 @@ class Game {
         });
     }
 
-    // Save/load preferences with enhanced options
+    
     static savePreferences() {
         const preferences = {
             lastPlayerName: document.getElementById('playerName').value,
@@ -1220,7 +1220,7 @@ class Game {
                 bestOfThree: document.getElementById('bestOfThree')?.checked || false
             },
             lastGameMode: this.currentState.gameMode,
-            soundEnabled: true, // Could be made configurable
+            soundEnabled: true, 
             notifications: true
         };
         
@@ -1236,12 +1236,12 @@ class Game {
             if (saved) {
                 const preferences = JSON.parse(saved);
                 
-                // Restore last player name
+                
                 if (preferences.lastPlayerName) {
                     document.getElementById('playerName').value = preferences.lastPlayerName;
                 }
                 
-                // Restore preferred settings (only for host)
+                
                 if (preferences.preferredSettings && this.currentState.isHost) {
                     const rangeStartEl = document.getElementById('rangeStart');
                     const rangeEndEl = document.getElementById('rangeEnd');
@@ -1252,7 +1252,7 @@ class Game {
                     if (bestOfThreeEl) bestOfThreeEl.checked = preferences.preferredSettings.bestOfThree || false;
                 }
                 
-                // Restore last game mode
+                
                 if (preferences.lastGameMode === 'single') {
                     this.selectSinglePlayer();
                 } else if (preferences.lastGameMode === 'multiplayer') {
@@ -1263,7 +1263,7 @@ class Game {
         }
     }
 
-    // Enhanced game tips and tutorials
+    
     static showGameTips() {
         const tips = [
             "💡 Use binary search strategy: start with the middle number!",
@@ -1280,7 +1280,7 @@ class Game {
         UI.showNotification(randomTip, 'info', 8000);
     }
 
-    // Connection quality monitoring
+    
     static monitorConnection() {
         setInterval(() => {
             if (!socketClient.isConnected && this.currentState.gamePhase) {
@@ -1289,7 +1289,7 @@ class Game {
         }, 30000);
     }
 
-    // Auto-save game state for recovery
+    
     static saveGameState() {
         if (this.currentState.party) {
             try {
@@ -1312,10 +1312,10 @@ class Game {
             if (saved) {
                 const gameState = JSON.parse(saved);
                 
-                // Only restore if it's recent (within 10 minutes)
+                
                 if (Date.now() - gameState.timestamp < 600000) {
                     UI.showNotification('Previous game session detected. Attempting to reconnect...', 'info');
-                    // Just clear the backup since reconnectAttempt doesn't exist
+                    
                     sessionStorage.removeItem('gameStateBackup');
                 } else {
                     sessionStorage.removeItem('gameStateBackup');
@@ -1326,9 +1326,9 @@ class Game {
         }
     }
 
-    // Performance optimizations
+    
     static optimizePerformance() {
-        // Debounce settings updates
+        
         let settingsTimeout;
         const originalUpdateSettings = this.updateSettings;
         this.updateSettings = function() {
@@ -1338,12 +1338,12 @@ class Game {
             }, 500);
         };
         
-        // Throttle guess submissions
+        
         let lastGuessTime = 0;
         const originalMakeGuess = this.makeGuess;
         this.makeGuess = function(guess) {
             const now = Date.now();
-            if (now - lastGuessTime < 500) { // 500ms throttle
+            if (now - lastGuessTime < 500) { 
                 return;
             }
             lastGuessTime = now;
@@ -1351,53 +1351,53 @@ class Game {
         };
     }
 
-    // Initialize all enhanced features
+    
     static initializeEnhancements() {
         this.setupAccessibility();
         this.monitorConnection();
         this.optimizePerformance();
         
-        // Auto-save game state periodically
+        
         setInterval(() => {
             this.saveGameState();
         }, 30000);
         
-        // Show tips occasionally during gameplay
+        
         setInterval(() => {
             if (this.currentState.gamePhase === 'playing' && Math.random() < 0.3) {
                 this.showGameTips();
             }
-        }, 120000); // Every 2 minutes
+        }, 120000); 
     }
 }
 
-// Initialize game when DOM is ready
+
 document.addEventListener('DOMContentLoaded', () => {
     Game.init();
     Game.initializeEnhancements();
     Game.loadPreferences();
     
-    // Initialize range display
+    
     Game.updateRangeDisplay(1, 100);
     
-    // Try to restore previous game state
+    
     setTimeout(() => {
         Game.restoreGameState();
     }, 1000);
 });
 
-// Save preferences when leaving page
+
 window.addEventListener('beforeunload', () => {
     Game.savePreferences();
     Game.saveGameState();
 });
 
-// Handle page visibility changes (for mobile apps)
+
 document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
         Game.saveGameState();
     } else {
-        // Could trigger reconnection check here
+        
         if (socketClient && !socketClient.isConnected) {
             if (typeof UI !== 'undefined') {
                 UI.showNotification('Checking connection...', 'info');
@@ -1407,5 +1407,5 @@ document.addEventListener('visibilitychange', () => {
     }
 });
 
-// Make Game globally available for debugging
+
 window.Game = Game;

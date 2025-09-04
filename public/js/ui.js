@@ -1,6 +1,6 @@
 class UI {
     static init() {
-        // Developer Credits Banner
+        
         console.log('┌────────────────────────────────────────────┐');
         console.log('│                                            │');
         console.log('│      Multiplayer Number Guesser Game      │');
@@ -15,14 +15,6 @@ class UI {
         console.log('│  • Progressive Web App (PWA)              │');
         console.log('│  • WebSocket Multiplayer Architecture     │');
         console.log('│                                            │');
-        console.log('│  Features:                                 │');
-        console.log('│  ⚡ Real-time Multiplayer Gaming          │');
-        console.log('│  🎮 Cross-browser Compatibility           │');
-        console.log('│  📱 Mobile-responsive Design              │');
-        console.log('│  🔄 Auto-reconnection System              │');
-        console.log('│  ⚙️  Dynamic Game Settings                │');
-        console.log('│  🏆 Session-based Score Tracking          │');
-        console.log('│                                            │');
         console.log('└────────────────────────────────────────────┘');
         
         this.setupEventListeners();
@@ -34,27 +26,27 @@ class UI {
         this.notificationQueue = [];
         this.maxNotifications = 3;
         
-        // Simple periodic check every 30 seconds
+        
         setInterval(() => {
             this.simpleButtonCheck();
         }, 30000);
     }
 
     static setupEnhancedUI() {
-        // Add enhanced UI class for progressive enhancement
+        
         document.body.classList.add('enhanced-ui');
         
-        // Setup real-time input validation
+        
         this.setupRealTimeValidation();
         
-        // QR code functionality removed for better performance
         
-        // Setup How to Play modal
+        
+        
         this.setupHowToPlayModal();
     }
     
     static setupHowToPlayModal() {
-        // Close modal events - check if elements exist
+        
         const closeBtn = document.getElementById('closeHowToPlay');
         const gotItBtn = document.getElementById('gotItBtn');
         const modal = document.getElementById('howToPlayModal');
@@ -72,7 +64,7 @@ class UI {
         }
         
         if (modal) {
-            // Close on overlay click
+            
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) {
                     this.hideHowToPlay();
@@ -80,31 +72,31 @@ class UI {
             });
         }
         
-        // Close on Escape key
+        
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && modal && modal.style.display === 'flex') {
                 this.hideHowToPlay();
             }
         });
         
-        // Handle browser navigation (back button) to close modal
+        
         window.addEventListener('popstate', (e) => {
             if (modal && modal.style.display === 'flex') {
-                // Don't call hideHowToPlay to avoid infinite loop
+                
                 modal.style.display = 'none';
-                document.body.style.overflow = ''; // Restore scroll
+                document.body.style.overflow = ''; 
             }
         });
     }
 
     static setupEventListeners() {
-        // Remove the prevention - each tab needs its own listener
-        // if (this._gameListenerAdded) return;
-        // this._gameListenerAdded = true;
         
-        // CLEAN BUTTON SYSTEM - Simple and reliable
+        
+        
+        
+        
         document.addEventListener('click', (e) => {
-            // Ready button handler
+            
             if (e.target.id === 'readyBtn') {
                 e.preventDefault();
                 e.stopPropagation();
@@ -122,11 +114,11 @@ class UI {
                     return;
                 }
                 
-                // Simple button disable
+                
                 e.target.disabled = true;
                 e.target.textContent = 'Setting...';
                 
-                // Auto-enable after 2 seconds regardless
+                
                 setTimeout(() => {
                     e.target.disabled = false;
                     e.target.textContent = '✅ Ready';
@@ -136,7 +128,7 @@ class UI {
                 return;
             }
             
-            // Guess button handler - COMPLETELY REWRITTEN
+            
             if (e.target.id === 'makeGuessBtn') {
                 e.preventDefault();
                 e.stopPropagation();
@@ -154,26 +146,26 @@ class UI {
                     return;
                 }
                 
-                // Clear input immediately
+                
                 input.value = '';
                 
-                // Simple button state change
+                
                 e.target.disabled = true;
                 e.target.textContent = 'Guessing...';
                 
-                // GUARANTEED reset after 1.5 seconds
+                
                 setTimeout(() => {
                     e.target.disabled = false;
                     e.target.textContent = '🎯 Guess!';
                 }, 1500);
                 
-                // Send the guess
+                
                 Game.makeGuess(num);
                 return;
             }
         });
         
-        // Game mode selection
+        
         document.getElementById('singlePlayerBtn').addEventListener('click', () => {
             Game.selectSinglePlayer();
         });
@@ -186,7 +178,7 @@ class UI {
             Game.startSinglePlayer();
         });
         
-        // Single player How to Play button
+        
         const howToPlaySingleBtn = document.getElementById('howToPlaySingleBtn');
         if (howToPlaySingleBtn) {
             howToPlaySingleBtn.addEventListener('click', () => {
@@ -194,7 +186,7 @@ class UI {
             });
         }
         
-        // Welcome screen How to Play link
+        
         const welcomeHowToPlay = document.getElementById('welcomeHowToPlay');
         if (welcomeHowToPlay) {
             welcomeHowToPlay.addEventListener('click', (e) => {
@@ -203,7 +195,7 @@ class UI {
             });
         }
 
-        // Welcome screen
+        
         document.getElementById('createPartyBtn').addEventListener('click', () => {
             const button = document.getElementById('createPartyBtn');
             const playerName = document.getElementById('playerName').value.trim();
@@ -222,11 +214,11 @@ class UI {
             const isVisible = joinDiv.style.display === 'block';
             
             if (isVisible) {
-                // Hide join form
+                
                 joinDiv.style.display = 'none';
                 document.getElementById('joinPartyBtn').textContent = '🚀 Join Party';
             } else {
-                // Show join form
+                
                 joinDiv.style.display = 'block';
                 document.getElementById('joinPartyBtn').textContent = '❌ Cancel';
                 document.getElementById('partyCodeInput').focus();
@@ -247,10 +239,10 @@ class UI {
             Game.joinParty(partyCodeInput.value.trim(), playerNameInput.value.trim());
         });
 
-        // Back to menu buttons
+        
         this.setupBackButtons();
 
-        // Lobby screen
+        
         document.getElementById('copyCodeBtn').addEventListener('click', () => {
             const partyCode = document.getElementById('lobbyPartyCode').textContent;
             this.copyToClipboard(partyCode);
@@ -268,7 +260,7 @@ class UI {
             );
         });
         
-        // How to Play button (multiplayer lobby)
+        
         const howToPlayBtn = document.getElementById('howToPlayBtn');
         if (howToPlayBtn) {
             howToPlayBtn.addEventListener('click', () => {
@@ -276,7 +268,7 @@ class UI {
             });
         }
 
-        // Enhanced range validation for multiplayer
+        
         const rangeStartEl = document.getElementById('rangeStart');
         if (rangeStartEl) {
             rangeStartEl.addEventListener('change', (e) => {
@@ -291,7 +283,7 @@ class UI {
             });
         }
 
-        // Enhanced range validation for single player
+        
         const singleRangeStartEl = document.getElementById('singleRangeStart');
         if (singleRangeStartEl) {
             singleRangeStartEl.addEventListener('change', (e) => {
@@ -306,7 +298,7 @@ class UI {
             });
         }
 
-        // bestOfThree removed - no longer needed
+        
         const bestOfThreeEl = document.getElementById('bestOfThree');
         if (bestOfThreeEl) {
             bestOfThreeEl.addEventListener('change', () => {
@@ -314,7 +306,7 @@ class UI {
             });
         }
 
-        // Add input validation for range inputs
+        
         if (rangeStartEl) {
             rangeStartEl.addEventListener('input', (e) => {
                 const value = parseInt(e.target.value);
@@ -333,7 +325,7 @@ class UI {
 
 
 
-        // Results screen
+        
         document.getElementById('nextRoundBtn').addEventListener('click', () => {
             Game.nextRound();
         });
@@ -352,7 +344,7 @@ class UI {
     }
 
     static setupBackButtons() {
-        // Add back button functionality to various screens
+        
         this.addBackButtonToScreen('lobbyScreen', () => {
             this.showConfirmDialog(
                 'Leave Party',
@@ -388,7 +380,7 @@ class UI {
         const screen = document.getElementById(screenId);
         if (!screen) return;
 
-        // Check if back button already exists
+        
         let backBtn = screen.querySelector('.back-btn');
         if (!backBtn) {
             backBtn = document.createElement('button');
@@ -400,7 +392,7 @@ class UI {
             backBtn.style.minWidth = 'auto';
             backBtn.style.padding = '10px 15px';
             
-            // Insert at the beginning of the screen
+            
             screen.insertBefore(backBtn, screen.firstChild);
         }
         
@@ -408,24 +400,24 @@ class UI {
     }
 
     static setupInputValidation() {
-        // Auto-uppercase party code input
+        
         document.getElementById('partyCodeInput').addEventListener('input', (e) => {
             e.target.value = e.target.value.toUpperCase();
         });
 
-        // Validate number inputs
+        
         const numberInputs = ['rangeStart', 'rangeEnd', 'secretNumber', 'guessInput', 'singleRangeStart', 'singleRangeEnd'];
         numberInputs.forEach(inputId => {
             const input = document.getElementById(inputId);
             if (input) {
                 input.addEventListener('input', (e) => {
-                    // Remove non-numeric characters except minus sign
+                    
                     e.target.value = e.target.value.replace(/[^0-9-]/g, '');
                 });
             }
         });
 
-        // Player name validation
+        
         document.getElementById('playerName').addEventListener('input', (e) => {
             const value = e.target.value;
             if (value.length > 20) {
@@ -437,7 +429,7 @@ class UI {
 
     static setupKeyboardShortcuts() {
         document.addEventListener('keydown', (e) => {
-            // Enter key shortcuts
+            
             if (e.key === 'Enter') {
                 const activeScreen = document.querySelector('.screen.active');
                 if (!activeScreen) return;
@@ -468,7 +460,7 @@ class UI {
                 }
             }
 
-            // Escape key - go back or cancel
+            
             if (e.key === 'Escape') {
                 const joinDiv = document.getElementById('joinPartyDiv');
                 if (joinDiv.style.display === 'block') {
@@ -476,7 +468,7 @@ class UI {
                     document.getElementById('joinPartyBtn').textContent = '🚀 Join Party';
                 }
                 
-                // Close any open confirmation dialogs
+                
                 const confirmDialog = document.querySelector('.confirm-dialog');
                 if (confirmDialog) {
                     confirmDialog.remove();
@@ -486,7 +478,7 @@ class UI {
     }
 
     static setupNavigationConfirmation() {
-        // Warn users when trying to leave during active game
+        
         window.addEventListener('beforeunload', (e) => {
             const activeScreen = document.querySelector('.screen.active');
             if (activeScreen && (activeScreen.id === 'gameScreen' || activeScreen.id === 'selectionScreen')) {
@@ -497,7 +489,7 @@ class UI {
         });
     }
 
-    // Screen management
+    
     static showScreen(screenId) {
         
         document.querySelectorAll('.screen').forEach(screen => {
@@ -510,7 +502,7 @@ class UI {
         } else {
         }
         
-        // Reset buttons when switching screens to prevent stuck states
+        
         if (screenId === 'gameScreen') {
             setTimeout(() => {
                 const guessBtn = document.getElementById('makeGuessBtn');
@@ -537,10 +529,10 @@ class UI {
             }, 100);
         }
         
-        // Focus management
+        
         this.focusFirstInput(screenId);
         
-        // Update URL hash for better navigation (optional)
+        
         window.location.hash = screenId;
     }
 
@@ -554,9 +546,9 @@ class UI {
         }, 100);
     }
 
-    // Enhanced notification system with queue management
+    
     static showNotification(message, type = 'info', duration = 4000, specialStyle = null) {
-        // Ensure queue and maxNotifications are initialized
+        
         if (!this.notificationQueue) {
             this.notificationQueue = [];
         }
@@ -564,7 +556,7 @@ class UI {
             this.maxNotifications = 3;
         }
         
-        // Add to queue if too many notifications
+        
         if (this.getActiveNotifications().length >= this.maxNotifications) {
             this.notificationQueue.push({ message, type, duration, specialStyle });
             return;
@@ -573,9 +565,9 @@ class UI {
         this.displayNotification(message, type, duration, specialStyle);
     }
 
-    // Confirmation dialog system
+    
     static showConfirmDialog(title, message, onConfirm, onCancel = null) {
-        // Remove existing dialog
+        
         const existingDialog = document.querySelector('.confirm-dialog');
         if (existingDialog) {
             existingDialog.remove();
@@ -597,7 +589,7 @@ class UI {
 
         document.body.appendChild(dialog);
 
-        // Add event listeners
+        
         dialog.querySelector('.confirm-yes').onclick = () => {
             dialog.remove();
             if (onConfirm) onConfirm();
@@ -613,13 +605,13 @@ class UI {
             if (onCancel) onCancel();
         };
 
-        // Focus the "No" button by default (safer choice)
+        
         setTimeout(() => {
             dialog.querySelector('.confirm-no').focus();
         }, 100);
     }
 
-    // Enhanced connection status
+    
     static updateConnectionStatus(status) {
         const statusElement = document.getElementById('connectionStatus');
         statusElement.className = `connection-status ${status}`;
@@ -636,13 +628,13 @@ class UI {
             case 'disconnected':
                 statusElement.innerHTML = 'Disconnected';
                 statusElement.title = 'Disconnected from server - attempting to reconnect';
-                // Show critical notification for disconnection
+                
                 this.showNotification('🚨 Connection lost! Attempting to reconnect...', 'critical', 10000);
                 break;
         }
     }
 
-    // Loading overlay
+    
     static showLoadingOverlay(message = 'Loading...') {
         const overlay = document.getElementById('loadingOverlay');
         const text = overlay.querySelector('.loading-text');
@@ -654,7 +646,7 @@ class UI {
         document.getElementById('loadingOverlay').style.display = 'none';
     }
 
-    // Enhanced clipboard functionality
+    
     static copyToClipboard(text) {
         if (navigator.clipboard && window.isSecureContext) {
             navigator.clipboard.writeText(text).then(() => {
@@ -686,7 +678,7 @@ class UI {
         document.body.removeChild(textArea);
     }
 
-    // Party management UI
+    
     static updatePartyInfo(party) {
         document.getElementById('partyCodeDisplay').textContent = party.code;
         document.getElementById('partyInfo').style.display = 'block';
@@ -701,7 +693,7 @@ class UI {
         const hostPlayer = players.find(p => p.isHost);
         const guestPlayer = players.find(p => !p.isHost);
 
-        // Update player 1 (host)
+        
         const player1Card = document.getElementById('player1Card');
         const player1Name = document.getElementById('player1Name');
         if (hostPlayer) {
@@ -712,7 +704,7 @@ class UI {
             player1Card.classList.toggle('active', hostPlayer.isConnected);
         }
 
-        // Update player 2 (guest)
+        
         const player2Card = document.getElementById('player2Card');
         const player2Name = document.getElementById('player2Name');
         if (guestPlayer) {
@@ -722,12 +714,12 @@ class UI {
             `;
             player2Card.classList.toggle('active', guestPlayer.isConnected);
             
-            // Enable start button if host
+            
             const startBtn = document.getElementById('startGameBtn');
             if (party.players.some(p => p.isHost && socketClient.gameState.playerId === p.id)) {
                 startBtn.disabled = false;
                 startBtn.textContent = '🚀 Start Game';
-                startBtn.classList.add('pulse-animation'); // Add visual emphasis
+                startBtn.classList.add('pulse-animation'); 
             }
         } else {
             player2Name.innerHTML = `
@@ -736,13 +728,13 @@ class UI {
             `;
             player2Card.classList.remove('active');
             
-            // Show invitation helpers
+            
             this.showInvitationHelpers(party.code);
         }
     }
 
     static showInvitationHelpers(partyCode) {
-        // Add invitation helper UI if not already present
+        
         const lobbyScreen = document.getElementById('lobbyScreen');
         let helperDiv = document.getElementById('invitation-helper');
         
@@ -763,7 +755,7 @@ class UI {
                 </div>
             `;
             
-            // Insert after party code section
+            
             const partyCodeSection = document.querySelector('.party-code-section');
             partyCodeSection.after(helperDiv);
         }
@@ -788,7 +780,7 @@ class UI {
     }
 
     static updateGameSettings(settings) {
-        // Update multiplayer input fields for all players in real-time
+        
         const rangeStartEl = document.getElementById('rangeStart');
         const rangeEndEl = document.getElementById('rangeEnd');
         
@@ -796,16 +788,16 @@ class UI {
             rangeStartEl.value = settings.rangeStart;
             rangeEndEl.value = settings.rangeEnd;
             
-            // Clear any error states since these are valid values from server
+            
             this.clearInputState(rangeStartEl);
             this.clearInputState(rangeEndEl);
             
-            // Show visual feedback that settings were synced (only for non-hosts)
+            
             if (socketClient && !socketClient.gameState.isHost) {
                 this.showInputSuccess(rangeStartEl, 'Synced');
                 this.showInputSuccess(rangeEndEl, 'Synced');
                 
-                // Clear success feedback after 2 seconds
+                
                 setTimeout(() => {
                     this.clearInputState(rangeStartEl);
                     this.clearInputState(rangeEndEl);
@@ -813,7 +805,7 @@ class UI {
             }
         }
         
-        // Update single player settings too for consistency
+        
         const singleStartEl = document.getElementById('singleRangeStart');
         const singleEndEl = document.getElementById('singleRangeEnd');
         
@@ -822,7 +814,7 @@ class UI {
             singleEndEl.value = settings.rangeEnd;
         }
         
-        // Update range display through Game class
+        
         if (typeof Game !== 'undefined' && Game.updateRangeDisplay) {
             Game.updateRangeDisplay(settings.rangeStart, settings.rangeEnd);
         }
@@ -832,9 +824,9 @@ class UI {
     static disableSettings(disabled = true) {
         document.getElementById('rangeStart').disabled = disabled;
         document.getElementById('rangeEnd').disabled = disabled;
-        // bestOfThree removed
         
-        // Add visual feedback
+        
+        
         const settingsSection = document.getElementById('gameSettings');
         if (disabled) {
             settingsSection.classList.add('disabled');
@@ -845,11 +837,11 @@ class UI {
         }
     }
 
-    // Selection screen UI
+    
     static updateSelectionScreen(party, timeLimit) {
         const roundText = party.maxRounds > 1 ? `Round ${party.currentRound} of ${party.maxRounds}` : 'Game Round';
         
-        // Safe DOM element access with null checks
+        
         const selectionRoundInfo = document.getElementById('selectionRoundInfo');
         if (selectionRoundInfo) {
             const roundTextEl = selectionRoundInfo.querySelector('.round-text');
@@ -873,7 +865,7 @@ class UI {
             secretNumberInput.placeholder = `Choose ${rangeDisplay}`;
         }
         
-        // Update range hints with null checks
+        
         const secretNumberRange = document.getElementById('secretNumberRange');
         if (secretNumberRange) {
             secretNumberRange.textContent = `(${rangeDisplay})`;
@@ -884,7 +876,7 @@ class UI {
             secretNumberHint.innerHTML = `💡 Pick a good number!`;
         }
         
-        // Add range hint
+        
         const selectionMessage = document.getElementById('selectionMessage');
         if (selectionMessage) {
             selectionMessage.innerHTML = `
@@ -894,7 +886,7 @@ class UI {
             selectionMessage.className = 'message info enhanced';
         }
         
-        // FIXED: Ensure button is properly reset for all new games/rounds/rematches
+        
         const readyBtn = document.getElementById('readyBtn');
         if (readyBtn) {
             readyBtn.disabled = false;
@@ -904,10 +896,10 @@ class UI {
             readyBtn.style.pointerEvents = 'auto';
             readyBtn.style.cursor = 'pointer';
             
-            // Re-attach event listener if it was lost
+            
             if (!readyBtn._eventListenerAttached) {
                 
-                // Ensure we have the bound function
+                
                 if (!this.handleReadyClick) {
                     this.handleReadyClick = (e) => {
                         const button = document.getElementById('readyBtn');
@@ -937,25 +929,25 @@ class UI {
             }
         }
         
-        // Clear ready status completely
+        
         const readyStatus = document.getElementById('readyStatus');
         if (readyStatus) {
             readyStatus.textContent = '';
             readyStatus.innerHTML = '';
         }
         
-        // Clear any previous timeout/interval from button reset
+        
         if (readyBtn && readyBtn._resetTimeout) {
             clearTimeout(readyBtn._resetTimeout);
             delete readyBtn._resetTimeout;
         }
         
-        // Focus on input
+        
         if (secretNumberInput) {
             setTimeout(() => secretNumberInput.focus(), 200);
         }
         
-        // Add input validation with toast messages
+        
         if (secretNumberInput) {
             this.setupSecretNumberValidation(secretNumberInput, party.gameSettings.rangeStart, party.gameSettings.rangeEnd);
         }
@@ -967,13 +959,13 @@ class UI {
             selectionTimer.textContent = timeLeft;
         }
         
-        // Add urgency styling and sound
+        
         if (selectionTimer) {
             if (timeLeft <= 10) {
                 selectionTimer.style.color = '#ff6b6b';
                 selectionTimer.style.animation = 'pulse 0.5s infinite';
                 
-                // Add urgent warning
+                
                 if (timeLeft === 10) {
                     this.showNotification('⚠️ 10 seconds left!', 'warning', 2000);
                 } else if (timeLeft === 5) {
@@ -1009,11 +1001,11 @@ class UI {
         }
     }
 
-    // Game screen UI with enhanced feedback
+    
     static updateGameScreen(party) {
         const roundText = party.maxRounds > 1 ? `Round ${party.currentRound} of ${party.maxRounds}` : 'Game Round';
         
-        // Safe DOM access for game round info
+        
         const gameRoundInfo = document.getElementById('gameRoundInfo');
         if (gameRoundInfo) {
             const roundTextEl = gameRoundInfo.querySelector('.round-text');
@@ -1027,16 +1019,16 @@ class UI {
         const opponent = players.find(p => p.id !== socketClient.gameState.playerId);
         
         if (myPlayer && opponent) {
-            // Update player names with enhanced display and match scores
+            
             const myWins = myPlayer.wins || 0;
             const opponentWins = opponent.wins || 0;
             
-            // Enhanced win display with session context - show X out of Y format
+            
             const totalRoundsPlayed = myWins + opponentWins;
             const myWinDisplay = totalRoundsPlayed > 0 ? `${myWins} out of ${totalRoundsPlayed} won` : `${myWins} wins`;
             const opponentWinDisplay = totalRoundsPlayed > 0 ? `${opponentWins} out of ${totalRoundsPlayed} won` : `${opponentWins} wins`;
             
-            // Safe DOM updates for player names
+            
             const myBattleName = document.getElementById('myBattleName');
             if (myBattleName) {
                 myBattleName.innerHTML = `${myPlayer.name} <small>(You) - Session: ${myWinDisplay}</small>`;
@@ -1047,7 +1039,7 @@ class UI {
                 opponentBattleName.innerHTML = `${opponent.name} <small>(Opponent) - Session: ${opponentWinDisplay}</small>`;
             }
             
-            // Update stats with better real-time tracking
+            
             const myAttempts = document.getElementById('myAttempts');
             if (myAttempts) {
                 myAttempts.textContent = myPlayer.attempts || 0;
@@ -1067,7 +1059,7 @@ class UI {
                 opponentWinsEl.textContent = opponentWins;
             }
             
-            // Add session performance indicator
+            
             const winDifference = myWins - opponentWins;
             let performanceClass = 'neutral';
             let performanceText = 'Tied';
@@ -1080,7 +1072,7 @@ class UI {
                 performanceText = `${Math.abs(winDifference)} behind`;
             }
             
-            // Update battle cards with performance indicators
+            
             const myCard = document.getElementById('myBattleCard');
             const opponentCard = document.getElementById('opponentBattleCard');
             
@@ -1096,12 +1088,12 @@ class UI {
                 }
             }
             
-            // Update targets with better display
+            
             document.getElementById('myTarget').textContent = myPlayer.secretNumber || '???';
-            document.getElementById('opponentTarget').innerHTML = '<span class="hidden-number">???</span>'; // Always hidden during game
+            document.getElementById('opponentTarget').innerHTML = '<span class="hidden-number">???</span>'; 
         }
         
-        // Setup guess input with enhanced UX and validation
+        
         const guessInput = document.getElementById('guessInput');
         guessInput.min = party.gameSettings.rangeStart;
         guessInput.max = party.gameSettings.rangeEnd;
@@ -1109,7 +1101,7 @@ class UI {
         guessInput.placeholder = `Guess ${party.gameSettings.rangeStart}-${party.gameSettings.rangeEnd}`;
         guessInput.disabled = false;
         
-        // Enable guess button and reset any stuck states
+        
         const guessBtn = document.getElementById('makeGuessBtn');
         if (guessBtn) {
             guessBtn.disabled = false;
@@ -1119,19 +1111,19 @@ class UI {
             guessBtn.style.transform = '';
         }
         
-        // Update range display
+        
         const guessRangeEl = document.getElementById('guessRange');
         if (guessRangeEl) {
             guessRangeEl.textContent = `(${party.gameSettings.rangeStart}-${party.gameSettings.rangeEnd})`;
         }
         
-        // Add input validation for guess input
+        
         this.setupGuessInputValidation(guessInput, party.gameSettings.rangeStart, party.gameSettings.rangeEnd);
         
-        // Focus on input
+        
         setTimeout(() => guessInput.focus(), 300);
         
-        // Clear message and history
+        
         const gameMessage = document.getElementById('gameMessage');
         if (gameMessage) {
             gameMessage.textContent = `🎯 Guess the number: ${party.gameSettings.rangeStart}-${party.gameSettings.rangeEnd}`;
@@ -1141,17 +1133,17 @@ class UI {
     }
 
     static updateGameStats(myAttempts, opponentAttempts) {
-        // Always update my attempts if provided
+        
         if (myAttempts !== null && myAttempts !== undefined) {
             document.getElementById('myAttempts').textContent = myAttempts;
         }
         
-        // Always update opponent attempts if provided - this fixes the real-time display issue
+        
         if (opponentAttempts !== null && opponentAttempts !== undefined) {
             document.getElementById('opponentAttempts').textContent = opponentAttempts;
         }
         
-        // Also update the battle card displays for better visibility
+        
         const myCard = document.getElementById('myBattleCard');
         const opponentCard = document.getElementById('opponentBattleCard');
         
@@ -1175,7 +1167,7 @@ class UI {
         messageElement.innerHTML = message;
         messageElement.className = `message ${type}`;
         
-        // Add animation for important messages
+        
         if (type === 'success' || type === 'warning') {
             messageElement.style.animation = 'messageHighlight 0.5s ease';
             setTimeout(() => {
@@ -1187,7 +1179,7 @@ class UI {
     static addGuessToHistory(guess, feedback) {
         const historyContent = document.querySelector('#gameGuessHistory .history-content');
         
-        // Remove placeholder if it exists
+        
         const placeholder = historyContent.querySelector('.history-placeholder');
         if (placeholder) {
             placeholder.remove();
@@ -1215,14 +1207,14 @@ class UI {
         
         historyContent.appendChild(guessItem);
         
-        // Scroll to bottom with smooth animation
+        
         const historyContainer = document.getElementById('gameGuessHistory');
         historyContainer.scrollTo({
             top: historyContainer.scrollHeight,
             behavior: 'smooth'
         });
         
-        // Highlight the new guess briefly
+        
         setTimeout(() => {
             guessItem.classList.add('new-guess');
             setTimeout(() => {
@@ -1248,11 +1240,11 @@ class UI {
         historyContent.innerHTML = '<div class="history-placeholder">Your guess history will appear here...</div>';
     }
 
-    // Enhanced results screen
+    
     static updateResultsScreen(roundResult, isGameComplete, gameWinner, party, additionalData = {}) {
         const isWinner = roundResult.winner.id === socketClient.gameState.playerId;
         
-        // Update header with enhanced animations
+        
         const resultEmoji = document.getElementById('resultEmoji');
         resultEmoji.textContent = isWinner ? '🎉' : '😔';
         resultEmoji.style.animation = 'bounceIn 0.5s ease';
@@ -1271,7 +1263,7 @@ class UI {
         }
         document.getElementById('resultTitle').textContent = title;
         
-        // Update player results with enhanced display
+        
         const players = party.players;
         const myPlayer = players.find(p => p.id === socketClient.gameState.playerId);
         const opponent = players.find(p => p.id !== socketClient.gameState.playerId);
@@ -1282,12 +1274,12 @@ class UI {
             
             document.getElementById('myFinalAttempts').textContent = myPlayer.attempts;
             document.getElementById('opponentFinalAttempts').textContent = opponent.attempts;
-            // Enhanced session win tracking display - show X out of Y format
+            
             const totalRoundsPlayed = myPlayer.wins + opponent.wins;
             document.getElementById('myTotalWins').textContent = `${myPlayer.wins} out of ${totalRoundsPlayed} rounds won`;
             document.getElementById('opponentTotalWins').textContent = `${opponent.wins} out of ${totalRoundsPlayed} rounds won`;
             
-            // Add session summary
+            
             const totalRounds = myPlayer.wins + opponent.wins;
             let sessionSummary = `Session: ${totalRounds} rounds played`;
             if (totalRounds > 0) {
@@ -1295,7 +1287,7 @@ class UI {
                 sessionSummary += ` | Your win rate: ${myWinRate}%`;
             }
             
-            // Update or create session info display
+            
             let sessionInfo = document.getElementById('sessionInfo');
             if (!sessionInfo) {
                 sessionInfo = document.createElement('div');
@@ -1309,11 +1301,11 @@ class UI {
             }
             sessionInfo.textContent = sessionSummary;
             
-            // Enhanced performance display
+            
             this.updatePerformanceBadge('myPerformance', roundResult.winner.performance, isWinner);
             this.updatePerformanceBadge('opponentPerformance', null, !isWinner);
             
-            // Highlight winner with animation
+            
             const myCard = document.getElementById('myResultCard');
             const opponentCard = document.getElementById('opponentResultCard');
             
@@ -1327,7 +1319,7 @@ class UI {
             }
         }
         
-        // Enhanced final message
+        
         let message;
         const totalRoundsPlayed = myPlayer.wins + opponent.wins;
         
@@ -1348,7 +1340,7 @@ class UI {
         document.getElementById('finalResultMessage').textContent = message;
         document.getElementById('finalResultMessage').className = `message ${isWinner ? 'success' : 'info'}`;
         
-        // Enhanced button display
+        
         const nextRoundBtn = document.getElementById('nextRoundBtn');
         const rematchBtn = document.getElementById('rematchBtn');
         const leaveBtn = document.getElementById('leaveResultsBtn');
@@ -1368,24 +1360,24 @@ class UI {
         leaveBtn.textContent = '🏠 Back to Menu';
     }
 
-    // Enhanced win badge system for session tracking
+    
     static updateWinBadges(cardId, wins) {
         const card = document.getElementById(cardId);
         if (!card) return;
         
-        // Remove existing badges
+        
         const existingBadge = card.querySelector('.win-badge');
         if (existingBadge) {
             existingBadge.remove();
         }
         
-        // Add new badge if there are wins
+        
         if (wins > 0) {
             const badge = document.createElement('div');
             badge.className = 'win-badge';
             badge.innerHTML = `<span class="win-count">${wins}</span><span class="win-label">wins</span>`;
             
-            // Add streak indicator
+            
             if (wins >= 3) {
                 badge.classList.add('hot-streak');
                 badge.title = 'On fire! 🔥';
@@ -1398,7 +1390,7 @@ class UI {
         }
     }
     
-    // How to Play Modal System
+    
     static showHowToPlay(mode = 'multiplayer') {
         const modal = document.getElementById('howToPlayModal');
         const content = document.getElementById('howToPlayContent');
@@ -1407,7 +1399,7 @@ class UI {
             return;
         }
         
-        // Set content based on mode
+        
         if (mode === 'multiplayer') {
             content.innerHTML = this.getMultiplayerGuide();
         } else if (mode === 'singleplayer') {
@@ -1416,21 +1408,21 @@ class UI {
             content.innerHTML = this.getGeneralGuide();
         }
         
-        // Add history entry for proper back button handling
+        
         if (history.pushState) {
             history.pushState({ modal: 'howToPlay' }, '', window.location.href);
         }
         
-        // Show modal
+        
         modal.style.display = 'flex';
-        document.body.style.overflow = 'hidden'; // Prevent background scroll
+        document.body.style.overflow = 'hidden'; 
     }
     
     static hideHowToPlay() {
         const modal = document.getElementById('howToPlayModal');
         if (modal && modal.style.display === 'flex') {
             modal.style.display = 'none';
-            document.body.style.overflow = ''; // Restore scroll
+            document.body.style.overflow = ''; 
         }
     }
     
@@ -1566,20 +1558,20 @@ class UI {
         badge.className = `performance-badge ${performance.rating}`;
     }
 
-    // Input clearing and resetting
+    
     static clearInputs() {
         document.getElementById('playerName').value = '';
         document.getElementById('partyCodeInput').value = '';
         document.getElementById('joinPartyDiv').style.display = 'none';
         document.getElementById('joinPartyBtn').textContent = '🚀 Join Party';
         
-        // Clear game mode selection
+        
         document.getElementById('singlePlayerOptions').style.display = 'none';
         document.getElementById('multiplayerOptions').style.display = 'none';
         document.getElementById('singlePlayerBtn').classList.remove('active');
         document.getElementById('multiplayerBtn').classList.remove('active');
         
-        // Remove any helper elements
+        
         const helperDiv = document.getElementById('invitation-helper');
         if (helperDiv) {
             helperDiv.remove();
@@ -1591,16 +1583,16 @@ class UI {
         this.clearInputs();
         this.showScreen('welcomeScreen');
         
-        // Remove any pulse animations
+        
         document.querySelectorAll('.pulse-animation').forEach(el => {
             el.classList.remove('pulse-animation');
         });
         
-        // Clean up all timers and prevent memory leaks
+        
         this.cleanup();
     }
 
-    // Animation helpers
+    
     static animateElement(element, animationClass, duration = 1000) {
         element.classList.add(animationClass);
         setTimeout(() => {
@@ -1620,7 +1612,7 @@ class UI {
         }
     }
 
-    // Button Loading States
+    
     static setButtonLoading(button, text = 'Loading...') {
         if (!button) return;
         
@@ -1671,29 +1663,29 @@ class UI {
         button.disabled = false;
     }
 
-    // Auto-join from URL parameter
+    
     static checkAutoJoin() {
         const urlParams = new URLSearchParams(window.location.search);
         const joinCode = urlParams.get('join');
         
         if (joinCode) {
-            // Auto-fill the party code
+            
             document.getElementById('partyCodeInput').value = joinCode.toUpperCase();
             
-            // Show join form
+            
             document.getElementById('multiplayerBtn').click();
             document.getElementById('joinPartyBtn').click();
             
-            // Focus on player name
+            
             document.getElementById('playerName').focus();
             
             this.showNotification('Party code loaded from link! Enter your name to join.', 'info', 6000);
         }
     }
 
-    // Input validation methods
+    
     static setupSecretNumberValidation(input, rangeStart, rangeEnd) {
-        // Remove any existing listeners
+        
         input.removeEventListener('input', input._secretValidationHandler);
         input.removeEventListener('blur', input._secretBlurHandler);
         
@@ -1727,7 +1719,7 @@ class UI {
     }
 
     static setupGuessInputValidation(input, rangeStart, rangeEnd) {
-        // Remove any existing listeners
+        
         input.removeEventListener('input', input._guessValidationHandler);
         
         const validationHandler = (e) => {
@@ -1745,19 +1737,19 @@ class UI {
         input.addEventListener('input', validationHandler);
     }
 
-    // Enhanced notification system with queue management
+    
     static displayNotification(message, type = 'info', duration = 4000, specialStyle = null) {
         const container = document.getElementById('notificationContainer');
         const notification = document.createElement('div');
         
-        // Add special styling for competitive scenarios
+        
         let className = `notification ${type}`;
         if (specialStyle) {
             className += ` ${specialStyle}`;
         }
         notification.className = className;
         
-        // Add icon based on type
+        
         const icons = {
             success: '✅',
             error: '❌',
@@ -1770,7 +1762,7 @@ class UI {
         
         const icon = icons[specialStyle] || icons[type] || icons.info;
         
-        // Enhanced notification structure
+        
         notification.innerHTML = `
             <span class="notification-icon">${icon}</span>
             <div class="notification-message">${message}</div>
@@ -1779,32 +1771,32 @@ class UI {
         
         container.appendChild(notification);
         
-        // Add click handlers
+        
         const closeBtn = notification.querySelector('.notification-close');
         closeBtn.onclick = () => this.removeNotification(notification);
         
-        // Auto remove with smart timing
+        
         const autoRemoveDelay = type === 'critical' ? duration * 2 : duration;
         const timeoutId = setTimeout(() => {
             this.removeNotification(notification);
         }, autoRemoveDelay);
         
-        // Store timeout ID for manual cancellation
+        
         notification.dataset.timeoutId = timeoutId;
         
-        // Pause auto-remove on hover
+        
         notification.addEventListener('mouseenter', () => {
             clearTimeout(timeoutId);
         });
         
         notification.addEventListener('mouseleave', () => {
-            // Clear any existing timeout first
+            
             if (notification.dataset.timeoutId) {
                 clearTimeout(notification.dataset.timeoutId);
             }
             const newTimeoutId = setTimeout(() => {
                 this.removeNotification(notification);
-            }, 2000); // Shorter delay after hover
+            }, 2000); 
             notification.dataset.timeoutId = newTimeoutId;
         });
     }
@@ -1812,7 +1804,7 @@ class UI {
     static removeNotification(notification) {
         if (!notification.parentNode) return;
         
-        // Clear any pending timeout
+        
         clearTimeout(notification.dataset.timeoutId);
         
         notification.style.opacity = '0';
@@ -1821,14 +1813,14 @@ class UI {
         setTimeout(() => {
             if (notification.parentNode) {
                 notification.parentNode.removeChild(notification);
-                // Process queue
+                
                 this.processNotificationQueue();
             }
         }, 300);
     }
     
     static processNotificationQueue() {
-        // Ensure queue and maxNotifications are initialized
+        
         if (!this.notificationQueue) {
             this.notificationQueue = [];
         }
@@ -1836,7 +1828,7 @@ class UI {
             this.maxNotifications = 3;
         }
         
-        // Double-check queue exists and has length property
+        
         if (this.notificationQueue && Array.isArray(this.notificationQueue) && this.notificationQueue.length > 0) {
             if (this.getActiveNotifications().length < this.maxNotifications) {
                 const next = this.notificationQueue.shift();
@@ -1859,28 +1851,28 @@ class UI {
         this.notificationQueue = [];
     }
 
-    // Cleanup method to clear all timers and prevent memory leaks
+    
     static cleanup() {
-        // Clear all notification timers
+        
         this.clearAllNotifications();
         
-        // Clear any ready button timeouts
+        
         const readyBtn = document.getElementById('readyBtn');
         if (readyBtn && readyBtn._resetTimeout) {
             clearTimeout(readyBtn._resetTimeout);
             delete readyBtn._resetTimeout;
         }
         
-        // Clear notification queue
+        
         this.notificationQueue = [];
     }
 
-    // QR Code functionality removed for better performance and reliability
-    // Users can simply copy and share the party code
+    
+    
 
-    // Enhanced input validation
+    
     static setupRealTimeValidation() {
-        // Add real-time validation for all form inputs
+        
         document.addEventListener('blur', (e) => {
             if (e.target.matches('input')) {
                 this.validateInput(e.target);
@@ -1889,7 +1881,7 @@ class UI {
         
         document.addEventListener('input', (e) => {
             if (e.target.matches('input')) {
-                // Clear error state on input
+                
                 this.clearInputError(e.target);
             }
         }, true);
@@ -1969,14 +1961,14 @@ class UI {
             return false;
         }
         
-        // Get current game range from game state if available
+        
         let min = 1, max = 100;
         
         if (typeof Game !== 'undefined' && Game.currentState && Game.currentState.party) {
             min = Game.currentState.party.gameSettings.rangeStart;
             max = Game.currentState.party.gameSettings.rangeEnd;
         } else {
-            // Fallback: try to get from range inputs
+            
             const rangeStartEl = document.getElementById('rangeStart');
             const rangeEndEl = document.getElementById('rangeEnd');
             if (rangeStartEl && rangeEndEl) {
@@ -1985,14 +1977,14 @@ class UI {
             }
         }
         
-        // Validation complete
+        
         
         if (value < min || value > max) {
             this.showInputError(input, `Number must be between ${min} and ${max}`);
             return false;
         }
         
-        this.clearInputState(input); // Clear any previous error state
+        this.clearInputState(input); 
         return true;
     }
     
@@ -2016,7 +2008,7 @@ class UI {
         return true;
     }
 
-    // Comprehensive range validation with edge case handling
+    
     static validateAndFixRange(input, type, otherInputId, callback = null) {
         const value = parseInt(input.value);
         const otherInput = document.getElementById(otherInputId);
@@ -2027,7 +2019,7 @@ class UI {
         
         const otherValue = parseInt(otherInput.value);
         
-        // Edge case 1: Invalid numbers
+        
         if (isNaN(value) || value < 1) {
             this.showNotification('Please enter a valid number (minimum 1)', 'error');
             input.value = type === 'start' ? 1 : 2;
@@ -2040,7 +2032,7 @@ class UI {
             return;
         }
         
-        // Edge case 2: Numbers too large
+        
         if (value > 10000) {
             this.showNotification('Maximum number is 10000', 'warning');
             input.value = 10000;
@@ -2048,7 +2040,7 @@ class UI {
             return;
         }
         
-        // Edge case 3: Start >= End
+        
         if (type === 'start' && value >= otherValue) {
             if (value === otherValue) {
                 this.showNotification('Start and end cannot be the same!', 'error');
@@ -2061,7 +2053,7 @@ class UI {
             return;
         }
         
-        // Edge case 4: End <= Start  
+        
         if (type === 'end' && value <= otherValue) {
             if (value === otherValue) {
                 this.showNotification('Start and end cannot be the same!', 'error');
@@ -2074,7 +2066,7 @@ class UI {
             return;
         }
         
-        // Edge case 5: Range too small (less than 2 numbers)
+        
         const rangeSize = type === 'start' ? otherValue - value + 1 : value - otherValue + 1;
         if (rangeSize < 2) {
             this.showNotification('Range must have at least 2 numbers', 'warning');
@@ -2087,7 +2079,7 @@ class UI {
             return;
         }
         
-        // Edge case 6: Range too large (more than 10000 numbers)
+        
         if (rangeSize > 10000) {
             this.showNotification('Range too large! Maximum 10000 numbers', 'warning');
             if (type === 'start') {
@@ -2099,18 +2091,18 @@ class UI {
             return;
         }
         
-        // All validation passed!
+        
         this.clearInputState(input);
         this.clearInputState(otherInput);
         
-        // Show success feedback
+        
         const actualStart = type === 'start' ? value : otherValue;
         const actualEnd = type === 'start' ? otherValue : value;
         const actualSize = actualEnd - actualStart + 1;
         
         this.showNotification(`✅ Range: ${actualStart}-${actualEnd} (${actualSize} numbers)`, 'success', 2000);
         
-        // Call callback if provided (for multiplayer settings update)
+        
         if (callback && typeof callback === 'function') {
             callback();
         }
@@ -2130,7 +2122,7 @@ class UI {
     
     static clearInputError(input) {
         input.classList.remove('error');
-        // Don't remove success state immediately
+        
     }
     
     static clearInputState(input) {
@@ -2157,36 +2149,36 @@ class UI {
         }
     }
     
-    // Ensure ready button is functional (debugging helper)
+    
     static ensureReadyButtonFunctional() {
         const readyBtn = document.getElementById('readyBtn');
         if (!readyBtn) {
             return;
         }
         
-        // Test if click event fires
+        
         readyBtn.addEventListener('click', function testClick() {
             readyBtn.removeEventListener('click', testClick);
         }, { once: true });
         
-        // Add visual feedback for debugging
+        
         readyBtn.style.border = '2px solid lime';
         setTimeout(() => {
             readyBtn.style.border = '';
         }, 2000);
     }
     
-    // Ensure guess button is functional (debugging helper)
+    
     static ensureGuessButtonFunctional() {
         const guessBtn = document.getElementById('makeGuessBtn');
         if (!guessBtn) {
             return;
         }
         
-        // Re-attach event listener if it was lost
+        
         if (!guessBtn._eventListenerAttached) {
             
-            // Ensure we have the bound function
+            
             if (!this.handleGuessClick) {
                 this.handleGuessClick = (e) => {
                     const button = document.getElementById('makeGuessBtn');
@@ -2220,12 +2212,12 @@ class UI {
             guessBtn._eventListenerAttached = true;
         }
         
-        // Test if click event fires
+        
         guessBtn.addEventListener('click', function testClick() {
             guessBtn.removeEventListener('click', testClick);
         }, { once: true });
         
-        // Add visual feedback for debugging
+        
         guessBtn.style.border = '2px solid orange';
         setTimeout(() => {
             guessBtn.style.border = '';
@@ -2233,7 +2225,7 @@ class UI {
     }
     
     
-    // Simple button check - just ensure they're not permanently stuck
+    
     static simpleButtonCheck() {
         const readyBtn = document.getElementById('readyBtn');
         if (readyBtn && readyBtn.textContent === 'Setting...') {
@@ -2248,40 +2240,40 @@ class UI {
         }
     }
     
-    // Comprehensive range pair validation used by Game.updateSettings
+    
     static validateRangePair(startValue, endValue) {
-        // Check for valid numbers
+        
         if (isNaN(startValue) || isNaN(endValue)) {
             this.showNotification('Please enter valid numbers', 'error');
             return false;
         }
         
-        // Check minimum values
+        
         if (startValue < 1 || endValue < 1) {
             this.showNotification('Numbers must be at least 1', 'error');
             return false;
         }
         
-        // Check maximum values
+        
         if (startValue > 10000 || endValue > 10000) {
             this.showNotification('Maximum value is 10000', 'error');
             return false;
         }
         
-        // Start must be less than end
+        
         if (startValue >= endValue) {
             this.showNotification('Start must be less than end', 'error');
             return false;
         }
         
-        // Minimum range size
+        
         const rangeSize = endValue - startValue + 1;
         if (rangeSize < 2) {
             this.showNotification('Range must have at least 2 numbers', 'error');
             return false;
         }
         
-        // Maximum range size
+        
         if (rangeSize > 10000) {
             this.showNotification('Range too large (max 10000 numbers)', 'warning');
             return false;
@@ -2291,7 +2283,7 @@ class UI {
     }
 }
 
-// Enhanced CSS for new features (add to styles.css)
+
 const additionalStyles = `
 .confirm-dialog {
     position: fixed;
@@ -2595,19 +2587,19 @@ const additionalStyles = `
 }
 `;
 
-// Initialize UI when DOM is ready
+
 document.addEventListener('DOMContentLoaded', () => {
     UI.init();
     
-    // Add the additional styles
+    
     const style = document.createElement('style');
     style.textContent = additionalStyles;
     document.head.appendChild(style);
     
-    // Check for auto-join from URL
+    
     UI.checkAutoJoin();
     
-    // Add global error handlers for better error recovery
+    
     window.addEventListener('error', (event) => {
         if (typeof UI !== 'undefined') {
             UI.showNotification('An unexpected error occurred. Please try refreshing the page.', 'error', 8000);

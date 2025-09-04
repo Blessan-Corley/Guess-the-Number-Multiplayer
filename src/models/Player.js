@@ -4,8 +4,8 @@ class Player {
     constructor(socketId, name) {
         this.id = uuidv4();
         this.socketId = socketId;
-        this.name = name.trim().substring(0, 20); // Limit name length
-        this.isHost = false; // ALWAYS starts as false - Party constructor will set to true for host
+        this.name = name.trim().substring(0, 20); 
+        this.isHost = false; 
         this.isConnected = true;
         this.isReady = false;
         this.secretNumber = null;
@@ -14,9 +14,9 @@ class Player {
         this.guessHistory = [];
         this.lastActivity = Date.now();
         this.joinedAt = Date.now();
-        this.hasFinished = false; // New: track if player found the number
-        this.finishedAt = null;   // New: timestamp when player finished
-        this.wantsRematch = false; // Track rematch requests
+        this.hasFinished = false; 
+        this.finishedAt = null;   
+        this.wantsRematch = false; 
         this.stats = {
             totalGames: 0,
             totalWins: 0,
@@ -26,12 +26,12 @@ class Player {
         };
     }
 
-    // Update player activity timestamp
+    
     updateActivity() {
         this.lastActivity = Date.now();
     }
 
-    // Set player as ready for the current round
+    
     setReady(secretNumber = null) {
         this.isReady = true;
         if (secretNumber !== null) {
@@ -40,35 +40,35 @@ class Player {
         this.updateActivity();
     }
 
-    // Reset player state for new round
+    
     resetForNewRound() {
         this.isReady = false;
         this.secretNumber = null;
         this.attempts = 0;
         this.guessHistory = [];
-        this.hasFinished = false;  // Reset finished status
-        this.finishedAt = null;    // Reset finished timestamp
-        this.wantsRematch = false; // Reset rematch flag
+        this.hasFinished = false;  
+        this.finishedAt = null;    
+        this.wantsRematch = false; 
         
-        // FIXED: Ensure player can participate in new round
+        
         this.isConnected = true;
         this.updateActivity();
     }
 
-    // Reset player state for new game (preserves session wins)
+    
     resetForNewGame() {
         this.resetForNewRound();
-        // FIXED: Don't reset wins here - they should persist for entire party session
-        // wins only reset when party is destroyed, not for rematches
+        
+        
     }
 
-    // Reset player state when party is destroyed (clears session wins)
+    
     resetForNewSession() {
         this.resetForNewRound();
-        this.wins = 0; // Only reset wins when starting a completely new session
+        this.wins = 0; 
     }
 
-    // Make a guess
+    
     makeGuess(guess, targetNumber) {
         this.attempts++;
         this.stats.totalAttempts++;
@@ -88,7 +88,7 @@ class Player {
         this.guessHistory.push(guessResult);
         this.updateActivity();
         
-        // Mark as finished if correct
+        
         if (isCorrect) {
             this.hasFinished = true;
             this.finishedAt = Date.now();
@@ -97,13 +97,13 @@ class Player {
         return guessResult;
     }
 
-    // Record a win
+    
     recordWin() {
         this.wins++;
         this.stats.totalWins++;
         this.stats.totalGames++;
         
-        // Update best score (lowest attempts to win)
+        
         if (this.stats.bestScore === null || this.attempts < this.stats.bestScore) {
             this.stats.bestScore = this.attempts;
         }
@@ -111,20 +111,20 @@ class Player {
         this.updateStats();
     }
 
-    // Record a loss
+    
     recordLoss() {
         this.stats.totalGames++;
         this.updateStats();
     }
 
-    // Update calculated stats
+    
     updateStats() {
         if (this.stats.totalGames > 0) {
             this.stats.averageAttempts = Math.round(this.stats.totalAttempts / this.stats.totalGames * 100) / 100;
         }
     }
 
-    // Set connection status
+    
     setConnected(connected) {
         this.isConnected = connected;
         if (connected) {
@@ -132,18 +132,18 @@ class Player {
         }
     }
 
-    // Update socket ID (for reconnection)
+    
     updateSocketId(newSocketId) {
         this.socketId = newSocketId;
         this.setConnected(true);
     }
 
-    // Check if player is inactive
-    isInactive(timeoutMs = 600000) { // 10 minutes default
+    
+    isInactive(timeoutMs = 600000) { 
         return Date.now() - this.lastActivity > timeoutMs;
     }
 
-    // Get public player info (safe to send to other players)
+    
     getPublicInfo() {
         return {
             id: this.id,
@@ -163,7 +163,7 @@ class Player {
         };
     }
 
-    // Get private player info (only for the player themselves)
+    
     getPrivateInfo() {
         return {
             ...this.getPublicInfo(),
@@ -174,7 +174,7 @@ class Player {
         };
     }
 
-    // Validate secret number for given range
+    
     validateSecretNumber(number, rangeStart, rangeEnd) {
         if (typeof number !== 'number' || isNaN(number)) {
             return { valid: false, error: 'Secret number must be a valid number' };
@@ -190,7 +190,7 @@ class Player {
         return { valid: true };
     }
 
-    // Validate guess for given range
+    
     validateGuess(guess, rangeStart, rangeEnd) {
         if (typeof guess !== 'number' || isNaN(guess)) {
             return { valid: false, error: 'Guess must be a valid number' };
@@ -206,7 +206,7 @@ class Player {
         return { valid: true };
     }
 
-    // Get player's game performance for current session
+    
     getSessionPerformance() {
         const gamesPlayed = this.wins + Math.max(0, this.stats.totalGames - this.stats.totalWins);
         const winRate = gamesPlayed > 0 ? (this.wins / gamesPlayed * 100).toFixed(1) : 0;
@@ -221,7 +221,7 @@ class Player {
         };
     }
 
-    // Serialize player for storage/transmission
+    
     toJSON() {
         return {
             id: this.id,
@@ -240,7 +240,7 @@ class Player {
         };
     }
 
-    // Create player from JSON data
+    
     static fromJSON(data) {
         const player = new Player(data.socketId, data.name);
         Object.assign(player, data);
