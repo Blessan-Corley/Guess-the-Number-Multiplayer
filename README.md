@@ -1,18 +1,17 @@
-# 🎯 Number Guesser - Real-time Multiplayer Game
+# Number Guesser - Real-time Multiplayer Game
 
-A real-time multiplayer number guessing game built with Node.js and Socket.IO. Challenge friends in exciting brain battles with smart AI feedback and beautiful UI.
+A real-time multiplayer number guessing game built with Node.js and Socket.IO. Challenge friends in exciting brain battles.
 
-## ✨ Key Features
+## Key Features
 
-### 🎮 Core Gameplay
+### Core Gameplay
 - **Real-time multiplayer** - Instant synchronization across devices
-- **Smart AI opponent** - Multiple difficulty levels for single-player
 - **Dynamic ranges** - Play with numbers from 1-10000
 - **Single round matches** - Quick and engaging gameplay
 - **Intelligent feedback** - Context-aware hints (close/far, high/low)
 - **Session tracking** - Win counts and performance stats
 
-### 🛠️ Technical Highlights
+### Technical Highlights
 - **WebSocket communication** - Zero-lag real-time gameplay
 - **Progressive Web App** - Install on any device as an app
 - **Mobile-first design** - Responsive and touch-friendly
@@ -20,13 +19,13 @@ A real-time multiplayer number guessing game built with Node.js and Socket.IO. C
 - **Party code system** - Easy friend invitations with 6-digit codes
 - **Clean architecture** - Modular MVC design for maintainability
 
-### 🎨 User Experience
+### User Experience
 - **Smooth UI/UX** - Modern gradients and smooth animations
 - **Visual feedback** - Win badges, difficulty indicators, and performance tracking
 - **Accessibility features** - Screen reader support and keyboard navigation
 - **Cross-platform** - Works on desktop, tablet, and mobile
 
-## 🚀 Quick Start
+## Quick Start
 
 ```bash
 # Install dependencies
@@ -38,7 +37,7 @@ npm start
 # Visit http://localhost:3000
 ```
 
-## 🏗️ Technology Stack
+## Technology Stack
 
 **Backend:**
 - Node.js with Express.js
@@ -58,7 +57,7 @@ npm start
 - Real-time state synchronization
 - Automatic cleanup and memory management
 
-## 🎮 How to Play
+## How to Play
 
 1. **Create/Join Party** - Share a 6-digit code with friends
 2. **Choose Settings** - Set number range as you like between (1-10000) and game mode
@@ -66,7 +65,7 @@ npm start
 4. **Battle Phase** - Guess opponent's number with smart feedback
 5. **Win & Repeat** - Track session wins and play again
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 src/
@@ -80,7 +79,7 @@ public/
 └── assets/          # Images and favicon
 ```
 
-## 🔧 Configuration
+## Configuration
 
 Environment variables in `.env`:
 ```env
@@ -94,21 +93,21 @@ Game settings in `config/config.js`:
 - Customizable feedback messages
 - Performance optimization settings
 
-## 📱 PWA Features
+## PWA Features
 
 - **Offline capable** - Service worker for offline gameplay
 - **Add to homescreen** - Native app-like experience
 - **Responsive design** - Works on all device sizes
 - **Fast loading** - Optimized assets and caching
 
-## 🚀 Deployment Ready
+## Deployment Ready
 
 - **PM2 process management** - Production-ready scaling
 - **Docker support** - Containerized deployment
 - **Load balancer compatible** - Horizontal scaling
 - **Security hardened** - Input validation and rate limiting
 
-## 🎯 Performance Optimizations
+## Performance Optimizations
 
 - Automatic party cleanup for memory efficiency
 - Optimized WebSocket event handling  
