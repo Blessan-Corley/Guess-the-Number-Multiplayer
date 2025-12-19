@@ -103,8 +103,13 @@ class GameServer {
         });
 
         
-        this.app.use((req, res) => {
-            res.status(404).json({ error: 'Route not found' });
+        // At the bottom of setupRoutes()
+        this.app.use((req, res, next) => {
+        if (req.path.startsWith('/google') && req.path.endsWith('.html')) {
+            // Let express.static try again
+            return res.sendFile(path.join(__dirname, 'public', req.path));
+        }
+        res.status(404).json({ error: 'Route not found' });
         });
 
         
