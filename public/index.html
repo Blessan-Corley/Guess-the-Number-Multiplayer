@@ -4,7 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Number Guesser - Multiplayer Brain Challenge</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/styles.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="icon" href="/favicon.ico" type="image/x-icon">
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/favicon.svg">
@@ -32,11 +36,11 @@
             <!-- Welcome Screen -->
             <section class="screen active" id="welcomeScreen">
                 <div class="welcome-content">
-                    <div class="emoji-large">🎮</div>
+                    <div class="emoji-large"><i data-lucide="gamepad-2"></i></div>
                     <h2>Welcome to the Number Guessing Challenge!</h2>
                     <p>Challenge your friends or play against our smart AI bot.</p>
                     <div class="welcome-help">
-                        <a href="#" id="welcomeHowToPlay" class="help-link">🎮 How to Play</a>
+                        <a href="#" id="welcomeHowToPlay" class="help-link"><i data-lucide="info"></i> How to Play</a>
                     </div>
                 </div>
 
@@ -48,16 +52,16 @@
                 <div class="game-mode-selection">
                     <h3>Choose Game Mode</h3>
                     <div class="mode-buttons">
-                        <button class="btn btn-mode" id="singlePlayerBtn" type="button">🤖 Single Player</button>
-                        <button class="btn btn-mode" id="multiplayerBtn" type="button">👥 Multiplayer</button>
+                        <button class="btn btn-mode" id="singlePlayerBtn" type="button"><i data-lucide="bot"></i> Single Player</button>
+                        <button class="btn btn-mode" id="multiplayerBtn" type="button"><i data-lucide="users"></i> Multiplayer</button>
                     </div>
                 </div>
 
                 <!-- Multiplayer Options -->
                 <div id="multiplayerOptions" class="multiplayer-options" style="display:none;">
                     <div class="button-group">
-                        <button class="btn btn-primary" id="createPartyBtn" type="button">🎮 Create Party</button>
-                        <button class="btn btn-secondary" id="joinPartyBtn" type="button">🚀 Join Party</button>
+                        <button class="btn btn-primary" id="createPartyBtn" type="button"><i data-lucide="plus-circle"></i> Create Party</button>
+                        <button class="btn btn-secondary" id="joinPartyBtn" type="button"><i data-lucide="log-in"></i> Join Party</button>
                     </div>
 
                     <div id="joinPartyDiv" class="join-party-section" style="display:none;">
@@ -65,14 +69,14 @@
                             <label for="partyCodeInput">Party Code</label>
                             <input type="text" class="input-field" id="partyCodeInput" placeholder="Enter 6-character code" maxlength="6" style="text-transform:uppercase;" pattern="[A-Z0-9]{6}">
                         </div>
-                        <button class="btn btn-primary" id="joinPartySubmitBtn" type="button">Join Game</button>
+                        <button class="btn btn-primary" id="joinPartySubmitBtn" type="button"><i data-lucide="arrow-right"></i> Join Game</button>
                     </div>
                 </div>
 
                 <!-- Single Player Options -->
                 <div id="singlePlayerOptions" class="single-player-options" style="display:none;">
                     <div class="settings-section">
-                        <h3>🎯 Game Settings</h3>
+                        <h3><i data-lucide="settings" class="inline-icon"></i> Game Settings</h3>
                         <div class="settings-grid">
                             <div class="input-group">
                                 <label for="singleRangeStart">Start Number</label>
@@ -93,8 +97,8 @@
                         </div>
                     </div>
                     <div class="button-group">
-                        <button class="btn btn-success" id="startSinglePlayerBtn" type="button">🎮 Start Single Player</button>
-                        <button class="btn btn-secondary" id="howToPlaySingleBtn" type="button">❓ How to Play</button>
+                        <button class="btn btn-success" id="startSinglePlayerBtn" type="button"><i data-lucide="play-circle"></i> Start Single Player</button>
+                        <button class="btn btn-secondary" id="howToPlaySingleBtn" type="button"><i data-lucide="help-circle"></i> How to Play</button>
                     </div>
                 </div>
             </section>
@@ -104,13 +108,13 @@
                 <div class="party-code-section">
                     <div class="party-code-label">Share this code with your friend:</div>
                     <div class="party-code-display" id="lobbyPartyCode" role="status" aria-live="polite"></div>
-                    <button class="btn btn-copy" id="copyCodeBtn" type="button">📋 Copy Code</button>
+                    <button class="btn btn-copy" id="copyCodeBtn" type="button"><i data-lucide="copy"></i> Copy Code</button>
                 </div>
 
                 <div class="players-section">
                     <div class="players-grid">
                         <div class="player-card" id="player1Card">
-                            <div class="player-avatar" role="img" aria-label="Player 1 Avatar">👤</div>
+                            <div class="player-avatar" role="img" aria-label="Player 1 Avatar"><i data-lucide="user"></i></div>
                             <div class="player-name" id="player1Name">
                                 <span class="status-indicator offline" aria-label="Offline"></span>
                                 Waiting...
@@ -118,7 +122,7 @@
                             <div class="player-role">Host</div>
                         </div>
                         <div class="player-card" id="player2Card">
-                            <div class="player-avatar" role="img" aria-label="Player 2 Avatar">👤</div>
+                            <div class="player-avatar" role="img" aria-label="Player 2 Avatar"><i data-lucide="user"></i></div>
                             <div class="player-name" id="player2Name">
                                 <span class="status-indicator offline" aria-label="Offline"></span>
                                 Waiting for player...
@@ -129,7 +133,7 @@
                 </div>
 
                 <div class="settings-section" id="gameSettings">
-                    <h3>🎯 Game Settings</h3>
+                    <h3><i data-lucide="target" class="inline-icon"></i> Game Settings</h3>
                     <div class="settings-grid">
                         <div class="input-group">
                             <label for="rangeStart">Start Number</label>
@@ -156,14 +160,14 @@
                     </div>
                     <!-- Best of 3 removed for simpler multiplayer experience -->
                     <div class="range-info">
-                        <small>💡 Current range: <span id="currentRangeDisplay">1 to 100</span> (<span id="rangeSize">100</span> numbers)</small>
+                        <small><i data-lucide="info" class="inline-icon"></i> Current range: <span id="currentRangeDisplay">1 to 100</span> (<span id="rangeSize">100</span> numbers)</small>
                     </div>
                 </div>
 
                 <div class="button-group">
-                    <button class="btn btn-success" id="startGameBtn" type="button" disabled>⏳ Waiting for player...</button>
-                    <button class="btn btn-secondary" id="howToPlayBtn" type="button">❓ How to Play</button>
-                    <button class="btn btn-danger" id="leaveLobbyBtn" type="button">🚪 Leave Party</button>
+                    <button class="btn btn-success" id="startGameBtn" type="button" disabled><i data-lucide="clock"></i> Waiting for player...</button>
+                    <button class="btn btn-secondary" id="howToPlayBtn" type="button"><i data-lucide="help-circle"></i> How to Play</button>
+                    <button class="btn btn-danger" id="leaveLobbyBtn" type="button"><i data-lucide="log-out"></i> Leave Party</button>
                 </div>
             </section>
 
@@ -189,7 +193,7 @@
                 </div>
 
                 <div class="button-group">
-                    <button class="btn btn-success" id="readyBtn" type="button">✅ Ready</button>
+                    <button class="btn btn-success" id="readyBtn" type="button"><i data-lucide="check-circle"></i> Ready</button>
                 </div>
 
                 <div class="ready-status" id="readyStatus" role="status" aria-live="polite"></div>
@@ -242,18 +246,28 @@
                 </div>
 
                 <div class="guess-section">
+                    <div class="range-visualizer-container">
+                        <div class="range-labels">
+                            <span id="visualRangeMin">1</span>
+                            <span>Remaining Range</span>
+                            <span id="visualRangeMax">100</span>
+                        </div>
+                        <div class="range-visualizer">
+                            <div class="range-bar-active" id="visualRangeBar" style="left: 0%; width: 100%;"></div>
+                        </div>
+                    </div>
                     <div class="input-group">
                         <label for="guessInput">Your Guess <span class="range-hint" id="guessRange"></span></label>
                         <input type="number" class="input-field guess-input" id="guessInput" placeholder="Enter your guess" required>
                         <div class="input-hint" id="guessHint">Find your opponent's secret number!</div>
                     </div>
-                    <button class="btn btn-primary" id="makeGuessBtn" type="button">🎯 Guess!</button>
+                    <button class="btn btn-primary" id="makeGuessBtn" type="button"><i data-lucide="target"></i> Guess!</button>
                 </div>
 
                 <div class="message" id="gameMessage" role="status" aria-live="polite"></div>
 
                 <div class="guess-history" id="gameGuessHistory">
-                    <div class="history-header">📝 Your Guess History</div>
+                    <div class="history-header"><i data-lucide="list"></i> Your Guess History</div>
                     <div class="history-content">
                         <div class="history-placeholder">Your guess history will appear here...</div>
                     </div>
@@ -263,7 +277,7 @@
             <!-- Results Screen -->
             <section class="screen" id="resultsScreen">
                 <div class="results-header">
-                    <div class="result-emoji" id="resultEmoji" role="img" aria-label="Result">🎉</div>
+                    <div class="result-emoji" id="resultEmoji" role="img" aria-label="Result"><i data-lucide="trophy"></i></div>
                     <div class="result-title" id="resultTitle">Round Complete!</div>
                 </div>
 
@@ -302,9 +316,9 @@
                 <div class="message" id="finalResultMessage" role="status" aria-live="polite"></div>
 
                 <div class="button-group">
-                    <button class="btn btn-primary" id="nextRoundBtn" type="button" style="display:none;">🚀 Next Round</button>
-                    <button class="btn btn-success" id="rematchBtn" type="button">🔄 Rematch</button>
-                    <button class="btn btn-danger" id="leaveResultsBtn" type="button">🚪 Leave Party</button>
+                    <button class="btn btn-primary" id="nextRoundBtn" type="button" style="display:none;"><i data-lucide="play"></i> Next Round</button>
+                    <button class="btn btn-success" id="rematchBtn" type="button"><i data-lucide="rotate-ccw"></i> Rematch</button>
+                    <button class="btn btn-danger" id="leaveResultsBtn" type="button"><i data-lucide="home"></i> Leave Party</button>
                 </div>
             </section>
         </main>
@@ -330,19 +344,20 @@
     <div class="modal-overlay" id="howToPlayModal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="howToPlayTitle">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 id="howToPlayTitle">🎮 How to Play</h2>
-                <button class="modal-close" id="closeHowToPlay" aria-label="Close">&times;</button>
+                <h2 id="howToPlayTitle"><i data-lucide="help-circle"></i> How to Play</h2>
+                <button class="modal-close" id="closeHowToPlay" aria-label="Close"><i data-lucide="x"></i></button>
             </div>
             <div class="modal-body" id="howToPlayContent">
                 <!-- Content will be populated by JavaScript based on game mode -->
             </div>
             <div class="modal-footer">
-                <button class="btn btn-primary" id="gotItBtn">Got it! 🚀</button>
+                <button class="btn btn-primary" id="gotItBtn">Got it! <i data-lucide="check"></i></button>
             </div>
         </div>
     </div>
 
     <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="/js/socket-client.js?v=1.2"></script>
     <script src="/js/ui.js?v=1.2"></script>
