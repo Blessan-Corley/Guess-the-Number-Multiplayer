@@ -1,4 +1,3 @@
-const Game = require('../models/Game');
 const messageGenerator = require('../utils/messageGenerator');
 const config = require('../../config/config');
 
