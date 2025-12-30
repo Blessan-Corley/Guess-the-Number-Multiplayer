@@ -244,6 +244,11 @@ class Game {
     }
 
     static nextRound() {
+        if (this.currentState.gameMode === 'single') {
+            singlePlayerGame.rematch();
+            return;
+        }
+
         if (!socketClient.isHost()) {
             UI.showNotification('Only the host can start the next round', 'error');
             return;
@@ -257,6 +262,10 @@ class Game {
     }
 
     static rematch() {
+        if (this.currentState.gameMode === 'single') {
+            singlePlayerGame.rematch();
+            return;
+        }
         
         
         this.currentState.hasFinished = false;
@@ -935,6 +944,11 @@ class Game {
     static validatePlayerName(name) {
         if (!name || name.trim().length === 0) {
             UI.showNotification('Please enter your name', 'error');
+            return false;
+        }
+
+        if (name.trim().length < 2) {
+            UI.showNotification('Name must be at least 2 characters', 'error');
             return false;
         }
         
