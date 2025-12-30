@@ -1,12 +1,11 @@
 const Party = require('../models/Party');
 const Player = require('../models/Player');
 const config = require('../../config/config');
+const MemoryStore = require('../storage/MemoryStore');
 
 class PartyService {
-    constructor() {
-        this.parties = new Map(); 
-        this.playerToParty = new Map(); 
-        this.socketToPlayer = new Map(); 
+    constructor(store = null) {
+        this.store = store || new MemoryStore();
         this.stats = {
             totalPartiesCreated: 0,
             totalPlayersJoined: 0,
@@ -15,7 +14,7 @@ class PartyService {
     }
 
     
-    generatePartyCode() {
+    async generatePartyCode() {
         let code;
         let attempts = 0;
         const maxAttempts = 10;
@@ -27,48 +26,52 @@ class PartyService {
                 code += chars.charAt(Math.floor(Math.random() * chars.length));
             }
             attempts++;
-        } while (this.parties.has(code) && attempts < maxAttempts);
+            
+            // Async check
+            const exists = await this.store.hasParty(code);
+            if (!exists) return code;
+            
+        } while (attempts < maxAttempts);
 
-        if (attempts >= maxAttempts) {
-            throw new Error('Unable to generate unique party code');
-        }
-
-        return code;
+        throw new Error('Unable to generate unique party code');
     }
 
     
-    createParty(hostSocketId, hostName) {
+    async createParty(hostSocketId, hostName) {
         if (!hostName || typeof hostName !== 'string') {
             throw new Error('Invalid host name');
         }
 
         
         
-        const existingPlayerId = this.socketToPlayer.get(hostSocketId);
+        const existingPlayerId = await this.store.getPlayerIdForSocket(hostSocketId);
         if (existingPlayerId) {
-            const existingPartyCode = this.playerToParty.get(existingPlayerId);
+            const existingPartyCode = await this.store.getPartyCodeForPlayer(existingPlayerId);
             if (existingPartyCode) {
                 
-                const existingParty = this.parties.get(existingPartyCode);
+                const existingParty = await this.store.getParty(existingPartyCode);
                 if (existingParty) {
                     existingParty.removePlayer(existingPlayerId);
                     if (existingParty.isEmpty()) {
-                        this.parties.delete(existingPartyCode);
+                        await this.store.deleteParty(existingPartyCode);
+                    } else {
+                        await this.store.saveParty(existingParty);
                     }
                 }
             }
             
-            this.playerToParty.delete(existingPlayerId);
-            this.socketToPlayer.delete(hostSocketId);
+            await this.store.removePlayerMapping(existingPlayerId);
+            await this.store.removeSocketMapping(hostSocketId);
         }
 
-        const partyCode = this.generatePartyCode();
+        const partyCode = await this.generatePartyCode();
         const hostPlayer = new Player(hostSocketId, hostName);
         const party = new Party(partyCode, hostPlayer);
 
-        this.parties.set(partyCode, party);
-        this.playerToParty.set(hostPlayer.id, partyCode);
-        this.socketToPlayer.set(hostSocketId, hostPlayer.id);
+        await this.store.saveParty(party);
+        await this.store.mapPlayerToParty(hostPlayer.id, partyCode);
+        await this.store.mapSocketToPlayer(hostSocketId, hostPlayer.id);
+        
         this.stats.totalPartiesCreated++;
         this.stats.totalPlayersJoined++;
 
@@ -76,12 +79,12 @@ class PartyService {
     }
 
     
-    joinParty(partyCode, playerSocketId, playerName) {
+    async joinParty(partyCode, playerSocketId, playerName) {
         if (!partyCode || !playerName) {
             throw new Error('Party code and player name are required');
         }
 
-        const party = this.parties.get(partyCode.toUpperCase());
+        const party = await this.store.getParty(partyCode.toUpperCase());
         if (!party) {
             throw new Error('Party not found');
         }
@@ -91,101 +94,114 @@ class PartyService {
         }
 
         
-        const existingPlayerId = this.socketToPlayer.get(playerSocketId);
+        const existingPlayerId = await this.store.getPlayerIdForSocket(playerSocketId);
         if (existingPlayerId) {
-            const existingPartyCode = this.playerToParty.get(existingPlayerId);
+            const existingPartyCode = await this.store.getPartyCodeForPlayer(existingPlayerId);
             if (existingPartyCode && existingPartyCode !== partyCode.toUpperCase()) {
                 
-                const existingParty = this.parties.get(existingPartyCode);
+                const existingParty = await this.store.getParty(existingPartyCode);
                 if (existingParty) {
                     existingParty.removePlayer(existingPlayerId);
                     if (existingParty.isEmpty()) {
-                        this.parties.delete(existingPartyCode);
+                        await this.store.deleteParty(existingPartyCode);
+                    } else {
+                        await this.store.saveParty(existingParty);
                     }
                 }
                 
-                this.playerToParty.delete(existingPlayerId);
-                this.socketToPlayer.delete(playerSocketId);
+                await this.store.removePlayerMapping(existingPlayerId);
+                await this.store.removeSocketMapping(playerSocketId);
             }
         }
 
         const player = new Player(playerSocketId, playerName);
         party.addPlayer(player);
 
-        this.playerToParty.set(player.id, partyCode.toUpperCase());
-        this.socketToPlayer.set(playerSocketId, player.id);
+        await this.store.saveParty(party);
+        await this.store.mapPlayerToParty(player.id, partyCode.toUpperCase());
+        await this.store.mapSocketToPlayer(playerSocketId, player.id);
+        
         this.stats.totalPlayersJoined++;
 
         return { party, player };
     }
 
     
-    leaveParty(socketId) {
-        const playerId = this.socketToPlayer.get(socketId);
+    async leaveParty(socketId) {
+        const playerId = await this.store.getPlayerIdForSocket(socketId);
         if (!playerId) {
             return null;
         }
 
-        const partyCode = this.playerToParty.get(playerId);
+        const partyCode = await this.store.getPartyCodeForPlayer(playerId);
         if (!partyCode) {
             return null;
         }
 
-        const party = this.parties.get(partyCode);
+        const party = await this.store.getParty(partyCode);
         if (!party) {
             return null;
         }
 
         const player = party.getPlayer(playerId);
+        if (!player) return null; // Logic safety
+        
         const wasHost = player.isHost;
         const removeResult = party.removePlayer(playerId);
 
         
-        this.playerToParty.delete(playerId);
-        this.socketToPlayer.delete(socketId);
+        await this.store.removePlayerMapping(playerId);
+        await this.store.removeSocketMapping(socketId);
 
         
         if (removeResult === 'HOST_LEFT' || party.isEmpty()) {
-            this.parties.delete(partyCode);
+            await this.store.deleteParty(partyCode);
+        } else {
+            await this.store.saveParty(party);
         }
 
         return { party, player, partyCode, wasHost };
     }
 
     
-    getParty(partyCode) {
+    async getParty(partyCode) {
         if (!partyCode) return null;
-        return this.parties.get(partyCode.toUpperCase());
+        return await this.store.getParty(partyCode.toUpperCase());
     }
 
     
-    getPartyBySocket(socketId) {
-        const playerId = this.socketToPlayer.get(socketId);
+    async getPartyBySocket(socketId) {
+        const playerId = await this.store.getPlayerIdForSocket(socketId);
         if (!playerId) return null;
 
-        const partyCode = this.playerToParty.get(playerId);
+        const partyCode = await this.store.getPartyCodeForPlayer(playerId);
         if (!partyCode) return null;
 
-        return this.parties.get(partyCode);
+        return await this.store.getParty(partyCode);
     }
 
     
-    getPlayerBySocket(socketId) {
-        const playerId = this.socketToPlayer.get(socketId);
+    async getPlayerBySocket(socketId) {
+        const playerId = await this.store.getPlayerIdForSocket(socketId);
         if (!playerId) return null;
 
-        const partyCode = this.playerToParty.get(playerId);
+        const partyCode = await this.store.getPartyCodeForPlayer(playerId);
         if (!partyCode) return null;
 
-        const party = this.parties.get(partyCode);
+        const party = await this.store.getParty(partyCode);
         if (!party) return null;
 
         return party.getPlayer(playerId);
     }
 
+    async isSocketInParty(socketId) {
+        const playerId = await this.store.getPlayerIdForSocket(socketId);
+        return !!playerId;
+    }
+
     
-    reconnectPlayer(socketId, partyCode, playerId) {
-        const party = this.getParty(partyCode);
+    async reconnectPlayer(socketId, partyCode, playerId) {
+        const party = await this.store.getParty(partyCode);
         if (!party) {
             return { success: false, error: 'Party not found' };
         }
@@ -197,29 +213,30 @@ class PartyService {
 
         
         const oldSocketId = player.socketId;
-        this.socketToPlayer.delete(oldSocketId);
-        this.socketToPlayer.set(socketId, playerId);
+        await this.store.removeSocketMapping(oldSocketId);
+        await this.store.mapSocketToPlayer(socketId, playerId);
 
         
         player.updateSocketId(socketId);
+        await this.store.saveParty(party);
 
         return { success: true, party, player };
     }
 
     
-    cleanupInactiveParties() {
+    async cleanupInactiveParties() {
         let cleanedCount = 0;
-        const now = Date.now();
+        const allParties = await this.store.getAllParties();
 
-        for (const [partyCode, party] of this.parties.entries()) {
+        for (const party of allParties) {
             if (party.isInactive() || party.isEmpty()) {
                 
-                party.players.forEach(player => {
-                    this.playerToParty.delete(player.id);
-                    this.socketToPlayer.delete(player.socketId);
-                });
+                for (const player of party.players.values()) {
+                    await this.store.removePlayerMapping(player.id);
+                    await this.store.removeSocketMapping(player.socketId);
+                }
 
-                this.parties.delete(partyCode);
+                await this.store.deleteParty(party.code);
                 cleanedCount++;
             }
         }
@@ -228,25 +245,30 @@ class PartyService {
     }
 
     
-    cleanupDisconnectedPlayer(socketId) {
-        const playerId = this.socketToPlayer.get(socketId);
+    async cleanupDisconnectedPlayer(socketId) {
+        const playerId = await this.store.getPlayerIdForSocket(socketId);
         if (!playerId) return null;
 
-        const partyCode = this.playerToParty.get(playerId);
+        const partyCode = await this.store.getPartyCodeForPlayer(playerId);
         if (!partyCode) return null;
 
-        const party = this.parties.get(partyCode);
+        const party = await this.store.getParty(partyCode);
         if (!party) return null;
 
         const player = party.getPlayer(playerId);
         if (player) {
             player.setConnected(false);
+            await this.store.saveParty(party);
             
             
-            setTimeout(() => {
-                const currentPlayer = party.getPlayer(playerId);
-                if (currentPlayer && !currentPlayer.isConnected) {
-                    this.leaveParty(socketId);
+            setTimeout(async () => {
+                // Fetch fresh state
+                const currentParty = await this.getParty(partyCode);
+                if (currentParty) {
+                    const currentPlayer = currentParty.getPlayer(playerId);
+                    if (currentPlayer && !currentPlayer.isConnected) {
+                        await this.leaveParty(socketId);
+                    }
                 }
             }, 60000); 
         }
@@ -255,13 +277,14 @@ class PartyService {
     }
 
     
-    getActiveParties() {
-        return Array.from(this.parties.values()).filter(party => !party.isEmpty());
+    async getActiveParties() {
+        const parties = await this.store.getAllParties();
+        return parties.filter(party => !party.isEmpty());
     }
 
     
-    getStats() {
-        const activeParties = this.getActiveParties();
+    async getStats() {
+        const activeParties = await this.getActiveParties();
         const activePlayers = activeParties.reduce((total, party) => total + party.players.size, 0);
         
         return {
@@ -274,13 +297,15 @@ class PartyService {
     }
 
     
-    getActivePartiesCount() {
-        return this.getActiveParties().length;
+    async getActivePartiesCount() {
+        const parties = await this.getActiveParties();
+        return parties.length;
     }
 
     
-    getActivePlayersCount() {
-        return this.getActiveParties().reduce((total, party) => total + party.players.size, 0);
+    async getActivePlayersCount() {
+        const parties = await this.getActiveParties();
+        return parties.reduce((total, party) => total + party.players.size, 0);
     }
 
     
@@ -302,6 +327,12 @@ class PartyService {
     recordGameCompletion() {
         this.stats.gamesCompleted++;
     }
+
+    // saveParty helper for external services
+    async saveParty(party) {
+        await this.store.saveParty(party);
+    }
+
 
     
     validatePartyCode(code) {
@@ -343,8 +374,8 @@ class PartyService {
     }
 
     
-    getPartyDetails(partyCode) {
-        const party = this.getParty(partyCode);
+    async getPartyDetails(partyCode) {
+        const party = await this.getParty(partyCode);
         if (!party) return null;
 
         return {
@@ -372,8 +403,8 @@ class PartyService {
     }
 
     
-    broadcastToParty(partyCode, event, data, io) {
-        const party = this.getParty(partyCode);
+    async broadcastToParty(partyCode, event, data, io) {
+        const party = await this.getParty(partyCode);
         if (!party) return false;
 
         party.players.forEach(player => {
@@ -386,11 +417,11 @@ class PartyService {
     }
 
     
-    sendToPlayer(playerId, event, data, io) {
-        const partyCode = this.playerToParty.get(playerId);
+    async sendToPlayer(playerId, event, data, io) {
+        const partyCode = await this.store.getPartyCodeForPlayer(playerId);
         if (!partyCode) return false;
 
-        const party = this.getParty(partyCode);
+        const party = await this.getParty(partyCode);
         if (!party) return false;
 
         const player = party.getPlayer(playerId);
@@ -401,47 +432,44 @@ class PartyService {
     }
 
     
-    isSocketInParty(socketId) {
-        return this.socketToPlayer.has(socketId);
+    async isSocketInParty(socketId) {
+        const playerId = await this.store.getPlayerIdForSocket(socketId);
+        return !!playerId;
     }
 
     
-    getAllParties() {
-        return Array.from(this.parties.entries()).map(([code, party]) => ({
-            code,
+    async getAllParties() {
+        const parties = await this.store.getAllParties();
+        return parties.map(party => ({
+            code: party.code,
             ...party.getPublicInfo()
         }));
     }
 
     
-    emergencyCleanup() {
-        const partyCount = this.parties.size;
-        const playerCount = this.playerToParty.size;
-
-        this.parties.clear();
-        this.playerToParty.clear();
-        this.socketToPlayer.clear();
-
-        return { partiesRemoved: partyCount, playersRemoved: playerCount };
+    async emergencyCleanup() {
+        // Not supported in generic store interface yet
+        return { partiesRemoved: 0, playersRemoved: 0 };
     }
 
     
-    getSystemHealth() {
-        const activeParties = this.getActiveParties();
+    async getSystemHealth() {
+        const activeParties = await this.getActiveParties();
         const memoryUsage = process.memoryUsage();
+        const totalParties = await this.store.getPartyCount();
         
         return {
             healthy: true,
             timestamp: new Date().toISOString(),
             uptime: process.uptime(),
             parties: {
-                total: this.parties.size,
+                total: totalParties,
                 active: activeParties.length,
-                inactive: this.parties.size - activeParties.length
+                inactive: totalParties - activeParties.length
             },
             players: {
-                total: this.socketToPlayer.size,
-                active: this.getActivePlayersCount()
+                total: 0, // Difficult to count effectively in generic store without scan
+                active: await this.getActivePlayersCount()
             },
             memory: {
                 rss: Math.round(memoryUsage.rss / 1024 / 1024) + ' MB',
