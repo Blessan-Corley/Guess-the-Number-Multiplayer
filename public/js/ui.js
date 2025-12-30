@@ -26,6 +26,11 @@ class UI {
         this.notificationQueue = [];
         this.maxNotifications = 3;
         
+        // Initialize icons
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+        
         
         setInterval(() => {
             this.simpleButtonCheck();
@@ -499,6 +504,11 @@ class UI {
         const targetScreen = document.getElementById(screenId);
         if (targetScreen) {
             targetScreen.classList.add('active');
+            
+            // Refresh icons for the new screen
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
         } else {
         }
         
@@ -699,9 +709,14 @@ class UI {
         if (hostPlayer) {
             player1Name.innerHTML = `
                 <span class="status-indicator ${hostPlayer.isConnected ? 'online' : 'offline'}"></span>
-                ${hostPlayer.name} ${hostPlayer.isHost ? '👑' : ''}
+                ${hostPlayer.name} ${hostPlayer.isHost ? '<i data-lucide="crown" class="inline-icon host-crown"></i>' : ''}
             `;
             player1Card.classList.toggle('active', hostPlayer.isConnected);
+        }
+
+        // Refresh icons after updating HTML
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
         }
 
         
@@ -1003,6 +1018,11 @@ class UI {
 
     
     static updateGameScreen(party) {
+        // Reset Visual Range Bar
+        this.currentPossibleMin = party.gameSettings.rangeStart;
+        this.currentPossibleMax = party.gameSettings.rangeEnd;
+        this.updateRangeVisualizer(party.gameSettings.rangeStart, party.gameSettings.rangeEnd);
+
         const roundText = party.maxRounds > 1 ? `Round ${party.currentRound} of ${party.maxRounds}` : 'Game Round';
         
         
@@ -1177,6 +1197,24 @@ class UI {
     }
 
     static addGuessToHistory(guess, feedback) {
+        // Update local tracking for visualizer
+        if (!feedback.isCorrect) {
+            if (feedback.direction === 'high') {
+                this.currentPossibleMax = Math.min(this.currentPossibleMax, guess - 1);
+            } else {
+                this.currentPossibleMin = Math.max(this.currentPossibleMin, guess + 1);
+            }
+            
+            let rangeStart = 1, rangeEnd = 100;
+            if (typeof Game !== 'undefined' && Game.currentState && Game.currentState.party) {
+                rangeStart = Game.currentState.party.gameSettings.rangeStart;
+                rangeEnd = Game.currentState.party.gameSettings.rangeEnd;
+            }
+            this.updateRangeVisualizer(rangeStart, rangeEnd);
+        } else {
+            this.triggerWinConfetti();
+        }
+
         const historyContent = document.querySelector('#gameGuessHistory .history-content');
         
         
@@ -1200,12 +1238,17 @@ class UI {
         
         const guessFeedback = document.createElement('div');
         guessFeedback.className = `guess-feedback ${feedback.closeness || 'far'}`;
-        guessFeedback.textContent = this.getFeedbackText(feedback);
+        guessFeedback.innerHTML = this.getFeedbackText(feedback);
         
         guessItem.appendChild(guessNumber);
         guessItem.appendChild(guessFeedback);
         
         historyContent.appendChild(guessItem);
+        
+        // Refresh icons for new history item
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
         
         
         const historyContainer = document.getElementById('gameGuessHistory');
@@ -1225,13 +1268,13 @@ class UI {
 
     static getFeedbackText(feedback) {
         if (feedback.isCorrect) {
-            return '🎯 Correct!';
+            return '<i data-lucide="check-circle" class="inline-icon"></i> Correct!';
         } else if (feedback.closeness === 'very_close') {
-            return feedback.direction === 'high' ? '🔥⬇️ Very Close High' : '🔥⬆️ Very Close Low';
+            return feedback.direction === 'high' ? '<i data-lucide="flame" class="inline-icon"></i> Very Close High' : '<i data-lucide="flame" class="inline-icon"></i> Very Close Low';
         } else if (feedback.closeness === 'close') {
-            return feedback.direction === 'high' ? '🎯⬇️ Close High' : '🎯⬆️ Close Low';
+            return feedback.direction === 'high' ? '<i data-lucide="target" class="inline-icon"></i> Close High' : '<i data-lucide="target" class="inline-icon"></i> Close Low';
         } else {
-            return feedback.direction === 'high' ? '📈 Too High' : '📉 Too Low';
+            return feedback.direction === 'high' ? '<i data-lucide="trending-up" class="inline-icon"></i> Too High' : '<i data-lucide="trending-down" class="inline-icon"></i> Too Low';
         }
     }
 
@@ -1750,26 +1793,32 @@ class UI {
         notification.className = className;
         
         
+        // icons Mapping
         const icons = {
-            success: '✅',
-            error: '❌',
-            warning: '⚠️',
-            info: 'ℹ️',
-            competitive: '🔥',
-            victory: '🏆',
-            critical: '🚨'
+            success: 'check-circle',
+            error: 'alert-circle',
+            warning: 'alert-triangle',
+            info: 'info',
+            competitive: 'flame',
+            victory: 'trophy',
+            critical: 'shield-alert'
         };
         
-        const icon = icons[specialStyle] || icons[type] || icons.info;
+        const iconName = icons[specialStyle] || icons[type] || icons.info;
         
         
         notification.innerHTML = `
-            <span class="notification-icon">${icon}</span>
+            <span class="notification-icon"><i data-lucide="${iconName}"></i></span>
             <div class="notification-message">${message}</div>
-            <button class="notification-close" aria-label="Close notification">×</button>
+            <button class="notification-close" aria-label="Close notification"><i data-lucide="x"></i></button>
         `;
         
         container.appendChild(notification);
+        
+        // Refresh icons for the new notification
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
         
         
         const closeBtn = notification.querySelector('.notification-close');
@@ -1852,6 +1901,49 @@ class UI {
     }
 
     
+    static updateRangeVisualizer(rangeStart, rangeEnd) {
+        const visualMin = document.getElementById('visualRangeMin');
+        const visualMax = document.getElementById('visualRangeMax');
+        const visualBar = document.getElementById('visualRangeBar');
+        
+        if (!visualMin || !visualMax || !visualBar) return;
+
+        visualMin.textContent = this.currentPossibleMin;
+        visualMax.textContent = this.currentPossibleMax;
+
+        const totalRange = rangeEnd - rangeStart;
+        const possibleRange = this.currentPossibleMax - this.currentPossibleMin;
+        
+        const widthPercent = (possibleRange / totalRange) * 100;
+        const leftPercent = ((this.currentPossibleMin - rangeStart) / totalRange) * 100;
+
+        visualBar.style.width = `${widthPercent}%`;
+        visualBar.style.left = `${leftPercent}%`;
+    }
+
+    static triggerWinConfetti() {
+        if (typeof confetti === 'function') {
+            const duration = 3 * 1000;
+            const animationEnd = Date.now() + duration;
+            const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+            const randomInRange = (min, max) => Math.random() * (max - min) + min;
+
+            const interval = setInterval(() => {
+                const timeLeft = animationEnd - Date.now();
+
+                if (timeLeft <= 0) {
+                    return clearInterval(interval);
+                }
+
+                const particleCount = 50 * (timeLeft / duration);
+                
+                confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
+                confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
+            }, 250);
+        }
+    }
+
     static cleanup() {
         
         this.clearAllNotifications();
