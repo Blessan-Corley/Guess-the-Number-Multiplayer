@@ -28,91 +28,69 @@ class SinglePlayerGame {
             hard: 1000
         };
         
-        this.gameMessages = {
-            TOO_HIGH: [
-                "🔥 Way too high! Come back down to earth!",
-                "📈 That's stratosphere level! Think lower!",
-                "🚀 Houston, we have a problem - too high!",
-                "⬆️ Nope, bring it down several notches!",
-                "🎈 Your guess is floating in the clouds!",
-                "🏔️ That's mountain-top high!",
-                "🎢 Whoa! Take it down a level!",
-                "⛰️ You're reaching the summit! Come down!",
-                "🛸 That's outer space territory! Descend!",
-                "📡 Satellite level! Bring it way down!",
-                "🎯 Aim lower, sharpshooter!",
-                "🔻 Drop it like it's hot!"
-            ],
-            TOO_LOW: [
-                "🕳️ That's underground territory!",
-                "📉 You're mining too deep! Go higher!",
-                "⬇️ Think way higher than that!",
-                "🐠 You're swimming in the deep end!",
-                "🏠 That's basement level thinking!",
-                "🌊 You're below sea level!",
-                "⛏️ Stop digging and climb up!",
-                "🐙 Deep ocean vibes! Surface level please!",
-                "🚇 You're in the subway! Go upstairs!",
-                "🔺 Elevate your thinking!",
-                "🎯 Aim higher, champion!",
-                "🚁 Time to take off!"
-            ],
-            CLOSE_HIGH: [
-                "🔥 Getting warm, but still too HIGH!",
-                "🎯 Close! Just dial it down a bit!",
-                "👀 So close! Nudge it down slightly!",
-                "⚡ Hot! But still flying too HIGH!",
-                "🎪 In the neighborhood, but aim LOWER!",
-                "🔍 Burning hot! Come down just a bit!",
-                "🌡️ Temperature rising! Cool it down!",
-                "🏹 Good shot! Just adjust down!",
-                "🎲 You're in the zone! Step down!",
-                "🧭 Right direction! Just lower!",
-                "🎨 Close call! Paint it lower!",
-                "⚖️ Almost balanced! Tip it down!"
-            ],
-            CLOSE_LOW: [
-                "🔥 Getting warm, but still too LOW!",
-                "🎯 Close! Just bump it up a bit!",
-                "👀 So close! Nudge it up slightly!",
-                "⚡ Hot! But still diving too LOW!",
-                "🎪 In the neighborhood, but aim HIGHER!",
-                "🔍 Burning hot! Climb up just a bit!",
-                "🌡️ Temperature rising! Heat it up!",
-                "🏹 Good shot! Just adjust up!",
-                "🎲 You're in the zone! Step up!",
-                "🧭 Right direction! Just higher!",
-                "🎨 Close call! Paint it higher!",
-                "⚖️ Almost balanced! Tip it up!"
-            ],
-            VERY_CLOSE_HIGH: [
-                "🌟 SO CLOSE! Just a tiny bit LOWER!",
-                "💫 Almost perfect! Go down just a smidge!",
-                "🎊 You're practically there! Slightly LOWER!",
-                "🔥 BURNING HOT! Just nudge it down!",
-                "⭐ Right on the edge! Think LOWER!",
-                "💎 Diamond close! Polish it down!",
-                "🎯 Bullseye territory! A hair lower!",
-                "🔮 Crystal ball says: DOWN just a notch!",
-                "🏆 Champion level! Just a whisper down!",
-                "⚡ Electric! Just a spark lower!"
-            ],
-            VERY_CLOSE_LOW: [
-                "🌟 SO CLOSE! Just a tiny bit HIGHER!",
-                "💫 Almost perfect! Go up just a smidge!",
-                "🎊 You're practically there! Slightly HIGHER!",
-                "🔥 BURNING HOT! Just nudge it up!",
-                "⭐ Right on the edge! Think HIGHER!",
-                "💎 Diamond close! Polish it up!",
-                "🎯 Bullseye territory! A hair higher!",
-                "🔮 Crystal ball says: UP just a notch!",
-                "🏆 Champion level! Just a whisper up!",
-                "⚡ Electric! Just a spark higher!"
-            ]
+        this.config = null;
+        this.loadConfig();
+        this.loadStats();
+    }
+
+    loadStats() {
+        try {
+            const savedStats = localStorage.getItem('numberGuesserSinglePlayerStats');
+            if (savedStats) {
+                const stats = JSON.parse(savedStats);
+                this.gameState.playerWins = stats.playerWins || 0;
+                this.gameState.botWins = stats.botWins || 0;
+            }
+        } catch (e) {
+            console.error('Failed to load stats:', e);
+        }
+    }
+
+    saveStats() {
+        try {
+            const stats = {
+                playerWins: this.gameState.playerWins,
+                botWins: this.gameState.botWins
+            };
+            localStorage.setItem('numberGuesserSinglePlayerStats', JSON.stringify(stats));
+        } catch (e) {
+            console.error('Failed to save stats:', e);
+        }
+    }
+
+    async loadConfig() {
+        try {
+            const response = await fetch('/api/config');
+            if (response.ok) {
+                this.config = await response.json();
+            } else {
+                this.useDefaultConfig();
+            }
+        } catch (error) {
+            this.useDefaultConfig();
+        }
+    }
+
+    useDefaultConfig() {
+        // Fallback minimal config in case server is down/unreachable
+        this.config = {
+            GAME_MESSAGES: {
+                TOO_HIGH: ["Too high!"],
+                TOO_LOW: ["Too low!"],
+                CLOSE_HIGH: ["Close, but high!"],
+                CLOSE_LOW: ["Close, but low!"],
+                VERY_CLOSE_HIGH: ["Very close, just a bit high!"],
+                VERY_CLOSE_LOW: ["Very close, just a bit low!"]
+            }
         };
     }
 
     startGame(playerName, rangeStart, rangeEnd, botDifficulty) {
+        if (!this.config) {
+            UI.showNotification('Game configuration not loaded yet. Please wait...', 'error');
+            return;
+        }
+
         this.gameState.playerName = playerName;
         this.gameState.rangeStart = rangeStart;
         this.gameState.rangeEnd = rangeEnd;
@@ -217,9 +195,10 @@ class SinglePlayerGame {
         document.getElementById('gameRoundInfo').querySelector('.round-text').textContent = 'Single Player vs Bot';
         
         
+        const opponentBattleName = document.getElementById('opponentBattleName');
         document.getElementById('myBattleName').textContent = this.gameState.playerName;
-        document.getElementById('opponentBattleName').innerHTML = `
-            <div class="bot-avatar">🤖</div>
+        opponentBattleName.innerHTML = `
+            <div class="bot-avatar"><i data-lucide="bot"></i></div>
             AI Bot (${this.gameState.botDifficulty})
         `;
         
@@ -255,7 +234,13 @@ class SinglePlayerGame {
     }
 
     makePlayerGuess(guess) {
-        if (this.gameState.gamePhase !== 'playing') return;
+        if (this.gameState.gamePhase !== 'playing') return; 
+
+        // Range validation
+        if (guess < this.gameState.rangeStart || guess > this.gameState.rangeEnd) {
+            UI.showNotification(`⚠️ Guess must be between ${this.gameState.rangeStart} and ${this.gameState.rangeEnd}`, 'error');
+            return;
+        }
         
         this.gameState.playerAttempts++;
         
@@ -292,7 +277,7 @@ class SinglePlayerGame {
     }
 
     botMakeGuess() {
-        if (this.gameState.gamePhase !== 'playing') return;
+        if (this.gameState.gamePhase !== 'playing') return; 
         
         this.gameState.botAttempts++;
         
@@ -434,13 +419,17 @@ class SinglePlayerGame {
             isCorrect: false,
             difference: difference,
             direction: guess > target ? 'high' : 'low',
-            closeness: difference <= veryCloseThreshold ? 'very_close' : 
+            closeness: difference <= veryCloseThreshold ? 'very_close' :
                       difference <= closeThreshold ? 'close' : 'far'
         };
     }
 
     getRandomMessage(category) {
-        const messages = this.gameMessages[category];
+        if (!this.config || !this.config.GAME_MESSAGES) {
+            return "Too high/low (config missing)";
+        }
+        const messages = this.config.GAME_MESSAGES[category];
+        if (!messages) return "Message not found";
         return messages[Math.floor(Math.random() * messages.length)];
     }
 
@@ -456,6 +445,8 @@ class SinglePlayerGame {
         } else {
             this.gameState.botWins++;
         }
+        
+        this.saveStats();
         
         
         this.showSinglePlayerResults(winner);
