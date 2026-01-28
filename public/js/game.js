@@ -139,7 +139,7 @@ class Game {
         
         
         const rangeText = `${settings.rangeStart}-${settings.rangeEnd}`;
-        UI.showNotification(`⚙️ Range updated to ${rangeText}`, 'info');
+        UI.showNotification(`Range updated to ${rangeText}`, 'info');
     }
 
     static setRangePreset(start, end) {
@@ -167,25 +167,25 @@ class Game {
         let difficultyClass = '';
         
         if (rangeSize <= 10) {
-            difficultyText = ' - Beginner 😊';
+            difficultyText = ' - Beginner';
             difficultyClass = 'difficulty-beginner';
         } else if (rangeSize <= 50) {
-            difficultyText = ' - Easy 🙂';
+            difficultyText = ' - Easy';
             difficultyClass = 'difficulty-easy';
         } else if (rangeSize <= 100) {
-            difficultyText = ' - Medium 😐';
+            difficultyText = ' - Medium';
             difficultyClass = 'difficulty-medium';
         } else if (rangeSize <= 500) {
-            difficultyText = ' - Hard 😤';
+            difficultyText = ' - Hard';
             difficultyClass = 'difficulty-hard';
         } else if (rangeSize <= 1000) {
-            difficultyText = ' - Expert 😰';
+            difficultyText = ' - Expert';
             difficultyClass = 'difficulty-expert';
         } else if (rangeSize <= 5000) {
-            difficultyText = ' - Insane 🤯';
+            difficultyText = ' - Insane';
             difficultyClass = 'difficulty-insane';
         } else {
-            difficultyText = ' - Legendary 😱';
+            difficultyText = ' - Legendary';
             difficultyClass = 'difficulty-legendary';
         }
         
@@ -197,7 +197,8 @@ class Game {
         const optimalAttempts = Math.ceil(Math.log2(rangeSize));
         const rangeInfo = document.querySelector('.range-info small');
         if (rangeInfo) {
-            rangeInfo.innerHTML = `💡 Current range: <span id="currentRangeDisplay">${start} to ${end}</span> (<span id="rangeSize" class="${difficultyClass}">${rangeSize}${difficultyText}</span>)<br><small>🎯 Optimal strategy: ~${optimalAttempts} attempts max</small>`;
+            rangeInfo.innerHTML = `<i data-lucide="info" class="inline-icon"></i> Current range: <span id="currentRangeDisplay">${start} to ${end}</span> (<span id="rangeSize" class="${difficultyClass}">${rangeSize}${difficultyText}</span>)<br><small><i data-lucide="target" class="inline-icon"></i> Optimal strategy: ~${optimalAttempts} attempts max</small>`;
+            if (typeof lucide !== 'undefined') lucide.createIcons();
         }
     }
 
@@ -226,19 +227,19 @@ class Game {
         }
         
         if (secretNumber < rangeStart || secretNumber > rangeEnd) {
-            UI.showNotification(`⚠️ Secret number must be between ${rangeStart} and ${rangeEnd}`, 'error');
+            UI.showNotification(`Secret number must be between ${rangeStart} and ${rangeEnd}`, 'error');
             document.getElementById('secretNumber').focus();
             return;
         }
         
         
         
-        UI.showNotification(`✅ Number ${secretNumber} chosen!`, 'success');
+        UI.showNotification(`Number ${secretNumber} chosen!`, 'success');
         
         
         document.getElementById('secretNumber').disabled = true;
         document.getElementById('readyBtn').disabled = true;
-        document.getElementById('readyBtn').textContent = '✅ Ready!';
+        document.getElementById('readyBtn').textContent = 'Ready!';
         
         socketClient.setReady(secretNumber);
     }
@@ -285,7 +286,7 @@ class Game {
         
         
         const createBtn = document.getElementById('createPartyBtn');
-        UI.setButtonSuccess(createBtn, '✓ Created!');
+        UI.setButtonSuccess(createBtn, 'Created!');
         
         UI.hideLoadingOverlay();
         UI.showScreen('lobbyScreen');
@@ -295,7 +296,7 @@ class Game {
         
         document.getElementById('lobbyPartyCode').textContent = data.party.code;
         
-        UI.showNotification(`🎉 Party ${data.party.code} created! Share it with your friend.`, 'success');
+        UI.showNotification(`Party ${data.party.code} created! Share it with your friend.`, 'success');
         
         
         setTimeout(() => {
@@ -314,7 +315,7 @@ class Game {
         
         
         const joinBtn = document.getElementById('joinPartySubmitBtn');
-        UI.setButtonSuccess(joinBtn, '✓ Joined!');
+        UI.setButtonSuccess(joinBtn, 'Joined!');
         
         UI.hideLoadingOverlay();
         UI.showScreen('lobbyScreen');
@@ -326,13 +327,13 @@ class Game {
         document.getElementById('lobbyPartyCode').textContent = data.party.code;
         document.getElementById('startGameBtn').style.display = 'none'; 
         
-        UI.showNotification(`🎉 Joined party ${data.party.code}! Wait for the host to start.`, 'success');
+        UI.showNotification(`Joined party ${data.party.code}! Wait for the host to start.`, 'success');
     }
 
     static handlePlayerJoined(data) {
         this.currentState.party = data.party;
         UI.updateLobbyPlayers(data.party);
-        UI.showNotification(`${data.newPlayer.name} joined the party! 🎉`, 'success');
+        UI.showNotification(`${data.newPlayer.name} joined the party!`, 'success');
         
         
         const helperDiv = document.getElementById('invitation-helper');
@@ -350,7 +351,7 @@ class Game {
         if (data.party.players.length < 2) {
             const startBtn = document.getElementById('startGameBtn');
             startBtn.disabled = true;
-            startBtn.textContent = '⏳ Waiting for player...';
+            startBtn.textContent = 'Waiting for player...';
             startBtn.classList.remove('pulse-animation');
         }
     }
@@ -372,7 +373,7 @@ class Game {
         
         
         setTimeout(() => {
-            UI.showNotification('🏠 Returned to main menu. You can create or join a new party!', 'info', 4000);
+            UI.showNotification('Returned to main menu. You can create or join a new party!', 'info', 4000);
         }, 2000);
     }
 
@@ -392,7 +393,7 @@ class Game {
         
         if (data.updatedBy !== socketClient.gameState.playerName) {
             const rangeText = `${data.settings.rangeStart}-${data.settings.rangeEnd}`;
-            UI.showNotification(`⚙️ ${data.updatedBy} changed range to ${rangeText}`, 'info');
+            UI.showNotification(`${data.updatedBy} changed range to ${rangeText}`, 'info');
         }
     }
 
@@ -404,14 +405,14 @@ class Game {
         UI.showScreen('selectionScreen');
         UI.updateSelectionScreen(data.party, data.selectionTimeLimit);
         
-        UI.showNotification('Game started! Choose your secret number wisely! 🎯', 'success');
+        UI.showNotification('Game started! Choose your secret number wisely!', 'success');
     }
 
     static handlePlayerReady(data) {
         UI.updateReadyStatus(data.playerId, data.playerName, data.allReady);
         
         if (data.playerId !== socketClient.gameState.playerId) {
-            UI.showNotification(`${data.playerName} is ready! ⚡`, 'info');
+            UI.showNotification(`${data.playerName} is ready!`, 'info');
         }
     }
 
@@ -427,7 +428,7 @@ class Game {
         UI.showScreen('gameScreen');
         UI.updateGameScreen(data.party);
         
-        UI.showNotification('Battle begins! Find your opponent\'s number! 🔥', 'success');
+        UI.showNotification('Battle begins! Find your opponent\'s number!', 'success');
     }
 
     static handleGuessResult(data) {
@@ -449,7 +450,7 @@ class Game {
         if (data.isCorrect) {
             this.currentState.hasFinished = true;
             
-            UI.showGameMessage(`🎉 Excellent! You found the number in ${data.attempts} attempts! Now wait for your opponent...`, 'success');
+            UI.showGameMessage(`Excellent! You found the number in ${data.attempts} attempts! Now wait for your opponent...`, 'success');
             
             
             const guessInput = document.getElementById('guessInput');
@@ -458,7 +459,7 @@ class Game {
             guessInput.disabled = true;
             guessInput.placeholder = 'You found it!';
             guessBtn.disabled = true;
-            guessBtn.textContent = '✅ Finished!';
+            guessBtn.textContent = 'Finished!';
             guessBtn.classList.add('finished');
             
             
@@ -482,13 +483,13 @@ class Game {
         
         if (data.playerId === socketClient.gameState.playerId) {
             if (data.isFirstToFinish) {
-                UI.showNotification(`🎯 Excellent! You found it first in ${data.attempts} attempts! Waiting for opponent to finish...`, 'success', 4000);
+                UI.showNotification(`Excellent! You found it first in ${data.attempts} attempts! Waiting for opponent to finish...`, 'success', 4000);
             } else {
-                UI.showNotification(`✅ You found it in ${data.attempts} attempts! Let's see who wins...`, 'success', 4000);
+                UI.showNotification(`You found it in ${data.attempts} attempts! Let's see who wins...`, 'success', 4000);
             }
         } else {
             if (data.isFirstToFinish && !this.currentState.hasFinished) {
-                UI.showNotification(`⚡ ${data.playerName} found it first in ${data.attempts} attempts! You need fewer attempts to win!`, 'warning', 5000);
+                UI.showNotification(`${data.playerName} found it first in ${data.attempts} attempts! You need fewer attempts to win!`, 'warning', 5000);
             } else if (!this.currentState.hasFinished) {
                 UI.showNotification(`${data.playerName} found it in ${data.attempts} attempts! Keep going!`, 'info', 4000);
             }
@@ -503,11 +504,11 @@ class Game {
     
     static handleOpponentFinishedFirst(data) {
         
-        const { opponentName, opponentAttempts, yourAttempts, attemptsToWin } = data;
-        
+        const { opponentName, opponentAttempts, yourAttempts, attemptsToWin, attemptsToTie } = data;
+        const attemptsLeft = (attemptsToTie || opponentAttempts) - yourAttempts;
         
         UI.showNotification(
-            `${opponentName} found it in ${opponentAttempts} attempts! You have ${yourAttempts} attempts so far. Find it in ${attemptsToWin} or fewer to win!`, 
+            `${opponentName} found it in ${opponentAttempts} attempts! You have ${yourAttempts} so far. ${attemptsLeft} attempts left to win or tie!`, 
             'warning', 
             6000, 
             'competitive'
@@ -515,7 +516,7 @@ class Game {
         
         
         UI.showGameMessage(
-            `🏁 FINAL SPRINT! You need to find it in ${attemptsToWin} or fewer attempts to beat ${opponentName}!`, 
+            `FINAL SPRINT! Find it in ${opponentAttempts} or fewer to win or tie! (Remaining: ${attemptsLeft})`, 
             'warning'
         );
         
@@ -524,7 +525,7 @@ class Game {
         gameScreen.classList.add('competitive-mode');
         
         
-        document.getElementById('opponentTarget').innerHTML = `<span class="finished-indicator">✅ Found it!</span>`;
+        document.getElementById('opponentTarget').innerHTML = `<span class="finished-indicator">Found it!</span>`;
     }
 
     
@@ -537,13 +538,13 @@ class Game {
         const guessBtn = document.getElementById('makeGuessBtn');
         
         guessInput.disabled = true;
-        guessInput.placeholder = '✅ You finished first!';
+        guessInput.placeholder = 'You finished first!';
         guessBtn.disabled = true;
-        guessBtn.textContent = '✅ Waiting...';
+        guessBtn.textContent = 'Waiting...';
         guessBtn.classList.add('finished');
         
         
-        UI.showGameMessage(`🏆 You finished first! Waiting for your opponent to complete...`, 'success');
+        UI.showGameMessage(`You finished first! Waiting for your opponent to complete...`, 'success');
         
         
         if (data.opponentAttempts) {
@@ -562,14 +563,14 @@ class Game {
         UI.showScreen('resultsScreen');
         
         
-        document.getElementById('resultEmoji').textContent = '🏆';
-        document.getElementById('resultTitle').textContent = 'Victory by Default! 🏆';
+        document.getElementById('resultEmoji').textContent = ''; 
+        document.getElementById('resultTitle').textContent = 'Victory by Default!';
         
         document.getElementById('myResultName').innerHTML = `${data.winner.name} <small>(You)</small>`;
         document.getElementById('opponentResultName').innerHTML = `${data.leftPlayer.name} <small>(Left)</small>`;
         
         document.getElementById('myFinalAttempts').textContent = data.winner.attempts || 0;
-        document.getElementById('opponentFinalAttempts').textContent = '❌';
+        document.getElementById('opponentFinalAttempts').textContent = 'X';
         document.getElementById('myTotalWins').textContent = (this.currentState.player?.wins || 0) + 1;
         document.getElementById('opponentTotalWins').textContent = 0;
         
@@ -585,7 +586,7 @@ class Game {
         
         document.getElementById('nextRoundBtn').style.display = 'none';
         
-        UI.showNotification('Your opponent left the game. You win by default! 🏆', 'success');
+        UI.showNotification('Your opponent left the game. You win by default!', 'success');
     }
 
     static handleOpponentGuessed(data) {
@@ -595,7 +596,7 @@ class Game {
         
         
         if (data.isCorrect) {
-            UI.showNotification(`💥 ${data.opponentName} found your number! The round is over.`, 'warning');
+            UI.showNotification(`${data.opponentName} found your number! The round is over.`, 'warning');
         } else {
             
             if (data.attempts % 2 === 0 || data.attempts <= 5) { 
@@ -623,24 +624,24 @@ class Game {
         
         if (isWinner) {
             if (additionalData.winReason === 'fewer_attempts') {
-                message = `🏆 Victory! You won with ${additionalData.winnerAttempts} attempts vs ${additionalData.loserAttempts} attempts!`;
+                message = `Victory! You won with ${additionalData.winnerAttempts} attempts vs ${additionalData.loserAttempts} attempts!`;
             } else if (additionalData.winReason === 'same_attempts_faster') {
-                message = `🏆 Victory! Same attempts (${additionalData.winnerAttempts}), but you were faster!`;
+                message = `Victory! Same attempts (${additionalData.winnerAttempts}), but you were faster!`;
             } else if (additionalData.winReason === 'exceeded_attempts') {
-                message = `🏆 Victory! Your opponent exceeded your ${additionalData.winnerAttempts} attempts!`;
+                message = `Victory! Your opponent exceeded your ${additionalData.winnerAttempts} attempts!`;
             } else {
-                message = `🎉 Round victory! You won in ${data.roundResult.winner.attempts} attempts!`;
+                message = `Round victory! You won in ${data.roundResult.winner.attempts} attempts!`;
             }
             this.playSound('win');
         } else {
             if (additionalData.winReason === 'fewer_attempts') {
-                message = `😔 Defeat! Opponent won with ${additionalData.winnerAttempts} vs your ${additionalData.loserAttempts} attempts.`;
+                message = `Defeat! Opponent won with ${additionalData.winnerAttempts} vs your ${additionalData.loserAttempts} attempts.`;
             } else if (additionalData.winReason === 'same_attempts_faster') {
-                message = `😔 So close! Same attempts (${additionalData.winnerAttempts}), but they were faster!`;
+                message = `So close! Same attempts (${additionalData.winnerAttempts}), but they were faster!`;
             } else if (additionalData.winReason === 'exceeded_attempts') {
-                message = `😔 You exceeded their ${additionalData.winnerAttempts} attempts. Better luck next round!`;
+                message = `You exceeded their ${additionalData.winnerAttempts} attempts. Better luck next round!`;
             } else {
-                message = `Round complete! Better luck next time! 💪`;
+                message = `Round complete! Better luck next time!`;
             }
             this.playSound('lose');
         }
@@ -650,11 +651,11 @@ class Game {
         
         if (additionalData.earlyEnd) {
             setTimeout(() => {
-                UI.showNotification(`⚡ Game ended early - no point continuing when victory is impossible!`, 'info', 4000);
+                UI.showNotification(`Game ended early - no point continuing when victory is impossible!`, 'info', 4000);
             }, 2000);
         } else if (additionalData.bothFinished) {
             setTimeout(() => {
-                UI.showNotification(`🎯 Both players found the number! Winner determined by performance.`, 'info', 4000);
+                UI.showNotification(`Both players found the number! Winner determined by performance.`, 'info', 4000);
             }, 2000);
         }
         
@@ -678,21 +679,22 @@ class Game {
         
         
         endGameDiv.innerHTML = `
-            <h4>🎮 What's Next?</h4>
+            <h4>What's Next?</h4>
             <div class="quick-actions">
-                <button class="btn btn-success pulse-animation" onclick="Game.requestRematch()">🔄 Rematch</button>
-                <button class="btn btn-primary" onclick="Game.changeSettings()">⚙️ Change Settings</button>
-                <button class="btn btn-danger" onclick="Game.confirmLeaveParty()">🏠 Main Menu</button>
+                <button class="btn btn-success" onclick="Game.requestRematch()"><i data-lucide="rotate-ccw"></i> Rematch</button>
+                <button class="btn btn-primary" onclick="Game.changeSettings()"><i data-lucide="settings"></i> Change Settings</button>
+                <button class="btn btn-danger" onclick="Game.confirmLeaveParty()"><i data-lucide="home"></i> Main Menu</button>
             </div>
-            <p class="action-help"><small>💡 <strong>Rematch:</strong> Direct to number selection with same range | <strong>Change Settings:</strong> Return to lobby to adjust range | <strong>Main Menu:</strong> Leave party</small></p>
+            <p class="action-help"><small><i data-lucide="info" class="inline-icon"></i> <strong>Rematch:</strong> Direct to number selection with same range | <strong>Change Settings:</strong> Return to lobby to adjust range | <strong>Main Menu:</strong> Leave party</small></p>
         `;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
     
     static requestRematch() {
         
         
-        UI.showNotification('🔄 Starting rematch...', 'info', 2000);
+        UI.showNotification('Starting rematch...', 'info', 2000);
         
         
         this.currentState.hasFinished = false;
@@ -708,7 +710,7 @@ class Game {
         
         
         UI.showLoadingOverlay('Returning to lobby...');
-        UI.showNotification('⚙️ Back to lobby...', 'info', 2000);
+        UI.showNotification('Back to lobby...', 'info', 2000);
         
         
         this.currentState.hasFinished = false;
@@ -742,19 +744,21 @@ class Game {
         UI.disableSettings(!isHost);
         
         if (isHost) {
-            UI.showNotification('⚙️ Change settings and start!', 'info', 3000);
+            UI.showNotification('Change settings and start!', 'info', 3000);
         } else {
-            UI.showNotification('⏳ Waiting for host...', 'info', 3000);
+            UI.showNotification('Waiting for host...', 'info', 3000);
         }
     }
     
     
     static confirmLeaveParty() {
-        const confirmed = confirm('🚔 Are you sure you want to leave this party and return to the main menu?\n\nYour session progress will be lost.');
-        
-        if (confirmed) {
-            this.leaveParty();
-        }
+        UI.showConfirmDialog(
+            'Leave Game?',
+            'Are you sure you want to leave this party and return to the main menu? Your session progress will be lost.',
+            () => {
+                this.leaveParty();
+            }
+        );
     }
     
     
@@ -775,8 +779,9 @@ class Game {
         const guessBtn = document.getElementById('makeGuessBtn');
         if (guessBtn) {
             guessBtn.disabled = false;
-            guessBtn.textContent = '🎯 Guess!';
+            guessBtn.innerHTML = '<i data-lucide="target"></i> Guess!';
             guessBtn.classList.remove('finished');
+            if (typeof lucide !== 'undefined') lucide.createIcons();
         }
         
         
@@ -846,14 +851,14 @@ class Game {
         UI.showScreen('selectionScreen');
         UI.updateSelectionScreen(data.party, data.selectionTimeLimit);
         
-        UI.showNotification(`Round ${data.party.currentRound} started! Choose wisely! 🎯`, 'success');
+        UI.showNotification(`Round ${data.party.currentRound} started! Choose wisely!`, 'success');
     }
 
     static handleRematchRequested(data) {
         
         if (data.playerId === socketClient.gameState.playerId) {
             
-            UI.showNotification('🔄 Rematch requested! Waiting for opponent to agree...', 'info', 3000);
+            UI.showNotification('Rematch requested! Waiting for opponent to agree...', 'info', 3000);
             this.updateRematchButtons('waiting');
         } else {
             
@@ -876,7 +881,7 @@ class Game {
         
         
         const range = `${data.party.gameSettings.rangeStart}-${data.party.gameSettings.rangeEnd}`;
-        UI.showNotification(`🔄 Rematch! Range: ${range} - Choose your secret number! 🍀`, 'success');
+        UI.showNotification(`Rematch! Range: ${range} - Choose your secret number!`, 'success');
     }
 
     static updateRematchButtons(state) {
@@ -888,20 +893,18 @@ class Game {
         
         switch (state) {
             case 'waiting':
-                playAgainBtn.textContent = '⏳ Waiting for opponent...';
+                playAgainBtn.innerHTML = '<i data-lucide="clock"></i> Waiting for opponent...';
                 playAgainBtn.disabled = true;
-                playAgainBtn.classList.remove('pulse-animation');
                 break;
             case 'requested':
-                playAgainBtn.textContent = '✅ Accept Rematch';
+                playAgainBtn.innerHTML = '<i data-lucide="check-circle"></i> Accept Rematch';
                 playAgainBtn.disabled = false;
-                playAgainBtn.classList.add('pulse-animation');
                 break;
             default:
-                playAgainBtn.textContent = '🎯 Play Again';
+                playAgainBtn.innerHTML = '<i data-lucide="rotate-ccw"></i> Play Again';
                 playAgainBtn.disabled = false;
-                playAgainBtn.classList.add('pulse-animation');
         }
+        if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
     static handlePlayerTyping(data) {
@@ -937,7 +940,7 @@ class Game {
                 UI.showScreen('welcomeScreen');
         }
         
-        UI.showNotification('Reconnected successfully! 🔄', 'success');
+        UI.showNotification('Reconnected successfully!', 'success');
     }
 
     
@@ -1280,14 +1283,14 @@ class Game {
     
     static showGameTips() {
         const tips = [
-            "💡 Use binary search strategy: start with the middle number!",
-            "🎯 Pay attention to 'close' vs 'far' feedback!",
-            "🧠 Remember your previous guesses to narrow down the range!",
-            "⚡ The fewer attempts, the better your performance rating!",
-            "🤝 In multiplayer, both players must find the number - it's not a race!",
-            "🔥 Choose your secret number wisely - not too obvious!",
-            "📊 Optimal attempts for range 1-100: about 7 guesses maximum!",
-            "🎮 Best of 3 rounds makes for more competitive gameplay!"
+            "Use binary search strategy: start with the middle number!",
+            "Pay attention to 'close' vs 'far' feedback!",
+            "Remember your previous guesses to narrow down the range!",
+            "The fewer attempts, the better your performance rating!",
+            "In multiplayer, both players must find the number - it's not a race!",
+            "Choose your secret number wisely - not too obvious!",
+            "Optimal attempts for range 1-100: about 7 guesses maximum!",
+            "Best of 3 rounds makes for more competitive gameplay!"
         ];
         
         const randomTip = tips[Math.floor(Math.random() * tips.length)];

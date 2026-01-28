@@ -210,7 +210,7 @@
                         <div class="player-battle-card" id="myBattleCard">
                             <div class="player-header">
                                 <div class="player-name" id="myBattleName">You</div>
-                                <div class="player-target">Guessing: <span id="opponentTarget">???</span></div>
+                                <div class="player-target">Goal: <span id="opponentTarget">???</span></div>
                             </div>
                             <div class="player-stats">
                                 <div class="stat">
@@ -229,7 +229,7 @@
                         <div class="player-battle-card" id="opponentBattleCard">
                             <div class="player-header">
                                 <div class="player-name" id="opponentBattleName">Opponent</div>
-                                <div class="player-target">Guessing: <span id="myTarget">???</span></div>
+                                <div class="player-target">Goal: <span id="myTarget">???</span></div>
                             </div>
                             <div class="player-stats">
                                 <div class="stat">
@@ -246,20 +246,10 @@
                 </div>
 
                 <div class="guess-section">
-                    <div class="range-visualizer-container">
-                        <div class="range-labels">
-                            <span id="visualRangeMin">1</span>
-                            <span>Remaining Range</span>
-                            <span id="visualRangeMax">100</span>
-                        </div>
-                        <div class="range-visualizer">
-                            <div class="range-bar-active" id="visualRangeBar" style="left: 0%; width: 100%;"></div>
-                        </div>
-                    </div>
                     <div class="input-group">
                         <label for="guessInput">Your Guess <span class="range-hint" id="guessRange"></span></label>
                         <input type="number" class="input-field guess-input" id="guessInput" placeholder="Enter your guess" required>
-                        <div class="input-hint" id="guessHint">Find your opponent's secret number!</div>
+                        <div class="input-hint" id="guessHint">Find the secret number!</div>
                     </div>
                     <button class="btn btn-primary" id="makeGuessBtn" type="button"><i data-lucide="target"></i> Guess!</button>
                 </div>

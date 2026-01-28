@@ -11,7 +11,7 @@ class GameService {
         if (guess === target) {
             return {
                 type: 'success',
-                message: '🎉 Correct! You found the number!',
+                message: 'Correct! You found the number!',
                 isCorrect: true
             };
         }
@@ -86,23 +86,23 @@ class GameService {
         if (attempts === 1) {
             rating = 'legendary';
             message = 'Incredible! First try! Are you a mind reader?';
-            emoji = '🍀';
+            emoji = 'sparkles';
         } else if (attempts <= optimalAttempts) {
             rating = 'excellent';
             message = 'Excellent strategy! You played like a pro!';
-            emoji = '🧠';
+            emoji = 'brain';
         } else if (attempts <= optimalAttempts * 1.5) {
             rating = 'good';
             message = 'Great job! Well played!';
-            emoji = '👍';
+            emoji = 'thumbs-up';
         } else if (attempts <= optimalAttempts * 2) {
             rating = 'fair';
             message = 'Good effort! You got there in the end!';
-            emoji = '😊';
+            emoji = 'smile';
         } else {
             rating = 'needs_improvement';
             message = 'Mission accomplished! Practice makes perfect!';
-            emoji = '🎯';
+            emoji = 'target';
         }
 
         return {
@@ -225,16 +225,16 @@ class GameService {
 
         if (winRate >= 80 && avgAttempts <= optimalAttempts * 1.2) {
             rating = 'master';
-            message = 'Number Guessing Master! 🏆';
+            message = 'Number Guessing Master!';
         } else if (winRate >= 60 && avgAttempts <= optimalAttempts * 1.5) {
             rating = 'expert';
-            message = 'Expert Player! Keep it up! 🎯';
+            message = 'Expert Player! Keep it up!';
         } else if (winRate >= 40) {
             rating = 'intermediate';
-            message = 'Getting better! Practice makes perfect! 📈';
+            message = 'Getting better! Practice makes perfect!';
         } else {
             rating = 'beginner';
-            message = 'Keep playing to improve! 🌟';
+            message = 'Keep playing to improve!';
         }
 
         return { rating, message };
@@ -253,7 +253,7 @@ class GameService {
                     id: 'first_game',
                     title: 'Welcome Player!',
                     description: 'Completed your first game',
-                    icon: '🎮'
+                    icon: 'gamepad-2'
                 });
             }
 
@@ -263,7 +263,7 @@ class GameService {
                     id: 'perfect_game',
                     title: 'Mind Reader',
                     description: 'Won in just 1 attempt!',
-                    icon: '🧠'
+                    icon: 'brain'
                 });
             }
 
@@ -273,7 +273,7 @@ class GameService {
                     id: 'win_streak',
                     title: 'On Fire!',
                     description: `${player.wins} wins in a row!`,
-                    icon: '🔥'
+                    icon: 'flame'
                 });
             }
 
@@ -283,7 +283,7 @@ class GameService {
                     id: 'efficient_player',
                     title: 'Strategic Mastermind',
                     description: 'Consistently efficient gameplay',
-                    icon: '🎯'
+                    icon: 'target'
                 });
             }
 
@@ -293,7 +293,7 @@ class GameService {
                     id: 'veteran',
                     title: 'Veteran Player',
                     description: 'Played 10+ games',
-                    icon: '🏅'
+                    icon: 'award'
                 });
             }
 
@@ -404,32 +404,32 @@ class GameService {
     getMotivationalMessage(player, context = 'general') {
         const messages = {
             general: [
-                "You've got this! 💪",
-                "Trust your instincts! 🎯",
-                "Every guess gets you closer! 🚀",
-                "Think strategically! 🧠",
-                "You're doing great! ⭐"
+                "You've got this!",
+                "Trust your instincts!",
+                "Every guess gets you closer!",
+                "Think strategically!",
+                "You're doing great!"
             ],
             behind: [
-                "Don't give up! You can catch up! 💪",
-                "Stay focused and think strategically! 🎯",
-                "Every expert was once a beginner! 🌟",
-                "Learn from each guess! 📚",
-                "Your comeback starts now! 🚀"
+                "Don't give up! You can catch up!",
+                "Stay focused and think strategically!",
+                "Every expert was once a beginner!",
+                "Learn from each guess!",
+                "Your comeback starts now!"
             ],
             ahead: [
-                "You're in the lead! Keep it up! 🏆",
-                "Excellent strategy! 🎯",
-                "You're on fire! 🔥",
-                "Maintain your focus! ⭐",
-                "Victory is within reach! 🏅"
+                "You're in the lead! Keep it up!",
+                "Excellent strategy!",
+                "You're on fire!",
+                "Maintain your focus!",
+                "Victory is within reach!"
             ],
             close: [
-                "So close! You can feel it! 🔥",
-                "The answer is right there! 👁️",
-                "Trust your instincts now! ⚡",
-                "You're practically touching it! ✨",
-                "One more strategic move! 🎯"
+                "So close! You can feel it!",
+                "The answer is right there!",
+                "Trust your instincts now!",
+                "You're practically touching it!",
+                "One more strategic move!"
             ]
         };
 

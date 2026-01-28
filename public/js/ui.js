@@ -587,17 +587,21 @@ class UI {
         dialog.className = 'confirm-dialog';
         dialog.innerHTML = `
             <div class="confirm-overlay"></div>
-            <div class="confirm-content">
-                <h3 class="confirm-title">${title}</h3>
+            <div class="confirm-content active">
+                <div class="confirm-header">
+                    <i data-lucide="help-circle" class="confirm-icon"></i>
+                    <h3 class="confirm-title">${title}</h3>
+                </div>
                 <p class="confirm-message">${message}</p>
                 <div class="confirm-buttons">
-                    <button class="btn btn-danger confirm-yes">Yes</button>
-                    <button class="btn btn-secondary confirm-no">No</button>
+                    <button class="btn btn-danger confirm-yes"><i data-lucide="log-out"></i> Leave</button>
+                    <button class="btn btn-secondary confirm-no">Cancel</button>
                 </div>
             </div>
         `;
 
         document.body.appendChild(dialog);
+        if (typeof lucide !== 'undefined') lucide.createIcons();
 
         
         dialog.querySelector('.confirm-yes').onclick = () => {
@@ -1197,24 +1201,6 @@ class UI {
     }
 
     static addGuessToHistory(guess, feedback) {
-        // Update local tracking for visualizer
-        if (!feedback.isCorrect) {
-            if (feedback.direction === 'high') {
-                this.currentPossibleMax = Math.min(this.currentPossibleMax, guess - 1);
-            } else {
-                this.currentPossibleMin = Math.max(this.currentPossibleMin, guess + 1);
-            }
-            
-            let rangeStart = 1, rangeEnd = 100;
-            if (typeof Game !== 'undefined' && Game.currentState && Game.currentState.party) {
-                rangeStart = Game.currentState.party.gameSettings.rangeStart;
-                rangeEnd = Game.currentState.party.gameSettings.rangeEnd;
-            }
-            this.updateRangeVisualizer(rangeStart, rangeEnd);
-        } else {
-            this.triggerWinConfetti();
-        }
-
         const historyContent = document.querySelector('#gameGuessHistory .history-content');
         
         
@@ -1243,27 +1229,15 @@ class UI {
         guessItem.appendChild(guessNumber);
         guessItem.appendChild(guessFeedback);
         
-        historyContent.appendChild(guessItem);
+        // Prepend so most recent is at the top
+        historyContent.insertBefore(guessItem, historyContent.firstChild);
+        
+        // No need to scroll to bottom anymore
         
         // Refresh icons for new history item
         if (typeof lucide !== 'undefined') {
             lucide.createIcons();
         }
-        
-        
-        const historyContainer = document.getElementById('gameGuessHistory');
-        historyContainer.scrollTo({
-            top: historyContainer.scrollHeight,
-            behavior: 'smooth'
-        });
-        
-        
-        setTimeout(() => {
-            guessItem.classList.add('new-guess');
-            setTimeout(() => {
-                guessItem.classList.remove('new-guess');
-            }, 1000);
-        }, 100);
     }
 
     static getFeedbackText(feedback) {

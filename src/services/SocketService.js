@@ -400,11 +400,12 @@ class SocketService {
                     opponentName: player.name,
                     opponentAttempts: player.attempts,
                     yourAttempts: opponent.attempts,
-                    attemptsToWin: player.attempts - 1
+                    attemptsToWin: player.attempts - 1,
+                    attemptsToTie: player.attempts
                 });
                 
                 this.io.to(player.socketId).emit('waiting_for_opponent', {
-                    message: `You found it in ${player.attempts} attempts! Waiting for opponent...`,
+                    message: `You found it in ${player.attempts} attempts! Waiting for opponent to finish...`,
                     opponentAttempts: opponent.attempts
                 });
             } else {
