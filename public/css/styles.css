@@ -623,102 +623,116 @@ body::before {
     color: rgba(255, 255, 255, 0.5);
 }
 
-/* Enhanced Buttons with Loading States */
+/* Subtle & Professional Button System */
 .btn {
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    background: var(--primary);
     color: #ffffff;
     border: none;
-    padding: 15px 25px;
-    border-radius: 12px;
-    font-size: 1rem;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 0.95rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
-    margin: 5px;
-    min-width: 140px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    position: relative;
-    overflow: hidden;
+    transition: var(--transition-fast);
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
+    text-transform: none;
+    letter-spacing: normal;
 }
 
 .btn:hover:not(:disabled):not(.loading) {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(79, 172, 254, 0.4);
+    background: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .btn:active:not(:disabled):not(.loading) {
     transform: translateY(0);
 }
 
-.btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
+.btn-secondary { background: #475569; }
+.btn-secondary:hover { background: #334155; }
+
+.btn-success { background: var(--success); }
+.btn-success:hover { background: #047857; }
+
+.btn-danger { background: var(--danger); }
+.btn-danger:hover { background: #b91c1c; }
+
+/* Integrated Back Button */
+.back-btn {
+    position: absolute;
+    top: 1.5rem;
+    left: 1.5rem;
+    padding: 8px 12px !important;
+    font-size: 0.8rem !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid var(--glass-border) !important;
+    color: var(--text-muted) !important;
+    border-radius: 6px !important;
+    min-width: auto !important;
+    z-index: 100;
 }
 
-/* Loading Button State */
-.btn.loading {
-    opacity: 0.8;
-    cursor: wait;
-    pointer-events: none;
+.back-btn:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: var(--text-main) !important;
 }
 
-.btn.loading::before {
-    content: '';
-    width: 16px;
-    height: 16px;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    border-top: 2px solid #ffffff;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin-right: 8px;
+/* Result Screen Layout */
+.end-game-actions {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--glass-border);
 }
 
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+.quick-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin: 1.5rem 0;
 }
 
-/* Success/Error Button States */
-.btn.success {
-    background: linear-gradient(135deg, #51cf66 0%, #40c057 100%) !important;
+/* Guess History: Newest on Top */
+.guess-history {
+    margin-top: 2rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    padding: 1.5rem;
 }
 
-.btn.error {
-    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%) !important;
+.history-content {
+    display: flex;
+    flex-direction: column; /* JS will prepend */
+    gap: 8px;
 }
 
-.btn.success::before,
-.btn.error::before {
-    display: none;
+.guess-item {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    padding: 12px 20px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    animation: slideDown 0.3s ease-out;
 }
 
-.btn-primary {
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-.btn-secondary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+.guess-item:first-child {
+    border-color: var(--primary);
+    background: rgba(79, 70, 229, 0.08);
 }
 
-.btn-success {
-    background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
-}
-
-.btn-danger {
-    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
-}
-
-.btn-copy {
-    background: linear-gradient(135deg, #ffd93d 0%, #ff6b6b 100%);
-    color: #333;
-    font-weight: 700;
-}
+/* Cleanup: Remove Visualizer Styles */
+.range-visualizer-container { display: none !important; }
+.range-visualizer { display: none !important; }
 
 .button-group {
     display: flex;
@@ -2501,6 +2515,61 @@ body::before {
     from { transform: scale(0); opacity: 0; }
     to { transform: scale(1); opacity: 1; }
 }
+
+/* Professional Confirmation Modal */
+.confirm-dialog {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+.confirm-overlay {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+}
+
+.confirm-content {
+    background: #1e293b;
+    border: 1px solid var(--glass-border);
+    padding: 2rem;
+    border-radius: var(--radius-lg);
+    width: 90%;
+    max-width: 400px;
+    position: relative;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    animation: zoomIn 0.2s ease-out;
+}
+
+@keyframes zoomIn {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.confirm-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 1rem;
+}
+
+.confirm-icon {
+    color: var(--primary);
+    width: 24px;
+    height: 24px;
+}
+
+.confirm-title { margin: 0; }
+.confirm-message { color: var(--text-muted); margin-bottom: 2rem; }
+.confirm-buttons { display: flex; gap: 12px; justify-content: flex-end; }
 
 /* Mobile Optimizations */
 @media (max-width: 768px) {

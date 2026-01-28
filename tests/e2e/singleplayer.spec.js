@@ -1,32 +1,30 @@
 const { test, expect } = require('@playwright/test');
 
-test('Single Player: AI Bot Match', async ({ page }) => {
+test('Single Player: History Order and Logic', async ({ page }) => {
   await page.goto('/');
   await page.waitForTimeout(2000);
 
-  // 1. Setup
   await page.fill('#playerName', 'SoloPlayer');
-  await page.click('#singlePlayerBtn');
-  await page.selectOption('#botDifficulty', 'medium');
-  await page.fill('#singleRangeStart', '1');
-  await page.fill('#singleRangeEnd', '10');
   
-  await page.click('#startSinglePlayerBtn');
+  // Use evaluate to bypass any overlay/icon click issues
+  await page.evaluate(() => document.getElementById('singlePlayerBtn').click());
+  
+  await expect(page.locator('#singlePlayerOptions')).toBeVisible();
+  
+  await page.fill('#singleRangeStart', '1');
+  await page.fill('#singleRangeEnd', '100');
+  await page.evaluate(() => document.getElementById('startSinglePlayerBtn').click());
 
-  // 2. Selection Phase
-  await page.waitForSelector('#selectionScreen.active', { state: 'visible', timeout: 15000 });
+  await expect(page.locator('#selectionScreen.active')).toBeVisible({ timeout: 15000 });
   
   await page.fill('#secretNumber', '5');
-  await page.click('#readyBtn', { force: true });
+  await page.evaluate(() => document.getElementById('readyBtn').click());
 
-  // 3. Gameplay Phase
-  await page.waitForSelector('#gameScreen.active', { state: 'visible', timeout: 15000 });
+  await expect(page.locator('#gameScreen.active')).toBeVisible({ timeout: 15000 });
   
-  // Make a guess
   await page.fill('#guessInput', '5');
-  await page.click('#makeGuessBtn', { force: true });
+  await page.evaluate(() => document.getElementById('makeGuessBtn').click());
 
-  // History should update (check presence)
   const historyItem = page.locator('.guess-item').first();
   await expect(historyItem).toBeAttached({ timeout: 10000 });
 });

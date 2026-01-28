@@ -11,50 +11,54 @@ test('Multiplayer: Full Match + Rematch Flow', async ({ browser }) => {
 
   // 1. Setup
   await host.fill('#playerName', 'TheHost');
-  await host.click('#multiplayerBtn');
-  await host.click('#createPartyBtn');
+  // Use more specific selectors for buttons with icons
+  await host.locator('button#multiplayerBtn').click();
+  await expect(host.locator('#multiplayerOptions')).toBeVisible();
+  await host.locator('button#createPartyBtn').click();
   
   await host.waitForSelector('#lobbyPartyCode:not(:empty)');
   const code = (await host.textContent('#lobbyPartyCode')).trim();
 
   await guest.fill('#playerName', 'TheGuest');
-  await guest.click('#multiplayerBtn');
-  await guest.click('#joinPartyBtn');
+  await guest.locator('button#multiplayerBtn').click();
+  await expect(guest.locator('#multiplayerOptions')).toBeVisible();
+  await guest.locator('button#joinPartyBtn').click();
+  await expect(guest.locator('#joinPartyDiv')).toBeVisible();
   await guest.fill('#partyCodeInput', code);
-  await guest.click('#joinPartySubmitBtn');
+  await guest.locator('button#joinPartySubmitBtn').click();
 
   // Wait for both to be in lobby
   await host.waitForSelector('#player2Name:has-text("TheGuest")');
 
   // 2. Start
-  await host.click('#startGameBtn', { force: true });
+  await host.locator('button#startGameBtn').click({ force: true });
   
   // Wait for selection screen
-  await host.waitForSelector('#selectionScreen.active');
-  await guest.waitForSelector('#selectionScreen.active');
+  await expect(host.locator('#selectionScreen')).toBeVisible();
+  await expect(guest.locator('#selectionScreen')).toBeVisible();
 
   await host.fill('#secretNumber', '10');
-  await host.click('#readyBtn', { force: true });
+  await host.locator('button#readyBtn').click({ force: true });
   await guest.fill('#secretNumber', '20');
-  await guest.click('#readyBtn', { force: true });
+  await guest.locator('button#readyBtn').click({ force: true });
 
   // 3. Play & Win
-  await host.waitForSelector('#gameScreen.active');
-  await guest.waitForSelector('#gameScreen.active');
+  await expect(host.locator('#gameScreen')).toBeVisible();
+  await expect(guest.locator('#gameScreen')).toBeVisible();
 
   await guest.fill('#guessInput', '10');
-  await guest.click('#makeGuessBtn', { force: true });
+  await guest.locator('button#makeGuessBtn').click({ force: true });
   await host.fill('#guessInput', '50');
-  await host.click('#makeGuessBtn', { force: true });
+  await host.locator('button#makeGuessBtn').click({ force: true });
 
-  await guest.waitForSelector('#resultsScreen.active');
+  await expect(guest.locator('#resultsScreen')).toBeVisible();
 
   // 4. Test Rematch Flow
-  await guest.click('button:has-text("Rematch")', { force: true });
-  await host.click('button:has-text("Rematch")', { force: true });
+  await guest.locator('button:has-text("Rematch")').click({ force: true });
+  await host.locator('button:has-text("Rematch")').click({ force: true });
 
   // Should be back in selection
-  await host.waitForSelector('#selectionScreen.active');
+  await expect(host.locator('#selectionScreen')).toBeVisible();
   
   await hostContext.close();
   await guestContext.close();
