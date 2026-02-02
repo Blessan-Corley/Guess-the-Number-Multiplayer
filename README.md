@@ -1,128 +1,135 @@
-# Number Guesser - Real-time Multiplayer Game
+# NumDuel
 
-A real-time multiplayer number guessing game built with Node.js and Socket.IO. Challenge friends in exciting brain battles.
+Real-time 1v1 number guessing game. Two players set secret numbers within a shared range, then take turns guessing until someone wins.
 
-## Key Features
+**Live demo:** https://guess-the-number-multiplayer-3rk1.onrender.com/
 
-### Core Gameplay
-- **Real-time multiplayer** - Instant synchronization across devices
-- **Dynamic ranges** - Play with numbers from 1-10000
-- **Single round matches** - Quick and engaging gameplay
-- **Intelligent feedback** - Context-aware hints (close/far, high/low)
-- **Session tracking** - Win counts and performance stats
-
-### Technical Highlights
-- **WebSocket communication** - Zero-lag real-time gameplay
-- **Progressive Web App** - Install on any device as an app
-- **Mobile-first design** - Responsive and touch-friendly
-- **Auto-reconnection** - Handles network interruptions gracefully  
-- **Party code system** - Easy friend invitations with 6-digit codes
-- **Clean architecture** - Modular MVC design for maintainability
-
-### User Experience
-- **Smooth UI/UX** - Modern gradients and smooth animations
-- **Visual feedback** - Win badges, difficulty indicators, and performance tracking
-- **Accessibility features** - Screen reader support and keyboard navigation
-- **Cross-platform** - Works on desktop, tablet, and mobile
-
-## Quick Start
-
-```bash
-# Install dependencies
-npm install
-
-# Start development server
-npm start
-
-# Visit http://localhost:3000
-```
-
-## Technology Stack
-
-**Backend:**
-- Node.js with Express.js
-- Socket.IO for real-time communication
-- UUID for unique identifiers
-- Security middleware (Helmet, CORS)
-
-**Frontend:**
-- Vanilla JavaScript (ES6+)
-- Modern CSS3 with animations
-- Web Audio API for sound effects
-- PWA features with service worker
-
-**Architecture:**
-- Event-driven design with Socket.IO
-- Modular MVC pattern
-- Real-time state synchronization
-- Automatic cleanup and memory management
-
-## How to Play
-
-1. **Create/Join Party** - Share a 6-digit code with friends
-2. **Choose Settings** - Set number range as you like between (1-10000) and game mode
-3. **Select Secret** - Pick your number strategically  
-4. **Battle Phase** - Guess opponent's number with smart feedback
-5. **Win & Repeat** - Track session wins and play again
-
-## Project Structure
-
-```
-src/
-├── models/           # Game logic (Player, Party, Game)
-├── services/         # Business logic (GameService, SocketService)
-└── utils/           # Helpers (validators, message generator)
-
-public/
-├── js/              # Client-side game logic
-├── css/             # Styling and animations  
-└── assets/          # Images and favicon
-```
-
-## Configuration
-
-Environment variables in `.env`:
-```env
-PORT=3000
-NODE_ENV=development
-CLEANUP_INTERVAL=300000
-```
-
-Game settings in `config/config.js`:
-- Party size, timeouts, and range limits
-- Customizable feedback messages
-- Performance optimization settings
-
-## PWA Features
-
-- **Offline capable** - Service worker for offline gameplay
-- **Add to homescreen** - Native app-like experience
-- **Responsive design** - Works on all device sizes
-- **Fast loading** - Optimized assets and caching
-
-## Deployment Ready
-
-- **PM2 process management** - Production-ready scaling
-- **Docker support** - Containerized deployment
-- **Load balancer compatible** - Horizontal scaling
-- **Security hardened** - Input validation and rate limiting
-
-## Performance Optimizations
-
-- Automatic party cleanup for memory efficiency
-- Optimized WebSocket event handling  
-- Client-side state management
-- Graceful error handling and recovery
+![CI](https://github.com/Blessan-Corley/Guess-the-Number-Multiplayer/actions/workflows/main.yml/badge.svg)
 
 ---
 
-**Perfect for showcasing:**
-- Real-time web technologies
-- Modern JavaScript development
-- Responsive design principles  
-- Multiplayer game architecture
-- Production deployment skills
+![NumDuel demo](docs/assets/demo.gif)
 
-*Built with ❤️ for friends who needs fun!* 🎮✨
+## Features
 
-*If you find any bugs in the game feels free to open issue*
+- **Multiplayer 1v1** — create a party, share the 6-character code, play against a friend
+- **Single-player bot** — three difficulty levels (Easy / Medium / Hard)
+- **Player profiles & leaderboard** — win/loss record, best score, top 20 ranking
+- **Reconnect support** — players can rejoin an active match within 120 seconds of disconnect
+- **Public room directory** — browse and join open lobbies from the home screen
+- **Live UI updates** — profile and leaderboard refresh automatically after each completed match
+
+## Stack
+
+| Layer         | Technology                                     |
+| ------------- | ---------------------------------------------- |
+| Runtime       | Node.js 20, Express                            |
+| Real-time     | Socket.IO                                      |
+| Frontend      | Vanilla JS, HTML, CSS (no framework)           |
+| Session store | Redis / Upstash (in-memory fallback for tests) |
+| Persistence   | PostgreSQL / Neon                              |
+| Testing       | Jest, Playwright, Supertest                    |
+| CI            | GitHub Actions                                 |
+| Deploy        | Docker, Docker Hub, Render                     |
+
+## Project structure
+
+```
+config/           environment config and shared constants
+public/           frontend — HTML, CSS (11 modules), JS (~70 modules)
+src/
+  app/            service factory
+  contracts/      HTTP and socket payload schemas
+  errors/         custom error class and error codes
+  http/           Express routes and error middleware
+  lib/            database connection and migration runner
+  models/         Party and Player state machines
+  services/       game logic, party management, socket handlers, persistence
+  storage/        Redis and in-memory store adapters
+  utils/          validators, message generators
+tests/
+  services/       unit tests (25 suites)
+  integration/    integration tests (9 suites)
+  e2e/            Playwright end-to-end tests (3 suites)
+docs/
+  ARCHITECTURE.md architecture overview
+  DEPLOYMENT.md   hosting and scaling guide
+```
+
+## Local setup
+
+```bash
+npm install
+cp .env.example .env
+# Fill in DATABASE_URL — Redis is optional (falls back to in-memory)
+npm start
+```
+
+Open `http://localhost:3000`.
+
+**Development (hot reload):**
+
+```bash
+npm run dev
+```
+
+**Docker (includes Redis and PostgreSQL):**
+
+```bash
+docker compose up --build
+```
+
+## Testing
+
+```bash
+npm test               # unit and integration tests
+npm run test:coverage  # with coverage report
+npm run test:e2e       # Playwright end-to-end tests
+npm run test:ci        # full CI-style run
+```
+
+404 test cases across unit, integration, and E2E layers. Coverage thresholds enforced at 70%.
+
+## Screenshots
+
+| Home                                    | Lobby                                           |
+| --------------------------------------- | ----------------------------------------------- |
+| ![Home screen](docs/assets/welcome.png) | ![Lobby and match setup](docs/assets/lobby.png) |
+
+| In-game                                      | Match results                             |
+| -------------------------------------------- | ----------------------------------------- |
+| ![In-game waiting](docs/assets/gameplay.png) | ![Match results](docs/assets/results.png) |
+
+| Single-player setup                                   | Single-player result                    |
+| ----------------------------------------------------- | --------------------------------------- |
+| ![Single player setup](docs/assets/single-player.png) | ![You won](docs/assets/results-win.png) |
+
+## API endpoints
+
+| Method | Path                        | Description           |
+| ------ | --------------------------- | --------------------- |
+| GET    | `/api/health`               | Service health        |
+| GET    | `/api/readiness`            | Readiness check       |
+| GET    | `/api/config`               | Client configuration  |
+| GET    | `/api/stats`                | Active sessions count |
+| POST   | `/api/profiles/guest`       | Create guest profile  |
+| GET    | `/api/profile`              | Get profile by token  |
+| GET    | `/api/leaderboard`          | Top 20 players        |
+| GET    | `/api/profiles/:id/matches` | Match history         |
+| POST   | `/api/validate-party`       | Validate a party code |
+
+## Architecture
+
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for a full breakdown.
+
+The app runs as a single service — Express, Socket.IO, and REST APIs share one Node.js process. Redis stores active game sessions. PostgreSQL stores player profiles and match history. This keeps deployment to a single URL without needing a separate frontend service.
+
+## Deployment
+
+See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for Render, Railway, Heroku, and Docker instructions.
+
+GitHub Actions now gates merges with lint, coverage-tested unit/integration checks, a production bundle build, Playwright E2E, and a Docker smoke test. Pushes to `main` or a `v*` tag can also publish a Docker Hub image once `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` are configured.
+
+## License
+
+MIT
