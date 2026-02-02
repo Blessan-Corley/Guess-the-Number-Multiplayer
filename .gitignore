@@ -1,10 +1,7 @@
 # Dependencies
 node_modules/
 npm-debug.log*
-yarn-debug.log*
 yarn-error.log*
-package-lock.json
-yarn.lock
 
 # Environment variables
 .env
@@ -15,11 +12,10 @@ yarn.lock
 # Runtime data
 pids
 *.pid
-*.seed
 *.pid.lock
 
 # Logs
-logs
+logs/
 *.log
 
 # OS generated files
@@ -30,28 +26,57 @@ logs
 .Trashes
 ehthumbs.db
 Thumbs.db
+desktop.ini
 
-# IDE/Editor files
+# IDE and editor files
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
-.claude
 
 # Temporary files
 *.tmp
 *.temp
 
-# Build outputs (if you have any)
+# Build outputs
 dist/
 build/
 
-# Coverage directory used by tools like istanbul
+# Test outputs
 coverage/
+test-results/
+playwright-report/
+jest-results.json
 
-# Optional npm cache directory
+# npm cache
 .npm
 
-# Optional REPL history
+# REPL history
 .node_repl_history
+
+# AI assistant working files
+.claude/
+CLAUDE.md
+AGENTS.md
+agents.md
+GEMINI.md
+memory.md
+
+# Agent-generated planning docs (not part of the project)
+docs/superpowers/
+
+# Local tooling output
+.playwright-mcp/
+.VSCodeCounter/
+
+# Raw screenshot/recording captures in root (use docs/assets/ for committed screenshots)
+/Screenshot *.png
+/Screenshot *.jpg
+/Screenshot *.jpeg
+/Recording *.gif
+/Recording *.mp4
+/screenshot-*.png
+/screenshot-*.jpg
+/debug-*.png
+/debug-*.jpg
