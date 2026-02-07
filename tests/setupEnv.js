@@ -1,0 +1,15 @@
+process.env.NODE_ENV = 'test';
+process.env.STORE_MODE = 'memory';
+process.env.DATABASE_URL = '';
+process.env.UPSTASH_REDIS_REST_URL = '';
+process.env.UPSTASH_REDIS_REST_TOKEN = '';
+process.env.REDIS_URL = '';
+process.env.REDIS_HOST = 'localhost';
+process.env.REDIS_PORT = '6379';
+process.env.TRUST_PROXY = 'false';
+process.env.APP_VERSION = 'test';
+process.env.COMMIT_SHA = 'test';
+process.env.PORT = process.env.PORT || '3100';
+process.env.APP_BASE_URL = process.env.APP_BASE_URL || `http://127.0.0.1:${process.env.PORT}`;
+process.env.CORS_ORIGINS = process.env.CORS_ORIGINS || process.env.APP_BASE_URL;
+process.env.SOCKET_CORS_ORIGINS = process.env.SOCKET_CORS_ORIGINS || process.env.APP_BASE_URL;
