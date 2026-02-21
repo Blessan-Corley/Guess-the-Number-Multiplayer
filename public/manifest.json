@@ -1,45 +1,25 @@
 {
-  "name": "Multiplayer Number Guesser",
-  "short_name": "NumberGuesser",
-  "description": "Real-time multiplayer number guessing game with friends",
-  "version": "1.0.0",
-  "manifest_version": 2,
+  "name": "NumDuel",
+  "short_name": "NumDuel",
+  "description": "Fast solo and private multiplayer number duels.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
   "theme_color": "#1a1a2e",
-  "background_color": "#1a1a2e",
-  "scope": "/",
+  "background_color": "#0f172a",
   "lang": "en",
-  "categories": ["games", "entertainment", "social"],
+  "categories": ["games", "entertainment"],
   "icons": [
     {
       "src": "/favicon.svg",
       "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "type": "image/svg+xml"
     },
     {
       "src": "/favicon.ico",
       "sizes": "32x32",
       "type": "image/x-icon"
     }
-  ],
-  "features": [
-    "Real-time multiplayer gameplay",
-    "Party code system for easy joining",
-    "Single round matches",
-    "Mobile-optimized interface",
-    "Offline capability",
-    "Progressive Web App"
-  ],
-  "prefer_related_applications": false,
-  "related_applications": [],
-  "edge_side_panel": {
-    "preferred_width": 400
-  },
-  "handle_links": "preferred",
-  "launch_handler": {
-    "client_mode": "navigate-existing"
-  }
+  ]
 }

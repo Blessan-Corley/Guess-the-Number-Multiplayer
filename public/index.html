@@ -1,357 +1,802 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Number Guesser - Multiplayer Brain Challenge</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/styles.css">
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <link rel="icon" href="/favicon.ico" type="image/x-icon">
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/favicon.svg">
-    <meta name="description" content="Real-time multiplayer number guessing game with friends">
-    <meta name="theme-color" content="#1a1a2e">
-    
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="/manifest.json">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Number Guesser">
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NumDuel | Real-Time Number Duels</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/css/tokens.css?v=3.3" />
+    <link rel="stylesheet" href="/css/layout.css?v=3.3" />
+    <link rel="stylesheet" href="/css/forms.css?v=3.3" />
+    <link rel="stylesheet" href="/css/welcome.css?v=3.3" />
+    <link rel="stylesheet" href="/css/lobby.css?v=3.3" />
+    <link rel="stylesheet" href="/css/gameplay.css?v=3.3" />
+    <link rel="stylesheet" href="/css/results.css?v=3.3" />
+    <link rel="stylesheet" href="/css/overlays.css?v=3.3" />
+    <link rel="stylesheet" href="/css/profile.css?v=3.3" />
+    <link rel="stylesheet" href="/css/theme-overrides.css?v=3.3" />
+    <script>
+      (function () {
+        var t = localStorage.getItem('numduel-theme');
+        if (t === 'light') document.documentElement.setAttribute('data-theme', 'light');
+        else if (t === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+      })();
+    </script>
+    <script
+      src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"
+      integrity="sha384-hJnF5AwidE18GSWTAGHv3ByzzvfNZ1Tcx5y1UUV3WkauuMCEzBJBMSwSt/PUPXnM"
+      crossorigin="anonymous"
+    ></script>
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/favicon.svg" />
+    <meta
+      name="description"
+      content="NumDuel is a fast solo and private multiplayer number duel game."
+    />
+    <meta name="theme-color" content="#1a1a2e" />
+
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="NumDuel" />
+  </head>
+  <body>
     <div class="game-container">
-        <!-- Header -->
-        <header class="header">
-            <h1>Number Guesser</h1>
-            <div class="party-info" id="partyInfo" style="display:none;">
-                Party: <span id="partyCodeDisplay"></span>
-            </div>
-        </header>
+      <!-- Header -->
+      <header class="header">
+        <div class="header-brand">
+          <p class="header-eyebrow">Signal Arena</p>
+          <h1>NumDuel</h1>
+        </div>
+        <div class="header-controls">
+          <div class="party-info" id="partyInfo" style="display: none">
+            Party: <span id="partyCodeDisplay"></span>
+          </div>
+          <button
+            class="btn theme-toggle-btn"
+            id="themeToggleBtn"
+            type="button"
+            aria-label="System theme"
+            title="System theme"
+          >
+            <i data-lucide="monitor"></i>
+          </button>
+        </div>
+      </header>
 
-        <main class="content">
-            <!-- Welcome Screen -->
-            <section class="screen active" id="welcomeScreen">
+      <main class="content">
+        <!-- Welcome Screen -->
+        <section class="screen active" id="welcomeScreen">
+          <div class="welcome-shell">
+            <div class="welcome-primary">
+              <div class="welcome-hero-card">
                 <div class="welcome-content">
-                    <div class="emoji-large"><i data-lucide="gamepad-2"></i></div>
-                    <h2>Welcome to the Number Guessing Challenge!</h2>
-                    <p>Challenge your friends or play against our smart AI bot.</p>
+                  <div class="welcome-tagline-row">
+                    <span class="welcome-tagline">Live number duels</span>
                     <div class="welcome-help">
-                        <a href="#" id="welcomeHowToPlay" class="help-link"><i data-lucide="info"></i> How to Play</a>
+                      <a href="#" id="welcomeHowToPlay" class="help-link"
+                        ><i data-lucide="info"></i> Rules</a
+                      >
                     </div>
-                </div>
-
-                <div class="input-group">
-                    <label for="playerName">Your Name</label>
-                    <input type="text" class="input-field" id="playerName" placeholder="Enter your name" maxlength="20" autocomplete="name" required>
+                  </div>
+                  <div class="emoji-large"><i data-lucide="crosshair"></i></div>
+                  <h2>Pick a mode. Set a range. Outguess first.</h2>
+                  <p>Solo drills or private 1v1 matches.</p>
                 </div>
 
                 <div class="game-mode-selection">
-                    <h3>Choose Game Mode</h3>
-                    <div class="mode-buttons">
-                        <button class="btn btn-mode" id="singlePlayerBtn" type="button"><i data-lucide="bot"></i> Single Player</button>
-                        <button class="btn btn-mode" id="multiplayerBtn" type="button"><i data-lucide="users"></i> Multiplayer</button>
-                    </div>
+                  <div class="mode-buttons">
+                    <button class="btn btn-mode mode-card" id="singlePlayerBtn" type="button">
+                      <span class="mode-card-top">
+                        <i data-lucide="bot"></i>
+                        Solo
+                      </span>
+                      <span class="mode-card-copy">Practice against the bot.</span>
+                    </button>
+                    <button class="btn btn-mode mode-card" id="multiplayerBtn" type="button">
+                      <span class="mode-card-top">
+                        <i data-lucide="users"></i>
+                        Private Match
+                      </span>
+                      <span class="mode-card-copy">Create or join a room.</span>
+                    </button>
+                  </div>
+                  <div class="welcome-selection-hint" id="welcomeSelectionHint">
+                    Choose a mode to continue.
+                  </div>
+                </div>
+              </div>
+
+              <div class="welcome-setup-card">
+                <div class="welcome-setup-header">
+                  <div>
+                    <p class="welcome-section-kicker">Start</p>
+                    <h3>Enter your name and continue</h3>
+                  </div>
+                  <div class="welcome-identity-chip">
+                    <i data-lucide="user-round"></i>
+                    <span>Name</span>
+                  </div>
+                </div>
+
+                <div class="input-group welcome-name-group">
+                  <label for="playerName">Your Name</label>
+                  <input
+                    type="text"
+                    class="input-field"
+                    id="playerName"
+                    placeholder="Enter your name"
+                    maxlength="20"
+                    autocomplete="name"
+                    required
+                  />
                 </div>
 
                 <!-- Multiplayer Options -->
-                <div id="multiplayerOptions" class="multiplayer-options" style="display:none;">
-                    <div class="button-group">
-                        <button class="btn btn-primary" id="createPartyBtn" type="button"><i data-lucide="plus-circle"></i> Create Party</button>
-                        <button class="btn btn-secondary" id="joinPartyBtn" type="button"><i data-lucide="log-in"></i> Join Party</button>
+                <div id="multiplayerOptions" class="multiplayer-options" style="display: none">
+                  <div class="option-panel-header">
+                    <div>
+                      <p class="welcome-section-kicker">Multiplayer</p>
+                      <h3>Create or join</h3>
+                    </div>
+                    <span class="option-panel-pill">1v1</span>
+                  </div>
+                  <div class="button-group">
+                    <button class="btn btn-primary" id="createPartyBtn" type="button">
+                      <i data-lucide="plus-circle"></i> Create Party
+                    </button>
+                    <button class="btn btn-secondary" id="joinPartyBtn" type="button">
+                      <i data-lucide="log-in"></i> Join Party
+                    </button>
+                  </div>
+
+                  <div id="joinPartyDiv" class="join-party-section" style="display: none">
+                    <div class="input-group">
+                      <label for="partyCodeInput">Party Code</label>
+                      <input
+                        type="text"
+                        class="input-field"
+                        id="partyCodeInput"
+                        placeholder="Enter 6-character code"
+                        maxlength="6"
+                        style="text-transform: uppercase"
+                        pattern="[A-Z0-9]{6}"
+                      />
+                    </div>
+                    <button class="btn btn-primary" id="joinPartySubmitBtn" type="button">
+                      <i data-lucide="arrow-right"></i> Join Game
+                    </button>
+                  </div>
+
+                  <div class="multiplayer-directory-panel">
+                    <div class="multiplayer-setup-stats" id="multiplayerSetupStats">
+                      <article class="directory-stat">
+                        <span class="directory-stat-label">Players Online</span>
+                        <strong class="directory-stat-value" id="publicOnlinePlayers">0</strong>
+                      </article>
+                      <article class="directory-stat">
+                        <span class="directory-stat-label">Active Matches</span>
+                        <strong class="directory-stat-value" id="publicActiveMatches">0</strong>
+                      </article>
+                      <article class="directory-stat">
+                        <span class="directory-stat-label">Latency</span>
+                        <strong class="directory-stat-value" id="publicConnectionLatency">-</strong>
+                      </article>
                     </div>
 
-                    <div id="joinPartyDiv" class="join-party-section" style="display:none;">
-                        <div class="input-group">
-                            <label for="partyCodeInput">Party Code</label>
-                            <input type="text" class="input-field" id="partyCodeInput" placeholder="Enter 6-character code" maxlength="6" style="text-transform:uppercase;" pattern="[A-Z0-9]{6}">
+                    <div class="public-room-section">
+                      <div class="option-panel-header public-room-header">
+                        <div>
+                          <p class="welcome-section-kicker">Public Rooms</p>
+                          <h3>Join a live lobby</h3>
                         </div>
-                        <button class="btn btn-primary" id="joinPartySubmitBtn" type="button"><i data-lucide="arrow-right"></i> Join Game</button>
+                        <span class="option-panel-pill" id="publicRoomCount">0 open</span>
+                      </div>
+                      <div class="public-room-list" id="publicRoomList" aria-live="polite">
+                        <div class="public-room-empty">No public rooms yet.</div>
+                      </div>
                     </div>
+                  </div>
                 </div>
 
                 <!-- Single Player Options -->
-                <div id="singlePlayerOptions" class="single-player-options" style="display:none;">
-                    <div class="settings-section">
-                        <h3><i data-lucide="settings" class="inline-icon"></i> Game Settings</h3>
-                        <div class="settings-grid">
-                            <div class="input-group">
-                                <label for="singleRangeStart">Start Number</label>
-                                <input type="number" class="input-field" id="singleRangeStart" value="1" min="1" max="9999">
-                            </div>
-                            <div class="input-group">
-                                <label for="singleRangeEnd">End Number</label>
-                                <input type="number" class="input-field" id="singleRangeEnd" value="100" min="2" max="10000">
-                            </div>
-                        </div>
-                        <div class="input-group">
-                            <label for="botDifficulty">Bot Difficulty</label>
-                            <select class="input-field" id="botDifficulty">
-                                <option value="easy">Easy - Bot makes random guesses</option>
-                                <option value="medium" selected>Medium - Bot uses basic strategy</option>
-                                <option value="hard">Hard - Bot uses optimal strategy</option>
-                            </select>
-                        </div>
+                <div id="singlePlayerOptions" class="single-player-options" style="display: none">
+                  <div class="option-panel-header">
+                    <div>
+                      <p class="welcome-section-kicker">Solo</p>
+                      <h3>Set range and start</h3>
                     </div>
-                    <div class="button-group">
-                        <button class="btn btn-success" id="startSinglePlayerBtn" type="button"><i data-lucide="play-circle"></i> Start Single Player</button>
-                        <button class="btn btn-secondary" id="howToPlaySingleBtn" type="button"><i data-lucide="help-circle"></i> How to Play</button>
+                    <span class="option-panel-pill">Bot match</span>
+                  </div>
+                  <div class="settings-section">
+                    <div class="settings-grid">
+                      <div class="input-group">
+                        <label for="singleRangeStart">Start Number</label>
+                        <input
+                          type="number"
+                          class="input-field"
+                          id="singleRangeStart"
+                          value="1"
+                          min="1"
+                          max="10000"
+                        />
+                      </div>
+                      <div class="input-group">
+                        <label for="singleRangeEnd">End Number</label>
+                        <input
+                          type="number"
+                          class="input-field"
+                          id="singleRangeEnd"
+                          value="100"
+                          min="2"
+                          max="10000"
+                        />
+                      </div>
                     </div>
+                    <div class="input-group">
+                      <label for="botDifficulty">Bot Difficulty</label>
+                      <select class="input-field" id="botDifficulty">
+                        <option value="easy">Easy - Bot makes random guesses</option>
+                        <option value="medium" selected>Medium - Bot uses basic strategy</option>
+                        <option value="hard">Hard - Bot uses optimal strategy</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="button-group single-player-actions">
+                    <button class="btn btn-success" id="startSinglePlayerBtn" type="button">
+                      <i data-lucide="play-circle"></i> Start Single Player
+                    </button>
+                    <button class="btn btn-secondary" id="howToPlaySingleBtn" type="button">
+                      <i data-lucide="help-circle"></i> How to Play
+                    </button>
+                  </div>
                 </div>
-            </section>
+              </div>
+            </div>
 
-            <!-- Lobby Screen -->
-            <section class="screen" id="lobbyScreen">
+            <aside class="welcome-secondary">
+              <section class="profile-hub" aria-labelledby="profileHubTitle">
+                <div class="profile-hub-card" id="welcomeProfileCard">
+                  <div class="profile-hub-header">
+                    <div>
+                      <p class="profile-hub-kicker">Stats</p>
+                      <h3 id="profileHubTitle">Your Progress</h3>
+                    </div>
+                    <div class="profile-hub-badge" id="profileIdentityBadge">
+                      <i data-lucide="shield-check"></i>
+                      Player
+                    </div>
+                  </div>
+                  <div class="profile-hub-summary">
+                    <div>
+                      <p class="profile-hub-name" id="welcomeProfileName">Player</p>
+                      <p class="profile-hub-meta" id="welcomeProfileMeta">
+                        Wins, matches, best score.
+                      </p>
+                    </div>
+                    <div class="profile-hub-actions">
+                      <button class="btn btn-secondary" id="viewProfileBtn" type="button">
+                        <i data-lucide="badge-info"></i> Profile
+                      </button>
+                      <button class="btn btn-primary" id="viewLeaderboardBtn" type="button">
+                        <i data-lucide="trophy"></i> Leaderboard
+                      </button>
+                    </div>
+                  </div>
+                  <div class="profile-hub-stats" id="welcomeProfileStats">
+                    <div class="profile-stat">
+                      <span class="profile-stat-label">Matches</span>
+                      <span class="profile-stat-value" id="profileTotalMatches">0</span>
+                    </div>
+                    <div class="profile-stat">
+                      <span class="profile-stat-label">Wins</span>
+                      <span class="profile-stat-value" id="profileTotalWins">0</span>
+                    </div>
+                    <div class="profile-stat">
+                      <span class="profile-stat-label">Best Score</span>
+                      <span class="profile-stat-value" id="profileBestScore">-</span>
+                    </div>
+                  </div>
+                  <div class="leaderboard-preview" id="leaderboardPreview" aria-live="polite"></div>
+                </div>
+              </section>
+            </aside>
+          </div>
+        </section>
+
+        <!-- Lobby Screen -->
+        <section class="screen" id="lobbyScreen">
+          <div class="lobby-shell">
+            <div class="screen-intro">
+              <p class="welcome-section-kicker">Private Match</p>
+              <h2>Lobby and match setup</h2>
+              <p>
+                Share the room code, confirm both players are in, and tune the range before the duel
+                starts.
+              </p>
+            </div>
+
+            <div class="lobby-grid">
+              <div class="lobby-primary">
                 <div class="party-code-section">
-                    <div class="party-code-label">Share this code with your friend:</div>
-                    <div class="party-code-display" id="lobbyPartyCode" role="status" aria-live="polite"></div>
-                    <button class="btn btn-copy" id="copyCodeBtn" type="button"><i data-lucide="copy"></i> Copy Code</button>
+                  <div class="party-code-label">Share this code with your friend:</div>
+                  <div
+                    class="party-code-display"
+                    id="lobbyPartyCode"
+                    role="status"
+                    aria-live="polite"
+                  ></div>
+                  <button class="btn btn-copy" id="copyCodeBtn" type="button">
+                    <i data-lucide="copy"></i> Copy Code
+                  </button>
+                  <div class="lobby-visibility-card">
+                    <div>
+                      <div class="party-code-label">Room visibility</div>
+                      <div class="lobby-visibility-helper" id="partyVisibilityHelper">
+                        Private room. Join with code only.
+                      </div>
+                    </div>
+                    <button
+                      class="btn btn-secondary lobby-visibility-toggle"
+                      id="partyVisibilityToggle"
+                      type="button"
+                      data-visibility="private"
+                      aria-pressed="false"
+                    >
+                      <i data-lucide="lock"></i>
+                      <span id="partyVisibilityLabel">Private Room</span>
+                    </button>
+                  </div>
                 </div>
 
                 <div class="players-section">
-                    <div class="players-grid">
-                        <div class="player-card" id="player1Card">
-                            <div class="player-avatar" role="img" aria-label="Player 1 Avatar"><i data-lucide="user"></i></div>
-                            <div class="player-name" id="player1Name">
-                                <span class="status-indicator offline" aria-label="Offline"></span>
-                                Waiting...
-                            </div>
-                            <div class="player-role">Host</div>
-                        </div>
-                        <div class="player-card" id="player2Card">
-                            <div class="player-avatar" role="img" aria-label="Player 2 Avatar"><i data-lucide="user"></i></div>
-                            <div class="player-name" id="player2Name">
-                                <span class="status-indicator offline" aria-label="Offline"></span>
-                                Waiting for player...
-                            </div>
-                            <div class="player-role">Guest</div>
-                        </div>
+                  <div class="players-grid">
+                    <div class="player-card" id="player1Card">
+                      <div class="player-avatar" role="img" aria-label="Player 1 Avatar">
+                        <i data-lucide="user"></i>
+                      </div>
+                      <div class="player-name" id="player1Name">
+                        <span class="status-indicator offline" aria-label="Offline"></span>
+                        Waiting...
+                      </div>
+                      <div class="player-role">Host</div>
                     </div>
+                    <div class="player-card" id="player2Card">
+                      <div class="player-avatar" role="img" aria-label="Player 2 Avatar">
+                        <i data-lucide="user"></i>
+                      </div>
+                      <div class="player-name" id="player2Name">
+                        <span class="status-indicator offline" aria-label="Offline"></span>
+                        Waiting for player...
+                      </div>
+                      <div class="player-role">Guest</div>
+                    </div>
+                  </div>
                 </div>
+              </div>
 
+              <div class="lobby-secondary">
                 <div class="settings-section" id="gameSettings">
-                    <h3><i data-lucide="target" class="inline-icon"></i> Game Settings</h3>
-                    <div class="settings-grid">
-                        <div class="input-group">
-                            <label for="rangeStart">Start Number</label>
-                            <input type="number" class="input-field" id="rangeStart" value="1" min="1" max="9999">
-                            <div class="input-hint">Minimum: 1</div>
-                        </div>
-                        <div class="input-group">
-                            <label for="rangeEnd">End Number</label>
-                            <input type="number" class="input-field" id="rangeEnd" value="100" min="2" max="10000">
-                            <div class="input-hint">Maximum: 10000</div>
-                        </div>
+                  <h3><i data-lucide="target" class="inline-icon"></i> Game Settings</h3>
+                  <div class="settings-grid">
+                    <div class="input-group">
+                      <label for="rangeStart">Start Number</label>
+                      <input
+                        type="number"
+                        class="input-field"
+                        id="rangeStart"
+                        value="1"
+                        min="1"
+                        max="10000"
+                      />
+                      <div class="input-hint">Minimum: 1</div>
                     </div>
-                    <div class="range-presets">
-                        <h4>Quick Presets:</h4>
-                        <div class="preset-buttons">
-                            <button type="button" class="btn btn-preset" onclick="Game.setRangePreset(1, 10)">1-10 (Beginner)</button>
-                            <button type="button" class="btn btn-preset" onclick="Game.setRangePreset(1, 50)">1-50 (Easy)</button>
-                            <button type="button" class="btn btn-preset" onclick="Game.setRangePreset(1, 100)">1-100 (Medium)</button>
-                            <button type="button" class="btn btn-preset" onclick="Game.setRangePreset(1, 500)">1-500 (Hard)</button>
-                            <button type="button" class="btn btn-preset" onclick="Game.setRangePreset(1, 1000)">1-1000 (Expert)</button>
-                            <button type="button" class="btn btn-preset" onclick="Game.setRangePreset(1, 5000)">1-5000 (Insane)</button>
-                            <button type="button" class="btn btn-preset" onclick="Game.setRangePreset(1, 10000)">1-10000 (Legendary)</button>
-                        </div>
+                    <div class="input-group">
+                      <label for="rangeEnd">End Number</label>
+                      <input
+                        type="number"
+                        class="input-field"
+                        id="rangeEnd"
+                        value="100"
+                        min="2"
+                        max="10000"
+                      />
+                      <div class="input-hint">Maximum: 10000</div>
                     </div>
-                    <!-- Best of 3 removed for simpler multiplayer experience -->
-                    <div class="range-info">
-                        <small><i data-lucide="info" class="inline-icon"></i> Current range: <span id="currentRangeDisplay">1 to 100</span> (<span id="rangeSize">100</span> numbers)</small>
+                  </div>
+                  <div class="range-presets">
+                    <h4>Quick Presets:</h4>
+                    <div class="preset-buttons">
+                      <button
+                        type="button"
+                        class="btn btn-preset"
+                        data-range-start="1"
+                        data-range-end="10"
+                      >
+                        1-10 (Beginner)
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn-preset"
+                        data-range-start="1"
+                        data-range-end="50"
+                      >
+                        1-50 (Easy)
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn-preset"
+                        data-range-start="1"
+                        data-range-end="100"
+                      >
+                        1-100 (Medium)
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn-preset"
+                        data-range-start="1"
+                        data-range-end="500"
+                      >
+                        1-500 (Hard)
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn-preset"
+                        data-range-start="1"
+                        data-range-end="1000"
+                      >
+                        1-1000 (Expert)
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn-preset"
+                        data-range-start="1"
+                        data-range-end="5000"
+                      >
+                        1-5000 (Insane)
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn-preset"
+                        data-range-start="1"
+                        data-range-end="10000"
+                      >
+                        1-10000 (Legendary)
+                      </button>
                     </div>
+                  </div>
+                  <div class="range-info">
+                    <small
+                      ><i data-lucide="info" class="inline-icon"></i> Current range:
+                      <span id="currentRangeDisplay">1 to 100</span> (<span id="rangeSize"
+                        >100</span
+                      >
+                      numbers)</small
+                    >
+                    <small class="range-strategy" id="rangeOptimalHint"
+                      ><i data-lucide="target" class="inline-icon"></i> Optimal strategy: ~7
+                      attempts max</small
+                    >
+                  </div>
                 </div>
 
                 <div class="button-group">
-                    <button class="btn btn-success" id="startGameBtn" type="button" disabled><i data-lucide="clock"></i> Waiting for player...</button>
-                    <button class="btn btn-secondary" id="howToPlayBtn" type="button"><i data-lucide="help-circle"></i> How to Play</button>
-                    <button class="btn btn-danger" id="leaveLobbyBtn" type="button"><i data-lucide="log-out"></i> Leave Party</button>
+                  <button class="btn btn-success" id="startGameBtn" type="button" disabled>
+                    <i data-lucide="clock"></i> Waiting for player...
+                  </button>
+                  <button class="btn btn-secondary" id="howToPlayBtn" type="button">
+                    <i data-lucide="help-circle"></i> How to Play
+                  </button>
+                  <button class="btn btn-danger" id="leaveLobbyBtn" type="button">
+                    <i data-lucide="log-out"></i> Leave Party
+                  </button>
                 </div>
-            </section>
+              </div>
+            </div>
+          </div>
+        </section>
 
-            <!-- Selection Screen -->
-            <section class="screen" id="selectionScreen">
-                <div class="round-info" id="selectionRoundInfo">
-                    <div class="round-text">Round 1</div>
-                </div>
+        <!-- Selection Screen -->
+        <section class="screen" id="selectionScreen">
+          <div class="selection-shell">
+            <div class="selection-main">
+              <div class="round-info" id="selectionRoundInfo">
+                <div class="round-text">Round 1</div>
+              </div>
 
+              <div class="selection-panel">
                 <div class="timer-section">
-                    <div class="timer-label">Choose your secret number:</div>
-                    <div class="timer" id="selectionTimer" role="timer" aria-live="assertive">30</div>
+                  <div class="timer-label">Choose your secret number:</div>
+                  <div class="timer" id="selectionTimer" role="timer" aria-live="assertive">30</div>
                 </div>
 
                 <div class="message info" id="selectionMessage">
-                    Choose your secret number between <span id="selectionRangeDisplay">1 and 100</span>
+                  Choose your secret number between
+                  <span id="selectionRangeDisplay">1 and 100</span>
                 </div>
 
                 <div class="input-group">
-                    <label for="secretNumber">Your Secret Number <span class="range-hint" id="secretNumberRange"></span></label>
-                    <input type="number" class="input-field secret-number-input" id="secretNumber" placeholder="Enter your secret number" required>
-                    <div class="input-hint" id="secretNumberHint">Choose wisely - your opponent will try to guess this!</div>
+                  <label for="secretNumber"
+                    >Your Secret Number <span class="range-hint" id="secretNumberRange"></span
+                  ></label>
+                  <input
+                    type="number"
+                    class="input-field secret-number-input"
+                    id="secretNumber"
+                    placeholder="Enter your secret number"
+                    required
+                  />
+                  <div class="input-hint" id="secretNumberHint">
+                    Choose wisely - your opponent will try to guess this!
+                  </div>
                 </div>
 
                 <div class="button-group">
-                    <button class="btn btn-success" id="readyBtn" type="button"><i data-lucide="check-circle"></i> Ready</button>
+                  <button class="btn btn-success" id="readyBtn" type="button">
+                    <i data-lucide="check-circle"></i> Ready
+                  </button>
                 </div>
+              </div>
+            </div>
 
+            <aside class="selection-side">
+              <div class="selection-side-card">
+                <p class="welcome-section-kicker">Selection Phase</p>
+                <h3>Set the number your opponent has to crack.</h3>
+                <p>
+                  Make it difficult, stay within the shared range, and lock in before the timer
+                  ends.
+                </p>
                 <div class="ready-status" id="readyStatus" role="status" aria-live="polite"></div>
-            </section>
+              </div>
+            </aside>
+          </div>
+        </section>
 
-            <!-- Game Screen -->
-            <section class="screen" id="gameScreen">
-                <div class="round-info" id="gameRoundInfo">
-                    <div class="round-text">Round 1</div>
-                </div>
+        <!-- Game Screen -->
+        <section class="screen" id="gameScreen">
+          <div class="game-shell">
+            <div class="game-shell-top">
+              <div class="round-info" id="gameRoundInfo">
+                <div class="round-text">Round 1</div>
+              </div>
+              <div class="game-shell-note">Live duel in progress</div>
+            </div>
 
-                <div class="game-battle">
-                    <div class="players-battle-grid">
-                        <div class="player-battle-card" id="myBattleCard">
-                            <div class="player-header">
-                                <div class="player-name" id="myBattleName">You</div>
-                                <div class="player-target">Goal: <span id="opponentTarget">???</span></div>
-                            </div>
-                            <div class="player-stats">
-                                <div class="stat">
-                                    <div class="stat-number" id="myAttempts">0</div>
-                                    <div class="stat-label">Attempts</div>
-                                </div>
-                                <div class="stat">
-                                    <div class="stat-number" id="myWins">0</div>
-                                    <div class="stat-label">Wins</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="vs-divider" role="separator">VS</div>
-
-                        <div class="player-battle-card" id="opponentBattleCard">
-                            <div class="player-header">
-                                <div class="player-name" id="opponentBattleName">Opponent</div>
-                                <div class="player-target">Goal: <span id="myTarget">???</span></div>
-                            </div>
-                            <div class="player-stats">
-                                <div class="stat">
-                                    <div class="stat-number" id="opponentAttempts">0</div>
-                                    <div class="stat-label">Attempts</div>
-                                </div>
-                                <div class="stat">
-                                    <div class="stat-number" id="opponentWins">0</div>
-                                    <div class="stat-label">Wins</div>
-                                </div>
-                            </div>
-                        </div>
+            <div class="game-battle">
+              <div class="players-battle-grid">
+                <div class="player-battle-card" id="myBattleCard">
+                  <div class="player-header">
+                    <div class="player-name" id="myBattleName">You</div>
+                    <div class="player-target">Goal: <span id="opponentTarget">???</span></div>
+                  </div>
+                  <div class="player-stats">
+                    <div class="stat">
+                      <div class="stat-number" id="myAttempts">0</div>
+                      <div class="stat-label">Attempts</div>
                     </div>
+                    <div class="stat">
+                      <div class="stat-number" id="myWins">0</div>
+                      <div class="stat-label">Wins</div>
+                    </div>
+                  </div>
                 </div>
 
+                <div class="vs-divider" role="separator">VS</div>
+
+                <div class="player-battle-card" id="opponentBattleCard">
+                  <div class="player-header">
+                    <div class="player-name" id="opponentBattleName">Opponent</div>
+                    <div class="player-target">Goal: <span id="myTarget">???</span></div>
+                  </div>
+                  <div class="player-stats">
+                    <div class="stat">
+                      <div class="stat-number" id="opponentAttempts">0</div>
+                      <div class="stat-label">Attempts</div>
+                    </div>
+                    <div class="stat">
+                      <div class="stat-number" id="opponentWins">0</div>
+                      <div class="stat-label">Wins</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="game-main-grid">
+              <div class="guess-panel">
                 <div class="guess-section">
-                    <div class="input-group">
-                        <label for="guessInput">Your Guess <span class="range-hint" id="guessRange"></span></label>
-                        <input type="number" class="input-field guess-input" id="guessInput" placeholder="Enter your guess" required>
-                        <div class="input-hint" id="guessHint">Find the secret number!</div>
-                    </div>
-                    <button class="btn btn-primary" id="makeGuessBtn" type="button"><i data-lucide="target"></i> Guess!</button>
+                  <div class="input-group">
+                    <label for="guessInput"
+                      >Your Guess <span class="range-hint" id="guessRange"></span
+                    ></label>
+                    <input
+                      type="number"
+                      class="input-field guess-input"
+                      id="guessInput"
+                      placeholder="Enter your guess"
+                      required
+                    />
+                    <div class="input-hint" id="guessHint">Find the secret number!</div>
+                  </div>
+                  <button class="btn btn-primary" id="makeGuessBtn" type="button">
+                    <i data-lucide="target"></i> Guess!
+                  </button>
                 </div>
 
                 <div class="message" id="gameMessage" role="status" aria-live="polite"></div>
+              </div>
 
-                <div class="guess-history" id="gameGuessHistory">
-                    <div class="history-header"><i data-lucide="list"></i> Your Guess History</div>
-                    <div class="history-content">
-                        <div class="history-placeholder">Your guess history will appear here...</div>
-                    </div>
+              <div class="guess-history" id="gameGuessHistory">
+                <div class="history-header"><i data-lucide="list"></i> Your Guess History</div>
+                <div class="history-content">
+                  <div class="history-placeholder">
+                    Make your first guess to start the round log.
+                  </div>
                 </div>
-            </section>
+              </div>
+            </div>
+          </div>
+        </section>
 
-            <!-- Results Screen -->
-            <section class="screen" id="resultsScreen">
-                <div class="results-header">
-                    <div class="result-emoji" id="resultEmoji" role="img" aria-label="Result"><i data-lucide="trophy"></i></div>
-                    <div class="result-title" id="resultTitle">Round Complete!</div>
+        <!-- Results Screen -->
+        <section class="screen" id="resultsScreen">
+          <div class="results-shell">
+            <div class="results-summary-panel">
+              <div class="results-header">
+                <div class="result-emoji" id="resultEmoji" role="img" aria-label="Result">
+                  <i data-lucide="trophy"></i>
                 </div>
+                <div class="result-title" id="resultTitle">Round Complete!</div>
+              </div>
 
-                <div class="results-grid">
-                    <div class="result-card" id="myResultCard">
-                        <div class="result-player-name" id="myResultName">You</div>
-                        <div class="result-stats">
-                            <div class="result-stat">
-                                <div class="result-stat-number" id="myFinalAttempts">0</div>
-                                <div class="result-stat-label">Attempts</div>
-                            </div>
-                            <div class="result-stat">
-                                <div class="result-stat-number" id="myTotalWins">0</div>
-                                <div class="result-stat-label">Total Wins</div>
-                            </div>
-                        </div>
-                        <div class="performance-badge" id="myPerformance"></div>
-                    </div>
+              <div class="session-info" id="sessionInfo" hidden></div>
+              <div class="message" id="finalResultMessage" role="status" aria-live="polite"></div>
+            </div>
 
-                    <div class="result-card" id="opponentResultCard">
-                        <div class="result-player-name" id="opponentResultName">Opponent</div>
-                        <div class="result-stats">
-                            <div class="result-stat">
-                                <div class="result-stat-number" id="opponentFinalAttempts">0</div>
-                                <div class="result-stat-label">Attempts</div>
-                            </div>
-                            <div class="result-stat">
-                                <div class="result-stat-number" id="opponentTotalWins">0</div>
-                                <div class="result-stat-label">Total Wins</div>
-                            </div>
-                        </div>
-                        <div class="performance-badge" id="opponentPerformance"></div>
-                    </div>
+            <div class="results-grid">
+              <div class="result-card" id="myResultCard">
+                <div class="result-player-name" id="myResultName">You</div>
+                <div class="result-stats">
+                  <div class="result-stat">
+                    <div class="result-stat-number" id="myFinalAttempts">0</div>
+                    <div class="result-stat-label">Attempts</div>
+                  </div>
+                  <div class="result-stat">
+                    <div class="result-stat-number" id="myTotalWins">0</div>
+                    <div class="result-stat-label">Total Wins</div>
+                  </div>
                 </div>
+                <div class="performance-badge" id="myPerformance"></div>
+              </div>
 
-                <div class="message" id="finalResultMessage" role="status" aria-live="polite"></div>
-
-                <div class="button-group">
-                    <button class="btn btn-primary" id="nextRoundBtn" type="button" style="display:none;"><i data-lucide="play"></i> Next Round</button>
-                    <button class="btn btn-success" id="rematchBtn" type="button"><i data-lucide="rotate-ccw"></i> Rematch</button>
-                    <button class="btn btn-danger" id="leaveResultsBtn" type="button"><i data-lucide="home"></i> Leave Party</button>
+              <div class="result-card" id="opponentResultCard">
+                <div class="result-player-name" id="opponentResultName">Opponent</div>
+                <div class="result-stats">
+                  <div class="result-stat">
+                    <div class="result-stat-number" id="opponentFinalAttempts">0</div>
+                    <div class="result-stat-label">Attempts</div>
+                  </div>
+                  <div class="result-stat">
+                    <div class="result-stat-number" id="opponentTotalWins">0</div>
+                    <div class="result-stat-label">Total Wins</div>
+                  </div>
                 </div>
-            </section>
-        </main>
+                <div class="performance-badge" id="opponentPerformance"></div>
+              </div>
+            </div>
+
+            <div class="results-actions-panel">
+              <div class="end-game-actions" id="endGameActions" hidden></div>
+
+              <div class="button-group">
+                <button class="btn btn-primary" id="nextRoundBtn" type="button" hidden>
+                  <i data-lucide="play"></i> Next Round
+                </button>
+                <button class="btn btn-success" id="rematchBtn" type="button">
+                  <i data-lucide="rotate-ccw"></i> Rematch
+                </button>
+                <button class="btn btn-danger" id="leaveResultsBtn" type="button">
+                  <i data-lucide="home"></i> Leave Party
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
     </div>
 
     <!-- Connection Status -->
-    <div class="connection-status" id="connectionStatus">
-        <span class="loading-spinner" aria-hidden="true"></span> Connecting...
+    <div class="connection-status" id="connectionStatus" role="status" aria-live="polite">
+      <span class="loading-spinner" aria-hidden="true"></span> Connecting...
     </div>
+    <div class="visually-hidden" id="appLiveRegion" aria-live="polite" aria-atomic="true"></div>
 
     <!-- Notifications -->
-    <div class="notification-container" id="notificationContainer" role="alert" aria-live="assertive"></div>
+    <div
+      class="notification-container"
+      id="notificationContainer"
+      role="alert"
+      aria-live="assertive"
+    ></div>
 
     <!-- Loading Overlay -->
-    <div class="loading-overlay" id="loadingOverlay" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="loadingText">
-        <div class="loading-content">
-            <div class="loading-spinner-large" aria-hidden="true"></div>
-            <div class="loading-text" id="loadingText">Loading...</div>
-        </div>
+    <div
+      class="loading-overlay"
+      id="loadingOverlay"
+      style="display: none"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="loadingText"
+    >
+      <div class="loading-content">
+        <div class="loading-spinner-large" aria-hidden="true"></div>
+        <div class="loading-text" id="loadingText">Loading...</div>
+      </div>
     </div>
 
     <!-- How to Play Modal -->
-    <div class="modal-overlay" id="howToPlayModal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="howToPlayTitle">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="howToPlayTitle"><i data-lucide="help-circle"></i> How to Play</h2>
-                <button class="modal-close" id="closeHowToPlay" aria-label="Close"><i data-lucide="x"></i></button>
-            </div>
-            <div class="modal-body" id="howToPlayContent">
-                <!-- Content will be populated by JavaScript based on game mode -->
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-primary" id="gotItBtn">Got it! <i data-lucide="check"></i></button>
-            </div>
+    <div
+      class="modal-overlay"
+      id="howToPlayModal"
+      style="display: none"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="howToPlayTitle"
+    >
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="howToPlayTitle"><i data-lucide="help-circle"></i> How to Play</h2>
+          <button class="modal-close" id="closeHowToPlay" aria-label="Close">
+            <i data-lucide="x"></i>
+          </button>
         </div>
+        <div class="modal-body" id="howToPlayContent">
+          <!-- Content will be populated by JavaScript based on game mode -->
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-primary" id="gotItBtn">Got it! <i data-lucide="check"></i></button>
+        </div>
+      </div>
     </div>
 
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <div
+      class="modal-overlay"
+      id="playerDataModal"
+      style="display: none"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="playerDataTitle"
+    >
+      <div class="modal-content modal-content-wide">
+        <div class="modal-header">
+          <h2 id="playerDataTitle"><i data-lucide="bar-chart-3"></i> Player Data</h2>
+          <button class="modal-close" id="closePlayerDataModal" aria-label="Close">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+        <div class="modal-body" id="playerDataBody"></div>
+      </div>
+    </div>
+
+    <!-- External scripts — must load synchronously before the module bundle -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"
+      integrity="sha384-Rv68Y7adOjMMJc1/xFMcdNvXre/HF51to4GZjBALmXr7ABnVl5V4UajJwBu7zbhN"
+      crossorigin="anonymous"
+    ></script>
     <script src="/socket.io/socket.io.js"></script>
-    <script src="/js/socket-client.js?v=1.2"></script>
-    <script src="/js/ui.js?v=1.2"></script>
-    <script src="/js/single-player.js?v=1.2"></script>
-    <script src="/js/game.js?v=1.2"></script>
-</body>
+    <script src="/app-config.js"></script>
+    <!-- Application bundle (Vite entry point — all 60 modules bundled into one file) -->
+    <script type="module" src="/js/main.js"></script>
+    <script src="/js/theme.js"></script>
+  </body>
 </html>
