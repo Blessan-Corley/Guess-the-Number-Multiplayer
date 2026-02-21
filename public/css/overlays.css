@@ -1,0 +1,333 @@
+.notification-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 35;
+  display: grid;
+  gap: 12px;
+  width: min(100vw - 32px, 380px);
+}
+
+.notification {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 12px;
+  align-items: start;
+  padding: 16px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: rgba(8, 19, 35, 0.94);
+  box-shadow: var(--shadow-md);
+  animation: notificationIn 0.24s ease;
+  transition:
+    opacity 0.22s ease,
+    transform 0.22s ease;
+}
+
+.notification.success,
+.notification.victory {
+  border-color: rgba(99, 230, 163, 0.24);
+}
+
+.notification.warning,
+.notification.competitive {
+  border-color: rgba(255, 191, 71, 0.24);
+}
+
+.notification.error,
+.notification.critical {
+  border-color: rgba(255, 107, 114, 0.24);
+}
+
+.notification.info {
+  border-color: rgba(82, 214, 255, 0.24);
+}
+
+.notification-icon {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.notification-message {
+  color: var(--text-soft);
+  line-height: 1.55;
+}
+
+.notification-close,
+.modal-close {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.notification-close:hover,
+.modal-close:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+}
+
+.modal-overlay,
+.confirm-dialog {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+}
+
+.modal-overlay {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(3, 7, 14, 0.76);
+  backdrop-filter: blur(12px);
+}
+
+.modal-content,
+.confirm-content {
+  width: min(100%, 760px);
+  max-height: min(88vh, 900px);
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  background: var(--surface-strong);
+  box-shadow: var(--shadow-lg);
+}
+
+.modal-content-wide {
+  width: min(100%, 920px);
+}
+
+.modal-header,
+.modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px 24px;
+}
+
+.modal-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.modal-footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.modal-body {
+  padding: 24px;
+  color: var(--text-soft);
+  line-height: 1.7;
+}
+
+.modal-body h3,
+.modal-body h4 {
+  margin-bottom: 10px;
+  color: var(--text);
+}
+
+.modal-body p + h4,
+.modal-body ol + h4,
+.modal-body ul + h4 {
+  margin-top: 18px;
+}
+
+.modal-body ul,
+.modal-body ol {
+  display: grid;
+  gap: 10px;
+}
+
+.confirm-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(3, 7, 14, 0.76);
+  backdrop-filter: blur(12px);
+}
+
+.confirm-content {
+  position: relative;
+  z-index: 1;
+  margin: 8vh auto 0;
+  padding: 24px;
+}
+
+.confirm-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.confirm-icon {
+  width: 22px;
+  height: 22px;
+  color: var(--warning);
+}
+
+.confirm-title {
+  font-size: 1.35rem;
+}
+
+.confirm-message {
+  color: var(--text-soft);
+  line-height: 1.7;
+}
+
+.confirm-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+@media (max-width: 720px) {
+  .notification-container {
+    left: 16px;
+    right: 16px;
+    width: auto;
+  }
+
+  .modal-overlay,
+  .confirm-dialog {
+    padding: 16px;
+  }
+
+  .modal-header,
+  .modal-footer {
+    padding: 18px;
+  }
+
+  .modal-body,
+  .confirm-content {
+    padding: 18px;
+  }
+}
+
+/* ── Light mode overrides ──────────────────────────────────────────────────── */
+@media (prefers-color-scheme: light) {
+  .modal-overlay,
+  .confirm-dialog {
+    background: rgba(200, 214, 235, 0.72);
+  }
+
+  .modal-content,
+  .confirm-content {
+    background: rgba(255, 255, 255, 0.96);
+  }
+
+  /* Modal internal dividers are white-on-dark — need to be dark-on-light */
+  .modal-header {
+    border-bottom-color: rgba(60, 90, 140, 0.1);
+  }
+
+  .modal-footer {
+    border-top-color: rgba(60, 90, 140, 0.1);
+  }
+
+  .notification-close:hover,
+  .modal-close:hover {
+    background: rgba(60, 90, 140, 0.08);
+    color: var(--text);
+  }
+
+  .notification-icon {
+    background: rgba(60, 90, 140, 0.08);
+  }
+
+  .notification {
+    background: rgba(255, 255, 255, 0.94);
+    border-color: rgba(60, 90, 140, 0.16);
+    color: var(--text);
+  }
+
+  .notification.success,
+  .notification.victory {
+    background: rgba(214, 250, 232, 0.94);
+    border-color: rgba(26, 140, 64, 0.3);
+  }
+
+  .notification.warning,
+  .notification.competitive {
+    background: rgba(255, 243, 205, 0.94);
+    border-color: rgba(160, 107, 0, 0.3);
+  }
+
+  .notification.error,
+  .notification.critical {
+    background: rgba(255, 224, 226, 0.94);
+    border-color: rgba(192, 39, 45, 0.3);
+  }
+
+  .notification.info {
+    background: rgba(214, 244, 255, 0.94);
+    border-color: rgba(11, 125, 168, 0.28);
+  }
+}
+
+[data-theme='light'] .modal-overlay,
+[data-theme='light'] .confirm-dialog {
+  background: rgba(200, 214, 235, 0.72);
+}
+
+[data-theme='light'] .modal-content,
+[data-theme='light'] .confirm-content {
+  background: rgba(255, 255, 255, 0.96);
+}
+
+[data-theme='light'] .modal-header {
+  border-bottom-color: rgba(60, 90, 140, 0.1);
+}
+
+[data-theme='light'] .modal-footer {
+  border-top-color: rgba(60, 90, 140, 0.1);
+}
+
+[data-theme='light'] .notification-close:hover,
+[data-theme='light'] .modal-close:hover {
+  background: rgba(60, 90, 140, 0.08);
+  color: var(--text);
+}
+
+[data-theme='light'] .notification-icon {
+  background: rgba(60, 90, 140, 0.08);
+}
+
+[data-theme='light'] .notification {
+  background: rgba(255, 255, 255, 0.94);
+  border-color: rgba(60, 90, 140, 0.16);
+  color: var(--text);
+}
+
+[data-theme='light'] .notification.success,
+[data-theme='light'] .notification.victory {
+  background: rgba(214, 250, 232, 0.94);
+  border-color: rgba(26, 140, 64, 0.3);
+}
+
+[data-theme='light'] .notification.warning,
+[data-theme='light'] .notification.competitive {
+  background: rgba(255, 243, 205, 0.94);
+  border-color: rgba(160, 107, 0, 0.3);
+}
+
+[data-theme='light'] .notification.error,
+[data-theme='light'] .notification.critical {
+  background: rgba(255, 224, 226, 0.94);
+  border-color: rgba(192, 39, 45, 0.3);
+}
+
+[data-theme='light'] .notification.info {
+  background: rgba(214, 244, 255, 0.94);
+  border-color: rgba(11, 125, 168, 0.28);
+}

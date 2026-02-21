@@ -1,0 +1,316 @@
+.lobby-shell {
+  display: grid;
+  gap: 24px;
+}
+
+.lobby-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(320px, 0.95fr);
+  gap: 22px;
+}
+
+.lobby-primary,
+.lobby-secondary {
+  display: grid;
+  gap: 18px;
+}
+
+.party-code-section,
+.players-section {
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  background: var(--surface);
+  box-shadow: var(--shadow-md);
+}
+
+.party-code-section {
+  display: grid;
+  gap: 16px;
+}
+
+.lobby-visibility-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 18px;
+  border-radius: 20px;
+  background: rgba(13, 25, 46, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.lobby-visibility-helper {
+  margin-top: 6px;
+  color: var(--text-soft);
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
+.lobby-visibility-toggle {
+  min-width: 170px;
+}
+
+.lobby-visibility-toggle[data-visibility='public'] {
+  border-color: rgba(99, 230, 163, 0.32);
+  background: linear-gradient(135deg, rgba(99, 230, 163, 0.22), rgba(99, 230, 163, 0.12));
+  color: var(--success);
+}
+
+.party-code-label {
+  color: var(--text-soft);
+  font-size: 0.94rem;
+  font-weight: 700;
+}
+
+.party-code-display {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 92px;
+  padding: 18px;
+  border-radius: 24px;
+  background:
+    linear-gradient(135deg, rgba(82, 214, 255, 0.12), rgba(151, 255, 124, 0.08)),
+    rgba(11, 20, 38, 0.92);
+  border: 1px solid rgba(82, 214, 255, 0.2);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+.players-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.player-card {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  padding: 24px 18px;
+  border-radius: 24px;
+  background: rgba(13, 25, 46, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  text-align: center;
+}
+
+.player-card.active {
+  border-color: rgba(151, 255, 124, 0.28);
+  background: rgba(17, 39, 30, 0.78);
+}
+
+.player-avatar {
+  width: 72px;
+  height: 72px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 22px;
+  background: rgba(82, 214, 255, 0.12);
+  color: var(--accent-cyan);
+}
+
+.player-avatar i {
+  width: 32px;
+  height: 32px;
+}
+
+.player-name {
+  color: var(--text);
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.player-name small,
+.result-player-name small,
+.player-header small {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.player-role {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+.status-indicator {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.status-indicator.online {
+  background: var(--success);
+  box-shadow: 0 0 0 6px rgba(99, 230, 163, 0.16);
+}
+
+.status-indicator.offline {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.host-crown {
+  color: var(--accent-warm);
+}
+
+.invitation-helper {
+  padding: 20px 22px;
+  border: 1px solid rgba(82, 214, 255, 0.18);
+  border-radius: 24px;
+  background: rgba(10, 28, 45, 0.9);
+}
+
+.helper-content {
+  display: grid;
+  gap: 12px;
+}
+
+.helper-content p,
+.helper-tip {
+  color: var(--text-soft);
+  line-height: 1.65;
+}
+
+.helper-tip {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 1080px) {
+  .lobby-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .players-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .lobby-visibility-card {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .party-code-display {
+    font-size: 2rem;
+    letter-spacing: 0.18em;
+  }
+}
+
+/* ── Light mode overrides ──────────────────────────────────────────────────── */
+@media (prefers-color-scheme: light) {
+  /* Cards only — lobby-primary/secondary are grid wrappers, not cards */
+  .lobby-visibility-card,
+  .party-code-section,
+  .players-section {
+    background: rgba(255, 255, 255, 0.88);
+  }
+
+  .lobby-visibility-card {
+    border-color: rgba(60, 90, 140, 0.1);
+  }
+
+  .party-code-display {
+    background:
+      linear-gradient(135deg, rgba(11, 125, 168, 0.1), rgba(26, 140, 64, 0.07)),
+      rgba(240, 246, 255, 0.94);
+    border-color: rgba(11, 125, 168, 0.22);
+  }
+
+  .lobby-visibility-toggle[data-visibility='public'] {
+    background: linear-gradient(135deg, rgba(26, 140, 64, 0.16), rgba(26, 140, 64, 0.08));
+  }
+
+  .player-card {
+    background: rgba(240, 246, 255, 0.82);
+    border-color: rgba(60, 90, 140, 0.08);
+  }
+
+  .player-card.active {
+    background: rgba(220, 250, 235, 0.82);
+    border-color: rgba(26, 140, 64, 0.28);
+  }
+
+  .player-avatar {
+    background: rgba(60, 90, 140, 0.1);
+    color: var(--accent-cyan);
+  }
+
+  .invitation-helper {
+    background: rgba(240, 246, 255, 0.9);
+    border-color: rgba(11, 125, 168, 0.18);
+  }
+
+  /* Status dots: must be visible on light backgrounds */
+  .status-indicator.online {
+    background: var(--success);
+    box-shadow: 0 0 0 6px rgba(26, 140, 64, 0.18);
+  }
+
+  .status-indicator.offline {
+    background: rgba(90, 110, 145, 0.45);
+    box-shadow: none;
+  }
+}
+
+[data-theme='light'] .lobby-visibility-card,
+[data-theme='light'] .party-code-section,
+[data-theme='light'] .players-section {
+  background: rgba(255, 255, 255, 0.88);
+}
+
+[data-theme='light'] .lobby-visibility-card {
+  border-color: rgba(60, 90, 140, 0.1);
+}
+
+[data-theme='light'] .party-code-display {
+  background:
+    linear-gradient(135deg, rgba(11, 125, 168, 0.1), rgba(26, 140, 64, 0.07)),
+    rgba(240, 246, 255, 0.94);
+  border-color: rgba(11, 125, 168, 0.22);
+}
+
+[data-theme='light'] .lobby-visibility-toggle[data-visibility='public'] {
+  background: linear-gradient(135deg, rgba(26, 140, 64, 0.16), rgba(26, 140, 64, 0.08));
+}
+
+[data-theme='light'] .player-card {
+  background: rgba(240, 246, 255, 0.82);
+  border-color: rgba(60, 90, 140, 0.08);
+}
+
+[data-theme='light'] .player-card.active {
+  background: rgba(220, 250, 235, 0.82);
+  border-color: rgba(26, 140, 64, 0.28);
+}
+
+[data-theme='light'] .player-avatar {
+  background: rgba(60, 90, 140, 0.1);
+  color: var(--accent-cyan);
+}
+
+[data-theme='light'] .invitation-helper {
+  background: rgba(240, 246, 255, 0.9);
+  border-color: rgba(11, 125, 168, 0.18);
+}
+
+[data-theme='light'] .status-indicator.online {
+  background: var(--success);
+  box-shadow: 0 0 0 6px rgba(26, 140, 64, 0.18);
+}
+
+[data-theme='light'] .status-indicator.offline {
+  background: rgba(90, 110, 145, 0.45);
+  box-shadow: none;
+}
