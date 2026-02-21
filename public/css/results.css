@@ -1,0 +1,312 @@
+.results-shell {
+  display: grid;
+  gap: 20px;
+}
+
+.results-summary-panel,
+.results-actions-panel,
+.result-card {
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  background: var(--surface);
+  box-shadow: var(--shadow-md);
+}
+
+.results-summary-panel {
+  display: grid;
+  gap: 16px;
+}
+
+.results-header {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.result-emoji {
+  width: 72px;
+  height: 72px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 22px;
+  background: linear-gradient(135deg, rgba(151, 255, 124, 0.18), rgba(82, 214, 255, 0.16));
+  color: var(--accent);
+}
+
+.result-emoji i {
+  width: 34px;
+  height: 34px;
+}
+
+.result-title {
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1;
+}
+
+.session-info {
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: rgba(14, 28, 49, 0.78);
+  color: var(--text-soft);
+}
+
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.result-card {
+  position: relative;
+  display: grid;
+  gap: 18px;
+}
+
+.result-card.winner {
+  border-color: rgba(151, 255, 124, 0.3);
+  background: rgba(14, 40, 29, 0.82);
+}
+
+.result-player-name {
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.result-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.result-stat {
+  padding: 18px;
+  border-radius: 18px;
+  background: rgba(15, 29, 53, 0.82);
+}
+
+.result-stat-number {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.result-stat-label {
+  margin-top: 6px;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+.performance-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(82, 214, 255, 0.1);
+  color: var(--text-soft);
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.performance-badge.legendary,
+.performance-badge.master {
+  background: rgba(255, 191, 71, 0.16);
+  color: #ffe8b8;
+}
+
+.performance-badge.excellent,
+.performance-badge.expert {
+  background: rgba(99, 230, 163, 0.16);
+  color: #d8ffeb;
+}
+
+.performance-badge.good,
+.performance-badge.intermediate,
+.performance-badge.new_player {
+  background: rgba(82, 214, 255, 0.16);
+  color: #d9f7ff;
+}
+
+.performance-badge.fair,
+.performance-badge.beginner {
+  background: rgba(255, 191, 71, 0.16);
+  color: #ffe8b8;
+}
+
+.performance-badge.needs_improvement {
+  background: rgba(255, 107, 114, 0.14);
+  color: #ffd7da;
+}
+
+.end-game-actions {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.action-help {
+  margin-top: 2px;
+}
+
+.win-badge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 999px;
+  background: rgba(82, 214, 255, 0.12);
+}
+
+.win-badge.winning-streak {
+  background: rgba(255, 191, 71, 0.16);
+}
+
+.win-badge.hot-streak {
+  background: rgba(151, 255, 124, 0.16);
+}
+
+.win-count {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.win-label {
+  color: var(--text-soft);
+  font-size: 0.76rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 820px) {
+  .results-header,
+  .results-grid {
+    grid-template-columns: 1fr;
+    display: grid;
+  }
+}
+
+/* ── Light mode overrides ──────────────────────────────────────────────────── */
+@media (prefers-color-scheme: light) {
+  .results-summary-panel,
+  .results-actions-panel,
+  .result-card {
+    background: rgba(255, 255, 255, 0.88);
+  }
+
+  .session-info {
+    background: rgba(240, 246, 255, 0.82);
+  }
+
+  .result-card.winner {
+    background: rgba(220, 250, 235, 0.82);
+    border-color: rgba(26, 140, 64, 0.28);
+  }
+
+  .result-stat {
+    background: rgba(240, 246, 255, 0.76);
+  }
+
+  .performance-badge.legendary,
+  .performance-badge.master {
+    background: rgba(214, 255, 228, 0.76);
+    color: #0d4a29;
+  }
+
+  .performance-badge.excellent,
+  .performance-badge.expert {
+    background: rgba(214, 244, 255, 0.76);
+    color: #094a66;
+  }
+
+  .performance-badge.good,
+  .performance-badge.intermediate,
+  .performance-badge.new_player {
+    background: rgba(255, 243, 205, 0.76);
+    color: #5a3a00;
+  }
+
+  .performance-badge.fair,
+  .performance-badge.beginner {
+    background: rgba(255, 236, 220, 0.76);
+    color: #5a2a00;
+  }
+
+  .performance-badge.needs_improvement {
+    background: rgba(255, 224, 226, 0.76);
+    color: #5a1019;
+  }
+
+  .win-badge {
+    background: rgba(255, 243, 205, 0.76);
+  }
+
+  .win-badge.winning-streak,
+  .win-badge.hot-streak {
+    background: rgba(214, 255, 228, 0.76);
+  }
+}
+
+[data-theme='light'] .results-summary-panel,
+[data-theme='light'] .results-actions-panel,
+[data-theme='light'] .result-card {
+  background: rgba(255, 255, 255, 0.88);
+}
+
+[data-theme='light'] .session-info {
+  background: rgba(240, 246, 255, 0.82);
+}
+
+[data-theme='light'] .result-card.winner {
+  background: rgba(220, 250, 235, 0.82);
+  border-color: rgba(26, 140, 64, 0.28);
+}
+
+[data-theme='light'] .result-stat {
+  background: rgba(240, 246, 255, 0.76);
+}
+
+[data-theme='light'] .performance-badge.legendary,
+[data-theme='light'] .performance-badge.master {
+  background: rgba(214, 255, 228, 0.76);
+  color: #0d4a29;
+}
+
+[data-theme='light'] .performance-badge.excellent,
+[data-theme='light'] .performance-badge.expert {
+  background: rgba(214, 244, 255, 0.76);
+  color: #094a66;
+}
+
+[data-theme='light'] .performance-badge.good,
+[data-theme='light'] .performance-badge.intermediate,
+[data-theme='light'] .performance-badge.new_player {
+  background: rgba(255, 243, 205, 0.76);
+  color: #5a3a00;
+}
+
+[data-theme='light'] .performance-badge.fair,
+[data-theme='light'] .performance-badge.beginner {
+  background: rgba(255, 236, 220, 0.76);
+  color: #5a2a00;
+}
+
+[data-theme='light'] .performance-badge.needs_improvement {
+  background: rgba(255, 224, 226, 0.76);
+  color: #5a1019;
+}
+
+[data-theme='light'] .win-badge {
+  background: rgba(255, 243, 205, 0.76);
+}
+
+[data-theme='light'] .win-badge.winning-streak,
+[data-theme='light'] .win-badge.hot-streak {
+  background: rgba(214, 255, 228, 0.76);
+}
