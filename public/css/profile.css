@@ -1,0 +1,158 @@
+.player-data-panel {
+  display: grid;
+  gap: 22px;
+}
+
+.player-data-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.player-data-stat {
+  padding: 18px;
+  border-radius: 20px;
+  background: rgba(14, 28, 49, 0.84);
+}
+
+.player-data-stat span {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.player-data-stat strong {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.2rem;
+}
+
+.player-data-list,
+.leaderboard-list {
+  display: grid;
+  gap: 12px;
+}
+
+.player-data-lead {
+  color: var(--text-soft);
+}
+
+.player-data-row,
+.leaderboard-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: center;
+  padding: 16px 18px;
+  border-radius: 20px;
+  background: rgba(14, 28, 49, 0.82);
+}
+
+.player-data-row h4,
+.leaderboard-main strong {
+  margin-bottom: 4px;
+}
+
+.player-data-row p,
+.player-data-row-meta span,
+.leaderboard-main span {
+  color: var(--text-muted);
+  font-size: 0.84rem;
+  line-height: 1.55;
+}
+
+.player-data-row-meta,
+.leaderboard-main {
+  display: grid;
+  gap: 4px;
+}
+
+.player-data-empty,
+.leaderboard-modal-empty {
+  padding: 18px;
+  border-radius: 20px;
+  background: rgba(14, 28, 49, 0.72);
+  color: var(--text-muted);
+}
+
+.leaderboard-row {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+
+.leaderboard-row.is-current-player {
+  border: 1px solid rgba(151, 255, 124, 0.24);
+  background: rgba(18, 41, 28, 0.78);
+}
+
+.leaderboard-rank,
+.leaderboard-score {
+  font-weight: 700;
+  color: var(--text-soft);
+}
+
+@media (max-width: 900px) {
+  .player-data-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .player-data-grid,
+  .player-data-row,
+  .leaderboard-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Light mode overrides ──────────────────────────────────────────────────── */
+@media (prefers-color-scheme: light) {
+  .player-data-stat {
+    background: rgba(240, 246, 255, 0.82);
+  }
+
+  .player-data-row,
+  .leaderboard-row {
+    background: rgba(240, 246, 255, 0.72);
+  }
+
+  .player-data-row:hover,
+  .leaderboard-row:hover {
+    background: rgba(255, 255, 255, 0.9);
+  }
+
+  .leaderboard-row.is-current-player {
+    background: rgba(214, 244, 255, 0.82);
+    border-color: rgba(11, 125, 168, 0.3);
+  }
+
+  .player-data-empty,
+  .leaderboard-modal-empty {
+    background: rgba(240, 246, 255, 0.72);
+  }
+}
+
+[data-theme='light'] .player-data-stat {
+  background: rgba(240, 246, 255, 0.82);
+}
+
+[data-theme='light'] .player-data-row,
+[data-theme='light'] .leaderboard-row {
+  background: rgba(240, 246, 255, 0.72);
+}
+
+[data-theme='light'] .player-data-row:hover,
+[data-theme='light'] .leaderboard-row:hover {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+[data-theme='light'] .leaderboard-row.is-current-player {
+  background: rgba(214, 244, 255, 0.82);
+  border-color: rgba(11, 125, 168, 0.3);
+}
+
+[data-theme='light'] .player-data-empty,
+[data-theme='light'] .leaderboard-modal-empty {
+  background: rgba(240, 246, 255, 0.72);
+}
