@@ -1,0 +1,1160 @@
+/* ── Manual theme overrides ─────────────────────────────────────────────────
+ * These rules use html[data-theme] attribute selectors (specificity 0,1,1)
+ * which override @media (prefers-color-scheme) rules (specificity 0,0,1).
+ * This allows users to force light/dark regardless of their OS preference.
+ * ───────────────────────────────────────────────────────────────────────── */
+
+/* ══════════════════════════════════════════════════════════════════════════
+   LIGHT THEME FORCED
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── tokens ── */
+html[data-theme='light'] {
+  --bg: #f0f4fb;
+  --bg-alt: #e4ecf8;
+  --surface: rgba(255, 255, 255, 0.92);
+  --surface-strong: rgba(255, 255, 255, 0.97);
+  --surface-soft: rgba(240, 246, 255, 0.88);
+  --surface-muted: rgba(60, 90, 140, 0.07);
+  --border: rgba(60, 90, 140, 0.14);
+  --border-strong: rgba(60, 90, 140, 0.26);
+  --text: #0d1b30;
+  --text-soft: #2e4a72;
+  --text-muted: #5a7aaa;
+  --accent: #1a8c40;
+  --accent-strong: #167235;
+  --accent-cyan: #0b7da8;
+  --accent-warm: #c97a00;
+  --danger: #c0272d;
+  --warning: #a06b00;
+  --success: #1a7a4a;
+  --shadow-lg: 0 28px 80px rgba(12, 28, 60, 0.14);
+  --shadow-md: 0 16px 42px rgba(12, 28, 60, 0.1);
+  --shadow-sm: 0 10px 24px rgba(12, 28, 60, 0.08);
+}
+
+html[data-theme='light'] body {
+  background:
+    radial-gradient(circle at top left, rgba(11, 125, 168, 0.09), transparent 30%),
+    radial-gradient(circle at top right, rgba(26, 140, 64, 0.07), transparent 30%),
+    linear-gradient(160deg, #e8f0fb 0%, #eef4ff 55%, #e6eef8 100%);
+}
+
+html[data-theme='light'] body::before {
+  background-image:
+    linear-gradient(rgba(60, 90, 140, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(60, 90, 140, 0.03) 1px, transparent 1px);
+}
+
+/* ── layout ── */
+html[data-theme='light'] .party-info {
+  background: rgba(255, 255, 255, 0.82);
+}
+
+html[data-theme='light'] .round-info {
+  background: rgba(240, 246, 255, 0.9);
+  border-color: rgba(11, 125, 168, 0.2);
+}
+
+html[data-theme='light'] .connection-status {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(60, 90, 140, 0.15);
+}
+
+html[data-theme='light'] .loading-overlay {
+  background: rgba(240, 244, 251, 0.78);
+}
+
+html[data-theme='light'] .loading-spinner,
+html[data-theme='light'] .loading-spinner-large {
+  border-color: rgba(60, 90, 140, 0.15);
+  border-top-color: var(--accent-cyan);
+}
+
+html[data-theme='light'] .theme-toggle-btn {
+  background: rgba(240, 246, 255, 0.9);
+  border-color: rgba(60, 90, 140, 0.18);
+  color: var(--text-soft);
+}
+
+html[data-theme='light'] .theme-toggle-btn:hover {
+  background: rgba(255, 255, 255, 1);
+  color: var(--text);
+}
+
+/* ── forms ── */
+html[data-theme='light'] .btn {
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--text);
+}
+
+html[data-theme='light'] .btn:hover:not(:disabled),
+html[data-theme='light'] .btn:focus-visible:not(:disabled) {
+  background: rgba(255, 255, 255, 1);
+  box-shadow: 0 8px 24px rgba(12, 28, 60, 0.14);
+}
+
+html[data-theme='light'] .btn:focus-visible,
+html[data-theme='light'] .input-field:focus-visible,
+html[data-theme='light'] .help-link:focus-visible,
+html[data-theme='light'] .notification-close:focus-visible,
+html[data-theme='light'] .modal-close:focus-visible {
+  outline: 2px solid rgba(11, 125, 168, 0.65);
+  outline-offset: 2px;
+}
+
+html[data-theme='light'] .btn-primary {
+  border-color: rgba(11, 125, 168, 0.4);
+  background: linear-gradient(135deg, rgba(11, 125, 168, 0.14), rgba(11, 125, 168, 0.07));
+  color: #094a66;
+}
+
+html[data-theme='light'] .btn-primary:hover:not(:disabled),
+html[data-theme='light'] .btn-primary:focus-visible:not(:disabled) {
+  background: linear-gradient(135deg, rgba(11, 125, 168, 0.22), rgba(11, 125, 168, 0.12));
+}
+
+html[data-theme='light'] .btn-success {
+  border-color: rgba(26, 140, 64, 0.4);
+  background: linear-gradient(135deg, rgba(26, 140, 64, 0.16), rgba(26, 140, 64, 0.08));
+  color: #0d4a29;
+}
+
+html[data-theme='light'] .btn-success:hover:not(:disabled),
+html[data-theme='light'] .btn-success:focus-visible:not(:disabled) {
+  background: linear-gradient(135deg, rgba(26, 140, 64, 0.24), rgba(26, 140, 64, 0.14));
+}
+
+html[data-theme='light'] .btn-danger {
+  border-color: rgba(192, 39, 45, 0.4);
+  background: linear-gradient(135deg, rgba(192, 39, 45, 0.14), rgba(192, 39, 45, 0.07));
+  color: #5a1019;
+}
+
+html[data-theme='light'] .btn-danger:hover:not(:disabled),
+html[data-theme='light'] .btn-danger:focus-visible:not(:disabled) {
+  background: linear-gradient(135deg, rgba(192, 39, 45, 0.22), rgba(192, 39, 45, 0.12));
+}
+
+html[data-theme='light'] .btn-secondary,
+html[data-theme='light'] .btn-copy,
+html[data-theme='light'] .btn-preset {
+  background: rgba(228, 236, 248, 0.9);
+  color: var(--text-soft);
+}
+
+html[data-theme='light'] .btn-secondary:hover:not(:disabled),
+html[data-theme='light'] .btn-copy:hover:not(:disabled),
+html[data-theme='light'] .btn-preset:hover:not(:disabled) {
+  background: rgba(210, 224, 245, 0.95);
+}
+
+html[data-theme='light'] .btn.finished {
+  background: rgba(220, 250, 235, 0.9);
+  border-color: rgba(26, 140, 64, 0.3);
+  color: #0d4a29;
+}
+
+html[data-theme='light'] select.input-field {
+  background-image:
+    linear-gradient(45deg, transparent 50%, rgba(46, 74, 114, 0.75) 50%),
+    linear-gradient(135deg, rgba(46, 74, 114, 0.75) 50%, transparent 50%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(248, 252, 255, 0.95));
+}
+
+html[data-theme='light'] .input-field {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(60, 90, 140, 0.2);
+}
+
+html[data-theme='light'] select.input-field option,
+html[data-theme='light'] select.input-field optgroup {
+  background: #f0f4fb;
+  color: #0d1b30;
+}
+
+html[data-theme='light'] select.input-field option:checked,
+html[data-theme='light'] select.input-field option:hover,
+html[data-theme='light'] select.input-field option:focus {
+  background: #dbeafe;
+  color: #0d1b30;
+}
+
+html[data-theme='light'] .input-field::placeholder {
+  color: rgba(46, 74, 114, 0.6);
+}
+
+html[data-theme='light'] .input-field:focus {
+  border-color: rgba(11, 125, 168, 0.5);
+  box-shadow: 0 0 0 4px rgba(11, 125, 168, 0.15);
+  background: rgba(255, 255, 255, 1);
+}
+
+html[data-theme='light'] .message {
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--text-soft);
+  border-color: var(--border-strong);
+}
+
+html[data-theme='light'] .message.success {
+  background: rgba(210, 248, 228, 0.78);
+  border-color: rgba(26, 140, 64, 0.22);
+  color: #0d4a29;
+}
+
+html[data-theme='light'] .message.warning {
+  background: rgba(255, 243, 205, 0.82);
+  border-color: rgba(160, 107, 0, 0.22);
+  color: #4a3000;
+}
+
+html[data-theme='light'] .message.error {
+  background: rgba(255, 224, 226, 0.82);
+  border-color: rgba(192, 39, 45, 0.22);
+  color: #5a1019;
+}
+
+html[data-theme='light'] .message.info {
+  background: rgba(214, 244, 255, 0.78);
+  border-color: rgba(11, 125, 168, 0.22);
+  color: #094a66;
+}
+
+html[data-theme='light'] .timer-section {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: var(--border-strong);
+}
+
+/* ── welcome ── */
+html[data-theme='light'] .welcome-hero-card,
+html[data-theme='light'] .welcome-setup-card,
+html[data-theme='light'] .profile-hub-card,
+html[data-theme='light'] .welcome-side-story {
+  background: rgba(255, 255, 255, 0.88);
+}
+
+html[data-theme='light'] .feature-card,
+html[data-theme='light'] .mode-card,
+html[data-theme='light'] .join-card {
+  background: rgba(240, 246, 255, 0.82);
+  border-color: rgba(60, 90, 140, 0.12);
+}
+
+html[data-theme='light'] .feature-card:hover,
+html[data-theme='light'] .mode-card:hover,
+html[data-theme='light'] .mode-card.active,
+html[data-theme='light'] .mode-card:focus-visible {
+  background: rgba(255, 255, 255, 0.96);
+  border-color: rgba(11, 125, 168, 0.3);
+  box-shadow: 0 18px 34px rgba(11, 125, 168, 0.08);
+}
+
+html[data-theme='light'] .welcome-selection-hint {
+  background: rgba(240, 246, 255, 0.82);
+}
+
+html[data-theme='light'] .directory-stat {
+  background: rgba(240, 246, 255, 0.76);
+  border-color: rgba(60, 90, 140, 0.08);
+}
+
+html[data-theme='light'] .public-room-row {
+  background: rgba(255, 255, 255, 0.82);
+  border-color: rgba(60, 90, 140, 0.08);
+}
+
+html[data-theme='light'] .public-room-row[data-room-status='filled'] {
+  background: rgba(255, 243, 205, 0.72);
+  border-color: rgba(160, 107, 0, 0.18);
+}
+
+html[data-theme='light'] .public-room-empty {
+  background: rgba(240, 246, 255, 0.72);
+}
+
+html[data-theme='light'] .profile-stat {
+  background: rgba(240, 246, 255, 0.76);
+  border-color: rgba(60, 90, 140, 0.08);
+}
+
+html[data-theme='light'] .leaderboard-preview-row {
+  background: rgba(240, 246, 255, 0.72);
+}
+
+html[data-theme='light'] .leaderboard-preview-row.is-current-player {
+  background: rgba(214, 244, 255, 0.82);
+  border-color: rgba(11, 125, 168, 0.3);
+}
+
+html[data-theme='light'] .leaderboard-preview-empty {
+  background: rgba(240, 246, 255, 0.72);
+}
+
+html[data-theme='light'] .welcome-identity-chip,
+html[data-theme='light'] .profile-hub-badge {
+  background: rgba(26, 140, 64, 0.1);
+}
+
+/* ── lobby ── */
+html[data-theme='light'] .lobby-visibility-card,
+html[data-theme='light'] .party-code-section,
+html[data-theme='light'] .players-section {
+  background: rgba(255, 255, 255, 0.88);
+}
+
+html[data-theme='light'] .lobby-visibility-card {
+  border-color: rgba(60, 90, 140, 0.1);
+}
+
+html[data-theme='light'] .party-code-display {
+  background:
+    linear-gradient(135deg, rgba(11, 125, 168, 0.1), rgba(26, 140, 64, 0.07)),
+    rgba(240, 246, 255, 0.94);
+  border-color: rgba(11, 125, 168, 0.22);
+}
+
+html[data-theme='light'] .lobby-visibility-toggle[data-visibility='public'] {
+  background: linear-gradient(135deg, rgba(26, 140, 64, 0.16), rgba(26, 140, 64, 0.08));
+}
+
+html[data-theme='light'] .player-card {
+  background: rgba(240, 246, 255, 0.82);
+  border-color: rgba(60, 90, 140, 0.08);
+}
+
+html[data-theme='light'] .player-card.active {
+  background: rgba(220, 250, 235, 0.82);
+  border-color: rgba(26, 140, 64, 0.28);
+}
+
+html[data-theme='light'] .player-avatar {
+  background: rgba(60, 90, 140, 0.1);
+}
+
+html[data-theme='light'] .invitation-helper {
+  background: rgba(240, 246, 255, 0.9);
+  border-color: rgba(11, 125, 168, 0.18);
+}
+
+html[data-theme='light'] .status-indicator.online {
+  background: var(--success);
+  box-shadow: 0 0 0 6px rgba(26, 140, 64, 0.18);
+}
+
+html[data-theme='light'] .status-indicator.offline {
+  background: rgba(90, 110, 145, 0.45);
+  box-shadow: none;
+}
+
+/* ── gameplay ── */
+html[data-theme='light'] .selection-panel,
+html[data-theme='light'] .selection-side-card,
+html[data-theme='light'] .guess-panel,
+html[data-theme='light'] .guess-history,
+html[data-theme='light'] .game-battle {
+  background: rgba(255, 255, 255, 0.88);
+}
+
+html[data-theme='light'] .player-battle-card {
+  background: rgba(240, 246, 255, 0.82);
+  border-color: rgba(60, 90, 140, 0.1);
+}
+
+html[data-theme='light'] .player-battle-card.leading {
+  background: rgba(220, 250, 235, 0.82);
+  border-color: rgba(26, 140, 64, 0.28);
+}
+
+html[data-theme='light'] .player-battle-card.trailing {
+  background: rgba(255, 235, 236, 0.82);
+  border-color: rgba(192, 39, 45, 0.24);
+}
+
+html[data-theme='light'] .player-battle-card.neutral {
+  border-color: rgba(11, 125, 168, 0.2);
+}
+
+html[data-theme='light'] .ready-status {
+  background: rgba(240, 246, 255, 0.82);
+}
+
+html[data-theme='light'] .stat {
+  background: rgba(240, 246, 255, 0.76);
+}
+
+html[data-theme='light'] .vs-divider {
+  background: rgba(240, 246, 255, 0.92);
+  border-color: rgba(11, 125, 168, 0.22);
+}
+
+html[data-theme='light'] .win-status {
+  background: rgba(214, 244, 255, 0.8);
+  color: var(--text-soft);
+}
+
+html[data-theme='light'] .history-placeholder {
+  background: rgba(240, 246, 255, 0.72);
+}
+
+html[data-theme='light'] .guess-item {
+  background: rgba(240, 246, 255, 0.76);
+  border-color: rgba(60, 90, 140, 0.08);
+}
+
+html[data-theme='light'] .guess-item.correct-guess {
+  background: rgba(210, 248, 228, 0.76);
+  border-color: rgba(26, 140, 64, 0.22);
+}
+
+html[data-theme='light'] .guess-feedback.far {
+  background: rgba(192, 39, 45, 0.1);
+  color: #5a1019;
+}
+
+html[data-theme='light'] .guess-feedback.close {
+  background: rgba(160, 107, 0, 0.1);
+  color: #4a3000;
+}
+
+html[data-theme='light'] .guess-feedback.very_close {
+  background: rgba(11, 125, 168, 0.1);
+  color: #094a66;
+}
+
+html[data-theme='light'] .history-item {
+  background: rgba(240, 246, 255, 0.76);
+}
+
+html[data-theme='light'] .history-item.correct {
+  background: rgba(210, 248, 228, 0.76);
+}
+
+html[data-theme='light'] .history-item.high {
+  background: rgba(255, 224, 226, 0.7);
+}
+
+html[data-theme='light'] .history-item.low {
+  background: rgba(255, 243, 205, 0.7);
+}
+
+/* ── overlays ── */
+html[data-theme='light'] .modal-overlay,
+html[data-theme='light'] .confirm-dialog {
+  background: rgba(200, 214, 235, 0.72);
+}
+
+html[data-theme='light'] .modal-content,
+html[data-theme='light'] .confirm-content {
+  background: rgba(255, 255, 255, 0.96);
+}
+
+html[data-theme='light'] .modal-header {
+  border-bottom-color: rgba(60, 90, 140, 0.1);
+}
+
+html[data-theme='light'] .modal-footer {
+  border-top-color: rgba(60, 90, 140, 0.1);
+}
+
+html[data-theme='light'] .notification-close:hover,
+html[data-theme='light'] .modal-close:hover {
+  background: rgba(60, 90, 140, 0.08);
+  color: var(--text);
+}
+
+html[data-theme='light'] .notification-icon {
+  background: rgba(60, 90, 140, 0.08);
+}
+
+html[data-theme='light'] .notification {
+  background: rgba(255, 255, 255, 0.94);
+  border-color: rgba(60, 90, 140, 0.16);
+  color: var(--text);
+}
+
+html[data-theme='light'] .notification.success,
+html[data-theme='light'] .notification.victory {
+  background: rgba(214, 250, 232, 0.94);
+  border-color: rgba(26, 140, 64, 0.3);
+}
+
+html[data-theme='light'] .notification.warning,
+html[data-theme='light'] .notification.competitive {
+  background: rgba(255, 243, 205, 0.94);
+  border-color: rgba(160, 107, 0, 0.3);
+}
+
+html[data-theme='light'] .notification.error,
+html[data-theme='light'] .notification.critical {
+  background: rgba(255, 224, 226, 0.94);
+  border-color: rgba(192, 39, 45, 0.3);
+}
+
+html[data-theme='light'] .notification.info {
+  background: rgba(214, 244, 255, 0.94);
+  border-color: rgba(11, 125, 168, 0.28);
+}
+
+/* ── profile ── */
+html[data-theme='light'] .player-data-stat {
+  background: rgba(240, 246, 255, 0.82);
+}
+
+html[data-theme='light'] .player-data-row,
+html[data-theme='light'] .leaderboard-row {
+  background: rgba(240, 246, 255, 0.72);
+}
+
+html[data-theme='light'] .player-data-row:hover,
+html[data-theme='light'] .leaderboard-row:hover {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+html[data-theme='light'] .leaderboard-row.is-current-player {
+  background: rgba(214, 244, 255, 0.82);
+  border-color: rgba(11, 125, 168, 0.3);
+}
+
+html[data-theme='light'] .player-data-empty,
+html[data-theme='light'] .leaderboard-modal-empty {
+  background: rgba(240, 246, 255, 0.72);
+}
+
+/* ── results ── */
+html[data-theme='light'] .results-summary-panel,
+html[data-theme='light'] .results-actions-panel,
+html[data-theme='light'] .result-card {
+  background: rgba(255, 255, 255, 0.88);
+}
+
+html[data-theme='light'] .session-info {
+  background: rgba(240, 246, 255, 0.82);
+}
+
+html[data-theme='light'] .result-card.winner {
+  background: rgba(220, 250, 235, 0.82);
+  border-color: rgba(26, 140, 64, 0.28);
+}
+
+html[data-theme='light'] .result-stat {
+  background: rgba(240, 246, 255, 0.76);
+}
+
+html[data-theme='light'] .performance-badge.legendary,
+html[data-theme='light'] .performance-badge.master {
+  background: rgba(214, 255, 228, 0.76);
+  color: #0d4a29;
+}
+
+html[data-theme='light'] .performance-badge.excellent,
+html[data-theme='light'] .performance-badge.expert {
+  background: rgba(214, 244, 255, 0.76);
+  color: #094a66;
+}
+
+html[data-theme='light'] .performance-badge.good,
+html[data-theme='light'] .performance-badge.intermediate,
+html[data-theme='light'] .performance-badge.new_player {
+  background: rgba(255, 243, 205, 0.76);
+  color: #5a3a00;
+}
+
+html[data-theme='light'] .performance-badge.fair,
+html[data-theme='light'] .performance-badge.beginner {
+  background: rgba(255, 236, 220, 0.76);
+  color: #5a2a00;
+}
+
+html[data-theme='light'] .performance-badge.needs_improvement {
+  background: rgba(255, 224, 226, 0.76);
+  color: #5a1019;
+}
+
+html[data-theme='light'] .win-badge {
+  background: rgba(255, 243, 205, 0.76);
+}
+
+html[data-theme='light'] .win-badge.winning-streak,
+html[data-theme='light'] .win-badge.hot-streak {
+  background: rgba(214, 255, 228, 0.76);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   DARK THEME FORCED
+   (resets all light-mode media query overrides when user forces dark)
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── tokens ── */
+html[data-theme='dark'] {
+  --bg: #07111f;
+  --bg-alt: #0b1830;
+  --surface: rgba(9, 18, 34, 0.92);
+  --surface-strong: rgba(12, 24, 45, 0.96);
+  --surface-soft: rgba(17, 31, 56, 0.82);
+  --surface-muted: rgba(126, 150, 186, 0.14);
+  --border: rgba(167, 190, 230, 0.16);
+  --border-strong: rgba(167, 190, 230, 0.28);
+  --text: #eef4ff;
+  --text-soft: #bfd0f3;
+  --text-muted: #7f96be;
+  --accent: #97ff7c;
+  --accent-strong: #72f85d;
+  --accent-cyan: #52d6ff;
+  --accent-warm: #ffc76b;
+  --danger: #ff6b72;
+  --warning: #ffbf47;
+  --success: #63e6a3;
+  --shadow-lg: 0 28px 80px rgba(1, 8, 18, 0.45);
+  --shadow-md: 0 16px 42px rgba(1, 8, 18, 0.28);
+  --shadow-sm: 0 10px 24px rgba(1, 8, 18, 0.2);
+}
+
+html[data-theme='dark'] body {
+  background:
+    radial-gradient(circle at top left, rgba(82, 214, 255, 0.16), transparent 24%),
+    radial-gradient(circle at top right, rgba(151, 255, 124, 0.12), transparent 24%),
+    linear-gradient(160deg, #06101d 0%, #09172c 55%, #081321 100%);
+}
+
+html[data-theme='dark'] body::before {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+}
+
+/* ── layout ── */
+html[data-theme='dark'] .party-info {
+  background: rgba(9, 18, 34, 0.74);
+}
+
+html[data-theme='dark'] .round-info {
+  background: rgba(11, 23, 43, 0.9);
+  border-color: rgba(82, 214, 255, 0.2);
+}
+
+html[data-theme='dark'] .connection-status {
+  background: rgba(6, 16, 29, 0.88);
+  border-color: var(--border);
+}
+
+html[data-theme='dark'] .loading-overlay {
+  background: rgba(2, 7, 14, 0.7);
+}
+
+html[data-theme='dark'] .loading-spinner,
+html[data-theme='dark'] .loading-spinner-large {
+  border-color: rgba(255, 255, 255, 0.12);
+  border-top-color: var(--accent-cyan);
+}
+
+html[data-theme='dark'] .theme-toggle-btn {
+  background: rgba(9, 18, 34, 0.74);
+  border-color: var(--border);
+  color: var(--text-soft);
+}
+
+html[data-theme='dark'] .theme-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+}
+
+/* ── forms ── */
+html[data-theme='dark'] .btn {
+  background: rgba(12, 25, 46, 0.96);
+  color: var(--text);
+}
+
+html[data-theme='dark'] .btn:hover:not(:disabled),
+html[data-theme='dark'] .btn:focus-visible:not(:disabled) {
+  background: rgba(12, 25, 46, 0.96);
+  box-shadow: 0 14px 28px rgba(1, 8, 18, 0.28);
+}
+
+html[data-theme='dark'] .btn:focus-visible,
+html[data-theme='dark'] .input-field:focus-visible,
+html[data-theme='dark'] .help-link:focus-visible,
+html[data-theme='dark'] .notification-close:focus-visible,
+html[data-theme='dark'] .modal-close:focus-visible {
+  outline: 2px solid rgba(82, 214, 255, 0.5);
+  outline-offset: 2px;
+}
+
+html[data-theme='dark'] .btn-primary {
+  border-color: rgba(82, 214, 255, 0.3);
+  background: linear-gradient(135deg, rgba(82, 214, 255, 0.22), rgba(82, 214, 255, 0.1));
+  color: var(--text);
+}
+
+html[data-theme='dark'] .btn-primary:hover:not(:disabled),
+html[data-theme='dark'] .btn-primary:focus-visible:not(:disabled) {
+  background: linear-gradient(135deg, rgba(82, 214, 255, 0.28), rgba(82, 214, 255, 0.14));
+}
+
+html[data-theme='dark'] .btn-success {
+  border-color: rgba(99, 230, 163, 0.32);
+  background: linear-gradient(135deg, rgba(99, 230, 163, 0.22), rgba(99, 230, 163, 0.12));
+  color: var(--text);
+}
+
+html[data-theme='dark'] .btn-success:hover:not(:disabled),
+html[data-theme='dark'] .btn-success:focus-visible:not(:disabled) {
+  background: linear-gradient(135deg, rgba(99, 230, 163, 0.22), rgba(99, 230, 163, 0.12));
+}
+
+html[data-theme='dark'] .btn-danger {
+  border-color: rgba(255, 107, 114, 0.3);
+  background: linear-gradient(135deg, rgba(255, 107, 114, 0.2), rgba(255, 107, 114, 0.1));
+  color: var(--text);
+}
+
+html[data-theme='dark'] .btn-danger:hover:not(:disabled),
+html[data-theme='dark'] .btn-danger:focus-visible:not(:disabled) {
+  background: linear-gradient(135deg, rgba(255, 107, 114, 0.2), rgba(255, 107, 114, 0.1));
+}
+
+html[data-theme='dark'] .btn-secondary,
+html[data-theme='dark'] .btn-copy,
+html[data-theme='dark'] .btn-preset {
+  background: rgba(16, 31, 56, 0.88);
+  color: var(--text-soft);
+}
+
+html[data-theme='dark'] .btn-secondary:hover:not(:disabled),
+html[data-theme='dark'] .btn-copy:hover:not(:disabled),
+html[data-theme='dark'] .btn-preset:hover:not(:disabled) {
+  background: rgba(16, 31, 56, 0.88);
+}
+
+html[data-theme='dark'] .btn.finished {
+  background: rgba(12, 48, 33, 0.88);
+  border-color: rgba(99, 230, 163, 0.35);
+  color: var(--text);
+}
+
+html[data-theme='dark'] select.input-field {
+  background-image:
+    linear-gradient(45deg, transparent 50%, rgba(238, 244, 255, 0.82) 50%),
+    linear-gradient(135deg, rgba(238, 244, 255, 0.82) 50%, transparent 50%),
+    linear-gradient(180deg, rgba(12, 24, 43, 0.98), rgba(10, 20, 37, 0.98));
+}
+
+html[data-theme='dark'] .input-field {
+  background: rgba(7, 17, 32, 0.9);
+  border-color: var(--border);
+}
+
+html[data-theme='dark'] select.input-field option,
+html[data-theme='dark'] select.input-field optgroup {
+  background: #0c172b;
+  color: var(--text);
+}
+
+html[data-theme='dark'] select.input-field option:checked,
+html[data-theme='dark'] select.input-field option:hover,
+html[data-theme='dark'] select.input-field option:focus {
+  background: #1c3659;
+  color: #f4f8ff;
+}
+
+html[data-theme='dark'] .input-field::placeholder {
+  color: rgba(191, 208, 243, 0.45);
+}
+
+html[data-theme='dark'] .input-field:focus {
+  border-color: rgba(82, 214, 255, 0.42);
+  box-shadow: 0 0 0 4px rgba(82, 214, 255, 0.12);
+  background: rgba(10, 22, 40, 0.96);
+}
+
+html[data-theme='dark'] .message {
+  background: rgba(13, 26, 48, 0.88);
+  color: var(--text-soft);
+  border-color: var(--border);
+}
+
+html[data-theme='dark'] .message.success {
+  background: rgba(9, 53, 34, 0.58);
+  border-color: rgba(99, 230, 163, 0.26);
+  color: #d8ffeb;
+}
+
+html[data-theme='dark'] .message.warning {
+  background: rgba(71, 48, 7, 0.52);
+  border-color: rgba(255, 191, 71, 0.28);
+  color: #ffe8b8;
+}
+
+html[data-theme='dark'] .message.error {
+  background: rgba(68, 19, 29, 0.56);
+  border-color: rgba(255, 107, 114, 0.28);
+  color: #ffd7da;
+}
+
+html[data-theme='dark'] .message.info {
+  background: rgba(14, 42, 66, 0.62);
+  border-color: rgba(82, 214, 255, 0.25);
+  color: #d9f7ff;
+}
+
+html[data-theme='dark'] .timer-section {
+  background: rgba(12, 24, 43, 0.92);
+  border-color: var(--border);
+}
+
+/* ── welcome ── */
+html[data-theme='dark'] .welcome-hero-card,
+html[data-theme='dark'] .welcome-setup-card,
+html[data-theme='dark'] .profile-hub-card,
+html[data-theme='dark'] .welcome-side-story {
+  background: linear-gradient(180deg, rgba(11, 22, 41, 0.96), rgba(10, 18, 34, 0.92));
+}
+
+html[data-theme='dark'] .feature-card,
+html[data-theme='dark'] .mode-card,
+html[data-theme='dark'] .join-card {
+  background: rgba(16, 31, 56, 0.92);
+  border-color: rgba(82, 214, 255, 0.12);
+}
+
+html[data-theme='dark'] .feature-card:hover,
+html[data-theme='dark'] .mode-card:hover,
+html[data-theme='dark'] .mode-card.active,
+html[data-theme='dark'] .mode-card:focus-visible {
+  background: linear-gradient(180deg, rgba(22, 52, 83, 0.98), rgba(14, 35, 59, 0.96));
+  border-color: rgba(82, 214, 255, 0.36);
+  box-shadow: 0 18px 34px rgba(82, 214, 255, 0.1);
+}
+
+html[data-theme='dark'] .welcome-selection-hint {
+  background: rgba(17, 34, 60, 0.88);
+}
+
+html[data-theme='dark'] .directory-stat {
+  background: rgba(14, 28, 49, 0.82);
+  border-color: rgba(255, 255, 255, 0.04);
+}
+
+html[data-theme='dark'] .public-room-row {
+  background: rgba(14, 28, 49, 0.82);
+  border-color: rgba(255, 255, 255, 0.04);
+}
+
+html[data-theme='dark'] .public-room-row[data-room-status='filled'] {
+  background: rgba(14, 28, 49, 0.82);
+  border-color: rgba(255, 193, 7, 0.2);
+}
+
+html[data-theme='dark'] .public-room-empty {
+  background: rgba(14, 28, 49, 0.72);
+}
+
+html[data-theme='dark'] .profile-stat {
+  background: rgba(14, 28, 49, 0.82);
+  border-color: rgba(255, 255, 255, 0.04);
+}
+
+html[data-theme='dark'] .leaderboard-preview-row {
+  background: rgba(14, 28, 49, 0.82);
+}
+
+html[data-theme='dark'] .leaderboard-preview-row.is-current-player {
+  background: rgba(18, 41, 28, 0.76);
+  border-color: rgba(151, 255, 124, 0.24);
+}
+
+html[data-theme='dark'] .leaderboard-preview-empty {
+  background: rgba(14, 28, 49, 0.72);
+}
+
+html[data-theme='dark'] .welcome-identity-chip,
+html[data-theme='dark'] .profile-hub-badge {
+  background: rgba(151, 255, 124, 0.1);
+}
+
+/* ── lobby ── */
+html[data-theme='dark'] .lobby-visibility-card,
+html[data-theme='dark'] .party-code-section,
+html[data-theme='dark'] .players-section {
+  background: var(--surface);
+}
+
+html[data-theme='dark'] .lobby-visibility-card {
+  background: rgba(13, 25, 46, 0.82);
+  border-color: rgba(255, 255, 255, 0.04);
+}
+
+html[data-theme='dark'] .party-code-display {
+  background:
+    linear-gradient(135deg, rgba(82, 214, 255, 0.12), rgba(151, 255, 124, 0.08)),
+    rgba(11, 20, 38, 0.92);
+  border-color: rgba(82, 214, 255, 0.2);
+}
+
+html[data-theme='dark'] .lobby-visibility-toggle[data-visibility='public'] {
+  background: linear-gradient(135deg, rgba(99, 230, 163, 0.22), rgba(99, 230, 163, 0.12));
+}
+
+html[data-theme='dark'] .player-card {
+  background: rgba(13, 25, 46, 0.82);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+html[data-theme='dark'] .player-card.active {
+  background: rgba(17, 39, 30, 0.78);
+  border-color: rgba(151, 255, 124, 0.28);
+}
+
+html[data-theme='dark'] .player-avatar {
+  background: rgba(82, 214, 255, 0.12);
+}
+
+html[data-theme='dark'] .invitation-helper {
+  background: rgba(10, 28, 45, 0.9);
+  border-color: rgba(82, 214, 255, 0.18);
+}
+
+html[data-theme='dark'] .status-indicator.online {
+  background: var(--success);
+  box-shadow: 0 0 0 6px rgba(99, 230, 163, 0.16);
+}
+
+html[data-theme='dark'] .status-indicator.offline {
+  background: rgba(255, 255, 255, 0.18);
+  box-shadow: none;
+}
+
+/* ── gameplay ── */
+html[data-theme='dark'] .selection-panel,
+html[data-theme='dark'] .selection-side-card,
+html[data-theme='dark'] .guess-panel,
+html[data-theme='dark'] .guess-history,
+html[data-theme='dark'] .game-battle {
+  background: var(--surface);
+}
+
+html[data-theme='dark'] .player-battle-card {
+  background: rgba(13, 25, 46, 0.82);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+html[data-theme='dark'] .player-battle-card.leading {
+  background: rgba(13, 25, 46, 0.82);
+  border-color: rgba(99, 230, 163, 0.26);
+}
+
+html[data-theme='dark'] .player-battle-card.trailing {
+  background: rgba(13, 25, 46, 0.82);
+  border-color: rgba(255, 107, 114, 0.24);
+}
+
+html[data-theme='dark'] .player-battle-card.neutral {
+  border-color: rgba(82, 214, 255, 0.22);
+}
+
+html[data-theme='dark'] .ready-status {
+  background: rgba(14, 28, 49, 0.78);
+}
+
+html[data-theme='dark'] .stat {
+  background: rgba(17, 31, 56, 0.82);
+}
+
+html[data-theme='dark'] .vs-divider {
+  background: rgba(10, 22, 40, 0.9);
+  border-color: rgba(82, 214, 255, 0.18);
+}
+
+html[data-theme='dark'] .win-status {
+  background: rgba(82, 214, 255, 0.1);
+  color: var(--text-soft);
+}
+
+html[data-theme='dark'] .history-placeholder {
+  background: rgba(14, 28, 49, 0.76);
+}
+
+html[data-theme='dark'] .guess-item {
+  background: rgba(15, 29, 53, 0.84);
+  border-color: rgba(255, 255, 255, 0.04);
+}
+
+html[data-theme='dark'] .guess-item.correct-guess {
+  background: rgba(12, 48, 33, 0.74);
+  border-color: rgba(99, 230, 163, 0.24);
+}
+
+html[data-theme='dark'] .guess-feedback.far {
+  background: rgba(255, 107, 114, 0.14);
+  color: #ffd7da;
+}
+
+html[data-theme='dark'] .guess-feedback.close {
+  background: rgba(255, 191, 71, 0.16);
+  color: #ffe8b8;
+}
+
+html[data-theme='dark'] .guess-feedback.very_close {
+  background: rgba(82, 214, 255, 0.16);
+  color: #d9f7ff;
+}
+
+html[data-theme='dark'] .history-item {
+  background: rgba(15, 29, 53, 0.84);
+}
+
+html[data-theme='dark'] .history-item.correct {
+  background: rgba(12, 48, 33, 0.74);
+}
+
+html[data-theme='dark'] .history-item.high {
+  background: rgba(68, 19, 29, 0.56);
+}
+
+html[data-theme='dark'] .history-item.low {
+  background: rgba(71, 48, 7, 0.52);
+}
+
+/* ── overlays ── */
+html[data-theme='dark'] .modal-overlay,
+html[data-theme='dark'] .confirm-dialog {
+  background: rgba(3, 7, 14, 0.76);
+}
+
+html[data-theme='dark'] .modal-content,
+html[data-theme='dark'] .confirm-content {
+  background: var(--surface-strong);
+}
+
+html[data-theme='dark'] .modal-header {
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+html[data-theme='dark'] .modal-footer {
+  border-top-color: rgba(255, 255, 255, 0.06);
+}
+
+html[data-theme='dark'] .notification-close:hover,
+html[data-theme='dark'] .modal-close:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+}
+
+html[data-theme='dark'] .notification-icon {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+html[data-theme='dark'] .notification {
+  background: rgba(8, 19, 35, 0.94);
+  border-color: var(--border);
+  color: var(--text);
+}
+
+html[data-theme='dark'] .notification.success,
+html[data-theme='dark'] .notification.victory {
+  background: rgba(8, 19, 35, 0.94);
+  border-color: rgba(99, 230, 163, 0.24);
+}
+
+html[data-theme='dark'] .notification.warning,
+html[data-theme='dark'] .notification.competitive {
+  background: rgba(8, 19, 35, 0.94);
+  border-color: rgba(255, 191, 71, 0.24);
+}
+
+html[data-theme='dark'] .notification.error,
+html[data-theme='dark'] .notification.critical {
+  background: rgba(8, 19, 35, 0.94);
+  border-color: rgba(255, 107, 114, 0.24);
+}
+
+html[data-theme='dark'] .notification.info {
+  background: rgba(8, 19, 35, 0.94);
+  border-color: rgba(82, 214, 255, 0.24);
+}
+
+/* ── profile ── */
+html[data-theme='dark'] .player-data-stat {
+  background: rgba(14, 28, 49, 0.84);
+}
+
+html[data-theme='dark'] .player-data-row,
+html[data-theme='dark'] .leaderboard-row {
+  background: rgba(14, 28, 49, 0.82);
+}
+
+html[data-theme='dark'] .player-data-row:hover,
+html[data-theme='dark'] .leaderboard-row:hover {
+  background: rgba(14, 28, 49, 0.82);
+}
+
+html[data-theme='dark'] .leaderboard-row.is-current-player {
+  background: rgba(18, 41, 28, 0.78);
+  border-color: rgba(151, 255, 124, 0.24);
+}
+
+html[data-theme='dark'] .player-data-empty,
+html[data-theme='dark'] .leaderboard-modal-empty {
+  background: rgba(14, 28, 49, 0.72);
+}
+
+/* ── results ── */
+html[data-theme='dark'] .results-summary-panel,
+html[data-theme='dark'] .results-actions-panel,
+html[data-theme='dark'] .result-card {
+  background: var(--surface);
+}
+
+html[data-theme='dark'] .session-info {
+  background: rgba(14, 28, 49, 0.78);
+}
+
+html[data-theme='dark'] .result-card.winner {
+  background: rgba(14, 40, 29, 0.82);
+  border-color: rgba(151, 255, 124, 0.3);
+}
+
+html[data-theme='dark'] .result-stat {
+  background: rgba(15, 29, 53, 0.82);
+}
+
+html[data-theme='dark'] .performance-badge.legendary,
+html[data-theme='dark'] .performance-badge.master {
+  background: rgba(255, 191, 71, 0.16);
+  color: #ffe8b8;
+}
+
+html[data-theme='dark'] .performance-badge.excellent,
+html[data-theme='dark'] .performance-badge.expert {
+  background: rgba(99, 230, 163, 0.16);
+  color: #d8ffeb;
+}
+
+html[data-theme='dark'] .performance-badge.good,
+html[data-theme='dark'] .performance-badge.intermediate,
+html[data-theme='dark'] .performance-badge.new_player {
+  background: rgba(82, 214, 255, 0.16);
+  color: #d9f7ff;
+}
+
+html[data-theme='dark'] .performance-badge.fair,
+html[data-theme='dark'] .performance-badge.beginner {
+  background: rgba(255, 191, 71, 0.16);
+  color: #ffe8b8;
+}
+
+html[data-theme='dark'] .performance-badge.needs_improvement {
+  background: rgba(255, 107, 114, 0.14);
+  color: #ffd7da;
+}
+
+html[data-theme='dark'] .win-badge {
+  background: rgba(82, 214, 255, 0.12);
+}
+
+html[data-theme='dark'] .win-badge.winning-streak {
+  background: rgba(255, 191, 71, 0.16);
+}
+
+html[data-theme='dark'] .win-badge.hot-streak {
+  background: rgba(151, 255, 124, 0.16);
+}
