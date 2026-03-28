@@ -1,587 +1,177 @@
 class SinglePlayerGame {
-    constructor() {
-        this.gameState = {
-            playerName: '',
-            playerSecretNumber: null,
-            botSecretNumber: null,
-            playerAttempts: 0,
-            botAttempts: 0,
-            playerWins: 0,
-            botWins: 0,
-            rangeStart: 1,
-            rangeEnd: 100,
-            botDifficulty: 'medium',
-            gamePhase: 'setup', 
-            playerGuessHistory: [],
-            botGuessHistory: [],
-            botStrategy: {
-                min: 1,
-                max: 100,
-                lastGuess: null,
-                strategy: 'binary'
-            }
-        };
-        
-        this.botThinkingTime = {
-            easy: 2000,
-            medium: 1500,
-            hard: 1000
-        };
-        
-        this.config = null;
-        this.loadConfig();
-        this.loadStats();
+  constructor() {
+    this.gameState = this.createInitialGameState();
+    this.botThinkingTime = {
+      easy: 2000,
+      medium: 1500,
+      hard: 1000,
+    };
+
+    this.config = null;
+    this.loadConfig();
+    this.loadStats();
+  }
+
+  createInitialGameState() {
+    return {
+      playerName: '',
+      playerSecretNumber: null,
+      botSecretNumber: null,
+      playerAttempts: 0,
+      botAttempts: 0,
+      playerWins: 0,
+      botWins: 0,
+      rangeStart: 1,
+      rangeEnd: 100,
+      botDifficulty: 'medium',
+      gamePhase: 'setup',
+      playerGuessHistory: [],
+      botGuessHistory: [],
+      botStrategy: {
+        min: 1,
+        max: 100,
+        lastGuess: null,
+        strategy: 'binary',
+      },
+    };
+  }
+
+  loadStats() {
+    try {
+      const savedStats = localStorage.getItem('numberGuesserSinglePlayerStats');
+      if (savedStats) {
+        const stats = JSON.parse(savedStats);
+        this.gameState.playerWins = stats.playerWins || 0;
+        this.gameState.botWins = stats.botWins || 0;
+      }
+    } catch (e) {
+      console.error('Failed to load stats:', e);
+    }
+  }
+
+  saveStats() {
+    try {
+      const stats = {
+        playerWins: this.gameState.playerWins,
+        botWins: this.gameState.botWins,
+      };
+      localStorage.setItem('numberGuesserSinglePlayerStats', JSON.stringify(stats));
+    } catch (e) {
+      console.error('Failed to save stats:', e);
+    }
+  }
+
+  async loadConfig() {
+    try {
+      const response = await fetch('/api/config');
+      if (response.ok) {
+        this.config = await response.json();
+      } else {
+        this.useDefaultConfig();
+      }
+    } catch (error) {
+      this.useDefaultConfig();
+    }
+  }
+
+  useDefaultConfig() {
+    this.config = {
+      GAME_MESSAGES: {
+        TOO_HIGH: ['Too high!'],
+        TOO_LOW: ['Too low!'],
+        CLOSE_HIGH: ['Close, but high!'],
+        CLOSE_LOW: ['Close, but low!'],
+        VERY_CLOSE_HIGH: ['Very close, just a bit high!'],
+        VERY_CLOSE_LOW: ['Very close, just a bit low!'],
+      },
+    };
+  }
+
+  startGame(playerName, rangeStart, rangeEnd, botDifficulty) {
+    if (!this.config) {
+      UI.showNotification('Game configuration not loaded yet. Please wait...', 'error');
+      return;
     }
 
-    loadStats() {
-        try {
-            const savedStats = localStorage.getItem('numberGuesserSinglePlayerStats');
-            if (savedStats) {
-                const stats = JSON.parse(savedStats);
-                this.gameState.playerWins = stats.playerWins || 0;
-                this.gameState.botWins = stats.botWins || 0;
-            }
-        } catch (e) {
-            console.error('Failed to load stats:', e);
-        }
+    if (typeof Game !== 'undefined' && Game.currentState) {
+      Game.currentState.gameMode = 'single';
+      Game.currentState.party = null;
+      Game.currentState.hasFinished = false;
+    }
+    if (typeof window !== 'undefined' && window.AppActions) {
+      window.AppActions.setMode('single');
+      window.AppActions.setSinglePlayerBounds({ rangeStart, rangeEnd });
+      window.AppActions.setFinished(false);
     }
 
-    saveStats() {
-        try {
-            const stats = {
-                playerWins: this.gameState.playerWins,
-                botWins: this.gameState.botWins
-            };
-            localStorage.setItem('numberGuesserSinglePlayerStats', JSON.stringify(stats));
-        } catch (e) {
-            console.error('Failed to save stats:', e);
-        }
+    this.gameState.playerName = playerName;
+    this.gameState.rangeStart = rangeStart;
+    this.gameState.rangeEnd = rangeEnd;
+    this.gameState.botDifficulty = botDifficulty;
+    this.gameState.gamePhase = 'selection';
+
+    this.gameState.playerSecretNumber = null;
+    this.gameState.botSecretNumber = this.generateRandomNumber(rangeStart, rangeEnd);
+    this.initializeBotStrategy();
+
+    this.gameState.playerAttempts = 0;
+    this.gameState.botAttempts = 0;
+    this.gameState.playerGuessHistory = [];
+    this.gameState.botGuessHistory = [];
+
+    this.showSinglePlayerSelection();
+  }
+
+  makePlayerGuess(guess) {
+    if (this.gameState.gamePhase !== 'playing') {
+      return;
     }
 
-    async loadConfig() {
-        try {
-            const response = await fetch('/api/config');
-            if (response.ok) {
-                this.config = await response.json();
-            } else {
-                this.useDefaultConfig();
-            }
-        } catch (error) {
-            this.useDefaultConfig();
-        }
+    if (guess < this.gameState.rangeStart || guess > this.gameState.rangeEnd) {
+      UI.showNotification(
+        `Guess must be between ${this.gameState.rangeStart} and ${this.gameState.rangeEnd}`,
+        'error'
+      );
+      return;
     }
 
-    useDefaultConfig() {
-        // Fallback minimal config in case server is down/unreachable
-        this.config = {
-            GAME_MESSAGES: {
-                TOO_HIGH: ["Too high!"],
-                TOO_LOW: ["Too low!"],
-                CLOSE_HIGH: ["Close, but high!"],
-                CLOSE_LOW: ["Close, but low!"],
-                VERY_CLOSE_HIGH: ["Very close, just a bit high!"],
-                VERY_CLOSE_LOW: ["Very close, just a bit low!"]
-            }
-        };
+    this.gameState.playerAttempts++;
+    const feedback = this.generateFeedback(guess, this.gameState.botSecretNumber);
+
+    this.gameState.playerGuessHistory.push({
+      attempt: this.gameState.playerAttempts,
+      guess,
+      feedback,
+    });
+
+    document.getElementById('myAttempts').textContent = this.gameState.playerAttempts;
+    UI.showGameMessage(feedback.message, feedback.type);
+    UI.addGuessToHistory(guess, {
+      attempts: this.gameState.playerAttempts,
+      isCorrect: feedback.isCorrect,
+      closeness: feedback.closeness,
+      direction: feedback.direction,
+    });
+
+    if (feedback.isCorrect) {
+      this.endGame('player');
+      return;
     }
 
-    startGame(playerName, rangeStart, rangeEnd, botDifficulty) {
-        if (!this.config) {
-            UI.showNotification('Game configuration not loaded yet. Please wait...', 'error');
-            return;
-        }
+    setTimeout(() => {
+      this.botMakeGuess();
+    }, this.botThinkingTime[this.gameState.botDifficulty]);
+  }
 
-        this.gameState.playerName = playerName;
-        this.gameState.rangeStart = rangeStart;
-        this.gameState.rangeEnd = rangeEnd;
-        this.gameState.botDifficulty = botDifficulty;
-        this.gameState.gamePhase = 'selection';
-        
-        
-        this.gameState.playerSecretNumber = null; 
-        this.gameState.botSecretNumber = this.generateRandomNumber(rangeStart, rangeEnd);
-        
-        
-        this.initializeBotStrategy();
-        
-        
-        this.gameState.playerAttempts = 0;
-        this.gameState.botAttempts = 0;
-        this.gameState.playerGuessHistory = [];
-        this.gameState.botGuessHistory = [];
-        
-        
-        this.showSinglePlayerSelection();
-    }
-
-    showSinglePlayerSelection() {
-        
-        UI.showScreen('selectionScreen');
-        
-        
-        document.getElementById('selectionRoundInfo').querySelector('.round-text').textContent = 'Single Player vs Bot';
-        
-        const rangeDisplay = `${this.gameState.rangeStart} - ${this.gameState.rangeEnd}`;
-        document.getElementById('selectionRangeDisplay').textContent = rangeDisplay;
-        
-        const secretNumberInput = document.getElementById('secretNumber');
-        secretNumberInput.min = this.gameState.rangeStart;
-        secretNumberInput.max = this.gameState.rangeEnd;
-        secretNumberInput.value = '';
-        secretNumberInput.disabled = false;
-        secretNumberInput.placeholder = `Choose ${rangeDisplay}`;
-        
-        
-        const selectionMessage = document.getElementById('selectionMessage');
-        selectionMessage.innerHTML = `
-            <strong>🎯 Choose your secret number between ${rangeDisplay}</strong><br>
-            <small>🤖 The AI bot will try to guess YOUR number!</small>
-        `;
-        selectionMessage.className = 'message info enhanced';
-        
-        
-        const readyBtn = document.getElementById('readyBtn');
-        readyBtn.disabled = false;
-        readyBtn.textContent = '✅ Start Game';
-        readyBtn.onclick = () => this.setPlayerReady();
-        
-        
-        document.getElementById('readyStatus').innerHTML = '';
-        
-        
-        setTimeout(() => secretNumberInput.focus(), 200);
-        
-        UI.showNotification('🤖 Choose your secret number! The AI bot will try to guess it.', 'info', 4000);
-    }
-
-    setPlayerReady() {
-        const secretNumberInput = document.getElementById('secretNumber');
-        const secretNumber = parseInt(secretNumberInput.value);
-        
-        
-        if (!secretNumber || secretNumber < this.gameState.rangeStart || secretNumber > this.gameState.rangeEnd) {
-            UI.showNotification(`⚠️ Please enter a number between ${this.gameState.rangeStart} and ${this.gameState.rangeEnd}`, 'error');
-            secretNumberInput.focus();
-            return;
-        }
-        
-        
-        this.gameState.playerSecretNumber = secretNumber;
-        
-        
-        secretNumberInput.disabled = true;
-        const readyBtn = document.getElementById('readyBtn');
-        readyBtn.disabled = true;
-        readyBtn.textContent = '✅ Starting Game...';
-        
-        
-        document.getElementById('readyStatus').innerHTML = `✅ Your secret number: ${secretNumber}<br><small>🤖 Starting game with AI bot...</small>`;
-        
-        UI.showNotification(`✅ Secret number ${secretNumber} selected! Starting game...`, 'success');
-        
-        
-        setTimeout(() => {
-            this.showSinglePlayerGame();
-        }, 2000);
-    }
-
-    showSinglePlayerGame() {
-        
-        document.querySelector('.game-container').classList.add('single-player-mode');
-        
-        UI.showScreen('gameScreen');
-        
-        
-        document.getElementById('gameRoundInfo').querySelector('.round-text').textContent = 'Single Player vs Bot';
-        
-        
-        const opponentBattleName = document.getElementById('opponentBattleName');
-        document.getElementById('myBattleName').textContent = this.gameState.playerName;
-        opponentBattleName.innerHTML = `
-            <div class="bot-avatar"><i data-lucide="bot"></i></div>
-            AI Bot (${this.gameState.botDifficulty})
-        `;
-        
-        
-        document.getElementById('myAttempts').textContent = this.gameState.playerAttempts;
-        document.getElementById('myWins').textContent = this.gameState.playerWins;
-        document.getElementById('opponentAttempts').textContent = this.gameState.botAttempts;
-        document.getElementById('opponentWins').textContent = this.gameState.botWins;
-        
-        
-        document.getElementById('myTarget').textContent = this.gameState.playerSecretNumber;
-        document.getElementById('opponentTarget').textContent = '???';
-        
-        
-        const guessInput = document.getElementById('guessInput');
-        guessInput.min = this.gameState.rangeStart;
-        guessInput.max = this.gameState.rangeEnd;
-        guessInput.value = '';
-        guessInput.placeholder = `Guess Bot's number (${this.gameState.rangeStart}-${this.gameState.rangeEnd})`;
-        guessInput.focus();
-        
-        
-        document.getElementById('gameMessage').textContent = `🤖 Bot has picked a number between ${this.gameState.rangeStart} and ${this.gameState.rangeEnd}. Can you find it?`;
-        document.getElementById('gameMessage').className = 'message info';
-        UI.clearGuessHistory();
-        
-        this.gameState.gamePhase = 'playing';
-        
-        
-        setTimeout(() => {
-            this.botMakeGuess();
-        }, 2000);
-    }
-
-    makePlayerGuess(guess) {
-        if (this.gameState.gamePhase !== 'playing') return; 
-
-        // Range validation
-        if (guess < this.gameState.rangeStart || guess > this.gameState.rangeEnd) {
-            UI.showNotification(`⚠️ Guess must be between ${this.gameState.rangeStart} and ${this.gameState.rangeEnd}`, 'error');
-            return;
-        }
-        
-        this.gameState.playerAttempts++;
-        
-        
-        const feedback = this.generateFeedback(guess, this.gameState.botSecretNumber);
-        
-        
-        this.gameState.playerGuessHistory.push({
-            attempt: this.gameState.playerAttempts,
-            guess: guess,
-            feedback: feedback
-        });
-        
-        
-        document.getElementById('myAttempts').textContent = this.gameState.playerAttempts;
-        UI.showGameMessage(feedback.message, feedback.type);
-        UI.addGuessToHistory(guess, {
-            attempts: this.gameState.playerAttempts,
-            isCorrect: feedback.isCorrect,
-            closeness: feedback.closeness,
-            direction: feedback.direction
-        });
-        
-        
-        if (feedback.isCorrect) {
-            this.endGame('player');
-            return;
-        }
-        
-        
-        setTimeout(() => {
-            this.botMakeGuess();
-        }, this.botThinkingTime[this.gameState.botDifficulty]);
-    }
-
-    botMakeGuess() {
-        if (this.gameState.gamePhase !== 'playing') return; 
-        
-        this.gameState.botAttempts++;
-        
-        let botGuess;
-        switch (this.gameState.botDifficulty) {
-            case 'easy':
-                botGuess = this.botEasyStrategy();
-                break;
-            case 'medium':
-                botGuess = this.botMediumStrategy();
-                break;
-            case 'hard':
-                botGuess = this.botHardStrategy();
-                break;
-        }
-        
-        
-        const isCorrect = botGuess === this.gameState.playerSecretNumber;
-        
-        
-        this.gameState.botGuessHistory.push({
-            attempt: this.gameState.botAttempts,
-            guess: botGuess,
-            isCorrect: isCorrect
-        });
-        
-        
-        document.getElementById('opponentAttempts').textContent = this.gameState.botAttempts;
-        
-        
-        const botMessage = isCorrect ? 
-            `🤖 Bot found your number ${this.gameState.playerSecretNumber} in ${this.gameState.botAttempts} attempts! 🎯` :
-            `🤖 Bot guessed ${botGuess} (Attempt ${this.gameState.botAttempts})`;
-        
-        UI.showNotification(botMessage, isCorrect ? 'warning' : 'info');
-        
-        if (isCorrect) {
-            this.endGame('bot');
-        } else {
-            
-            this.updateBotStrategy(botGuess, this.gameState.playerSecretNumber);
-        }
-    }
-
-    
-    botEasyStrategy() {
-        
-        return this.generateRandomNumber(this.gameState.rangeStart, this.gameState.rangeEnd);
-    }
-
-    botMediumStrategy() {
-        
-        const { min, max } = this.gameState.botStrategy;
-        const range = max - min + 1;
-        
-        if (range <= 1) {
-            return min;
-        }
-        
-        
-        const mid = Math.floor((min + max) / 2);
-        const randomOffset = Math.floor(Math.random() * Math.min(3, range)) - 1;
-        return Math.max(min, Math.min(max, mid + randomOffset));
-    }
-
-    botHardStrategy() {
-        
-        const { min, max } = this.gameState.botStrategy;
-        return Math.floor((min + max) / 2);
-    }
-
-    updateBotStrategy(guess, target) {
-        if (guess < target) {
-            this.gameState.botStrategy.min = guess + 1;
-        } else if (guess > target) {
-            this.gameState.botStrategy.max = guess - 1;
-        }
-        this.gameState.botStrategy.lastGuess = guess;
-    }
-
-    initializeBotStrategy() {
-        this.gameState.botStrategy = {
-            min: this.gameState.rangeStart,
-            max: this.gameState.rangeEnd,
-            lastGuess: null,
-            strategy: 'binary'
-        };
-    }
-
-    generateFeedback(guess, target) {
-        if (guess === target) {
-            return {
-                type: 'success',
-                message: '🎉 Correct! You found the bot\'s number!',
-                isCorrect: true
-            };
-        }
-
-        const difference = Math.abs(guess - target);
-        const range = this.gameState.rangeEnd - this.gameState.rangeStart + 1;
-        
-        
-        let veryCloseThreshold, closeThreshold;
-        
-        if (range <= 20) {
-            veryCloseThreshold = 1;
-            closeThreshold = 2;
-        } else if (range <= 50) {
-            veryCloseThreshold = 2;
-            closeThreshold = 4;
-        } else if (range <= 100) {
-            veryCloseThreshold = 3;
-            closeThreshold = 8;
-        } else if (range <= 500) {
-            veryCloseThreshold = Math.max(5, Math.ceil(range * 0.015));
-            closeThreshold = Math.max(10, Math.ceil(range * 0.04));
-        } else {
-            veryCloseThreshold = Math.max(8, Math.ceil(range * 0.012));
-            closeThreshold = Math.max(20, Math.ceil(range * 0.035));
-        }
-
-        let messageType;
-        let messageKey;
-
-        if (difference <= veryCloseThreshold) {
-            messageType = 'warning';
-            messageKey = guess > target ? 'VERY_CLOSE_HIGH' : 'VERY_CLOSE_LOW';
-        } else if (difference <= closeThreshold) {
-            messageType = 'warning';
-            messageKey = guess > target ? 'CLOSE_HIGH' : 'CLOSE_LOW';
-        } else {
-            messageType = 'info';
-            messageKey = guess > target ? 'TOO_HIGH' : 'TOO_LOW';
-        }
-
-        return {
-            type: messageType,
-            message: this.getRandomMessage(messageKey),
-            isCorrect: false,
-            difference: difference,
-            direction: guess > target ? 'high' : 'low',
-            closeness: difference <= veryCloseThreshold ? 'very_close' :
-                      difference <= closeThreshold ? 'close' : 'far'
-        };
-    }
-
-    getRandomMessage(category) {
-        if (!this.config || !this.config.GAME_MESSAGES) {
-            return "Too high/low (config missing)";
-        }
-        const messages = this.config.GAME_MESSAGES[category];
-        if (!messages) return "Message not found";
-        return messages[Math.floor(Math.random() * messages.length)];
-    }
-
-    generateRandomNumber(min, max) {
-        return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
-
-    endGame(winner) {
-        this.gameState.gamePhase = 'finished';
-        
-        if (winner === 'player') {
-            this.gameState.playerWins++;
-        } else {
-            this.gameState.botWins++;
-        }
-        
-        this.saveStats();
-        
-        
-        this.showSinglePlayerResults(winner);
-    }
-
-    showSinglePlayerResults(winner) {
-        UI.showScreen('resultsScreen');
-        
-        const isPlayerWinner = winner === 'player';
-        
-        
-        document.getElementById('resultEmoji').textContent = isPlayerWinner ? '🎉' : '🤖';
-        document.getElementById('resultTitle').textContent = isPlayerWinner ? 
-            '🎉 You Won!' : '🤖 Bot Won!';
-        
-        
-        document.getElementById('myResultName').textContent = this.gameState.playerName;
-        document.getElementById('opponentResultName').innerHTML = `🤖 AI Bot (${this.gameState.botDifficulty})`;
-        
-        document.getElementById('myFinalAttempts').textContent = this.gameState.playerAttempts;
-        document.getElementById('opponentFinalAttempts').textContent = this.gameState.botAttempts;
-        document.getElementById('myTotalWins').textContent = this.gameState.playerWins;
-        document.getElementById('opponentTotalWins').textContent = this.gameState.botWins;
-        
-        
-        const optimalAttempts = Math.ceil(Math.log2(this.gameState.rangeEnd - this.gameState.rangeStart + 1));
-        let playerPerformance = 'Good Try!';
-        let botPerformance = 'AI Performance';
-        
-        if (isPlayerWinner) {
-            if (this.gameState.playerAttempts === 1) {
-                playerPerformance = '🍀 Lucky Shot!';
-            } else if (this.gameState.playerAttempts <= optimalAttempts) {
-                playerPerformance = '🧠 Excellent!';
-            } else if (this.gameState.playerAttempts <= optimalAttempts * 1.5) {
-                playerPerformance = '👍 Good!';
-            } else {
-                playerPerformance = '😊 Not bad!';
-            }
-        }
-        
-        document.getElementById('myPerformance').textContent = playerPerformance;
-        document.getElementById('opponentPerformance').textContent = botPerformance;
-        
-        
-        const myCard = document.getElementById('myResultCard');
-        const opponentCard = document.getElementById('opponentResultCard');
-        myCard.classList.toggle('winner', isPlayerWinner);
-        opponentCard.classList.toggle('winner', !isPlayerWinner);
-        
-        
-        let message;
-        if (isPlayerWinner) {
-            message = `Congratulations! You beat the ${this.gameState.botDifficulty} bot in ${this.gameState.playerAttempts} attempts!`;
-        } else {
-            message = `The ${this.gameState.botDifficulty} bot found your number in ${this.gameState.botAttempts} attempts. Try again!`;
-        }
-        
-        document.getElementById('finalResultMessage').textContent = message;
-        document.getElementById('finalResultMessage').className = `message ${isPlayerWinner ? 'success' : 'info'}`;
-        
-        
-        document.getElementById('nextRoundBtn').style.display = 'none';
-        
-        
-        const rematchBtn = document.getElementById('rematchBtn');
-        rematchBtn.textContent = '🔄 Play Again';
-        rematchBtn.onclick = () => this.rematch();
-        
-        
-        const leaveBtn = document.getElementById('leaveResultsBtn');
-        leaveBtn.textContent = '🏠 Main Menu';
-        leaveBtn.onclick = () => this.returnToMenu();
-    }
-
-    rematch() {
-        
-        this.gameState.playerAttempts = 0;
-        this.gameState.botAttempts = 0;
-        this.gameState.playerGuessHistory = [];
-        this.gameState.botGuessHistory = [];
-        this.gameState.gamePhase = 'selection';
-        
-        
-        this.gameState.playerSecretNumber = null; 
-        this.gameState.botSecretNumber = this.generateRandomNumber(this.gameState.rangeStart, this.gameState.rangeEnd);
-        
-        
-        this.initializeBotStrategy();
-        
-        
-        this.showSinglePlayerSelection();
-        
-        UI.showNotification('New game! Choose your secret number again! 🎮', 'success');
-    }
-
-    returnToMenu() {
-        
-        document.querySelector('.game-container').classList.remove('single-player-mode');
-        
-        
-        this.gameState = {
-            playerName: '',
-            playerSecretNumber: null,
-            botSecretNumber: null,
-            playerAttempts: 0,
-            botAttempts: 0,
-            playerWins: 0,
-            botWins: 0,
-            rangeStart: 1,
-            rangeEnd: 100,
-            botDifficulty: 'medium',
-            gamePhase: 'setup',
-            playerGuessHistory: [],
-            botGuessHistory: [],
-            botStrategy: {
-                min: 1,
-                max: 100,
-                lastGuess: null,
-                strategy: 'binary'
-            }
-        };
-        
-        
-        UI.showScreen('welcomeScreen');
-        UI.clearInputs();
-    }
-
-    getGameState() {
-        return { ...this.gameState };
-    }
+  getGameState() {
+    return { ...this.gameState };
+  }
 }
 
-
+window.SinglePlayerGame = SinglePlayerGame;
 const singlePlayerGame = new SinglePlayerGame();
-
-
 window.singlePlayerGame = singlePlayerGame;
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = SinglePlayerGame;
+}
