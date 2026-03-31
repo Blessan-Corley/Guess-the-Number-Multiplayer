@@ -36,7 +36,6 @@ test('Multiplayer: Full Match + Rematch Flow', async ({ browser }) => {
   // Wait for selection screen
   await expect(host.locator('#selectionScreen')).toBeVisible({ timeout: 15000 });
   await expect(guest.locator('#selectionScreen')).toBeVisible({ timeout: 15000 });
-  await expect(guest.locator('#selectionScreen')).toBeVisible();
 
   await host.fill('#secretNumber', '10');
   await host.waitForTimeout(1000);
@@ -48,15 +47,19 @@ test('Multiplayer: Full Match + Rematch Flow', async ({ browser }) => {
   // 3. Play & Win
   await expect(host.locator('#gameScreen')).toBeVisible({ timeout: 15000 });
   await expect(guest.locator('#gameScreen')).toBeVisible({ timeout: 15000 });
-
-  await guest.fill('#guessInput', '10');
-  await guest.locator('button#makeGuessBtn').click({ force: true });
-  await expect(guest.locator('button#makeGuessBtn')).toContainText('Waiting', { timeout: 15000 });
-  await expect(host.locator('#opponentAttempts')).toHaveText('1', { timeout: 15000 });
+  await expect(host.locator('#guessInput')).toBeEnabled({ timeout: 15000 });
+  await expect(guest.locator('#guessInput')).toBeEnabled({ timeout: 15000 });
+  await expect(host.locator('button#makeGuessBtn')).toBeEnabled({ timeout: 15000 });
+  await expect(guest.locator('button#makeGuessBtn')).toBeEnabled({ timeout: 15000 });
 
   await host.fill('#guessInput', '50');
-  await host.locator('button#makeGuessBtn').click({ force: true });
+  await host.locator('button#makeGuessBtn').click();
   await expect(host.locator('#myAttempts')).toHaveText('1', { timeout: 15000 });
+  await expect(guest.locator('#opponentAttempts')).toHaveText('1', { timeout: 15000 });
+
+  await guest.fill('#guessInput', '10');
+  await guest.locator('button#makeGuessBtn').click();
+  await expect(guest.locator('#myAttempts')).toHaveText('1', { timeout: 15000 });
 
   await expect(host.locator('#resultsScreen')).toBeVisible({ timeout: 15000 });
   await expect(guest.locator('#resultsScreen')).toBeVisible({ timeout: 15000 });
