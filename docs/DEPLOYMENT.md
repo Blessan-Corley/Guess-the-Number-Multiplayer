@@ -120,11 +120,16 @@ Start command:  npm start
 ### Docker Hub publish from GitHub Actions
 
 1. Create a Docker Hub account and a scoped access token.
-2. Add these repository secrets in GitHub:
+   - Use your Docker ID, not your email address, for `DOCKERHUB_USERNAME`
+   - Create the token with at least `Read & Write` access so CI can push images
+   - If you publish to an organization namespace, use a token that has access to that namespace/repository
+2. Create the Docker Hub repository `multiplayer-number-guesser` under that namespace if it doesn't already exist.
+3. Add these repository secrets in GitHub:
    - `DOCKERHUB_USERNAME`
    - `DOCKERHUB_TOKEN`
-3. Push to `main` or create a tag like `v1.0.0`.
-4. GitHub Actions will publish:
+   - Optional: `DOCKERHUB_NAMESPACE` if you want to publish under an organization or a namespace different from your login username
+4. Push to `main` or create a tag like `v1.0.0`.
+5. GitHub Actions will publish:
    - `latest` on the default branch
    - branch/tag refs
    - a `sha-...` image for traceability
