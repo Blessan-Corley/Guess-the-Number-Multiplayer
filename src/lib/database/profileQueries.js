@@ -20,6 +20,15 @@ function attachGuestSessionSecret(profile, guestSessionSecret) {
   };
 }
 
+function summarizeGuestToken(guestToken) {
+  if (!guestToken || typeof guestToken !== 'string') {
+    return 'missing';
+  }
+
+  const normalized = guestToken.trim();
+  return normalized.length <= 8 ? normalized : `...${normalized.slice(-8)}`;
+}
+
 async function getGuestSessionHash(db, guestToken) {
   const result = await db.pool.query(
     'SELECT session_secret_hash AS "sessionSecretHash" FROM player_profiles WHERE guest_token = $1 LIMIT 1',
@@ -79,6 +88,16 @@ async function upsertGuestProfile(db, { id, guestToken, guestSessionSecret, disp
   const existing = await getGuestSessionHash(db, guestToken);
 
   if (existing) {
+    if (config.LOAD_TEST_DEBUG_LOGS) {
+      db.logger.info(
+        {
+          guestToken: summarizeGuestToken(guestToken),
+          hasSessionSecretHash: Boolean(existing.sessionSecretHash),
+        },
+        'Updating existing guest profile'
+      );
+    }
+
     if (
       existing.sessionSecretHash &&
       !secretsMatch(guestSessionSecret, existing.sessionSecretHash)
@@ -95,6 +114,15 @@ async function upsertGuestProfile(db, { id, guestToken, guestSessionSecret, disp
       [guestToken, displayName, sessionSecretHash]
     );
   } else {
+    if (config.LOAD_TEST_DEBUG_LOGS) {
+      db.logger.info(
+        {
+          guestToken: summarizeGuestToken(guestToken),
+        },
+        'Inserting new guest profile'
+      );
+    }
+
     await db.pool.query(
       `INSERT INTO player_profiles (id, guest_token, session_secret_hash, display_name)
              VALUES ($1, $2, $3, $4)`,

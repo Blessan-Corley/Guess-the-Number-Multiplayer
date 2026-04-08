@@ -19,6 +19,7 @@
         latencyMs: null,
         smoothedLatencyMs: null,
         sampleCount: 0,
+        unstableSampleCount: 0,
         signal: 'unknown',
       };
     },
@@ -70,11 +71,11 @@
         return 'strong';
       }
 
-      if (latencyMs <= 260) {
+      if (latencyMs <= 320) {
         return 'fair';
       }
 
-      if (latencyMs <= 450) {
+      if (latencyMs <= 700) {
         return 'weak';
       }
 
@@ -108,11 +109,20 @@
       const smoothed = Number.isFinite(previous)
         ? Math.round(previous * 0.7 + rounded * 0.3)
         : rounded;
-      const signal = this.evaluateConnectionSignal(smoothed);
+      const severeLatencyThresholdMs = 700;
+      const unstableSampleCount =
+        smoothed > severeLatencyThresholdMs
+          ? (this.connectionTelemetry.unstableSampleCount || 0) + 1
+          : 0;
+      const signal =
+        smoothed > severeLatencyThresholdMs && unstableSampleCount < 3
+          ? 'weak'
+          : this.evaluateConnectionSignal(smoothed);
 
       this.connectionTelemetry.latencyMs = rounded;
       this.connectionTelemetry.smoothedLatencyMs = smoothed;
       this.connectionTelemetry.sampleCount += 1;
+      this.connectionTelemetry.unstableSampleCount = unstableSampleCount;
       this.connectionTelemetry.signal = signal;
 
       if (appActions && typeof appActions.setConnectionStatus === 'function') {

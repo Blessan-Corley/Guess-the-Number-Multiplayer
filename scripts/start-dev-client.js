@@ -1,18 +1,31 @@
 const { spawn } = require('node:child_process');
 const http = require('node:http');
 const https = require('node:https');
+const path = require('node:path');
 const { URL } = require('node:url');
 
 const DEFAULT_SERVER_URL = 'http://127.0.0.1:3000/api/health';
 const WAIT_TIMEOUT_MS = Number.parseInt(process.env.DEV_SERVER_WAIT_TIMEOUT_MS || '30000', 10);
 const POLL_INTERVAL_MS = Number.parseInt(process.env.DEV_SERVER_WAIT_INTERVAL_MS || '500', 10);
 
-function getCommand(command) {
-  return process.platform === 'win32' ? `${command}.cmd` : command;
-}
-
 function wait(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function resolveViteBinPath() {
+  const vitePackageJson = require.resolve('vite/package.json');
+  return path.join(path.dirname(vitePackageJson), 'bin', 'vite.js');
+}
+
+function buildViteLaunchSpec(options = {}) {
+  return {
+    command: options.nodeExecPath || process.execPath,
+    args: [options.viteBinPath || resolveViteBinPath()],
+    options: {
+      stdio: 'inherit',
+      shell: false,
+    },
+  };
 }
 
 function probeServer(url) {
@@ -63,10 +76,8 @@ async function main() {
   const healthcheckUrl = new URL(process.env.DEV_SERVER_HEALTHCHECK_URL || DEFAULT_SERVER_URL);
   await waitForServer(healthcheckUrl);
 
-  const viteProcess = spawn(getCommand('npx'), ['vite'], {
-    stdio: 'inherit',
-    shell: false,
-  });
+  const launchSpec = buildViteLaunchSpec();
+  const viteProcess = spawn(launchSpec.command, launchSpec.args, launchSpec.options);
 
   viteProcess.on('exit', (code, signal) => {
     if (signal) {
@@ -78,7 +89,16 @@ async function main() {
   });
 }
 
-main().catch((error) => {
-  console.error(error.message);
-  process.exit(1);
-});
+if (require.main === module) {
+  main().catch((error) => {
+    console.error(error.message);
+    process.exit(1);
+  });
+}
+
+module.exports = {
+  buildViteLaunchSpec,
+  probeServer,
+  resolveViteBinPath,
+  waitForServer,
+};

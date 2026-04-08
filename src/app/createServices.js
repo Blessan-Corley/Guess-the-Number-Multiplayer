@@ -21,9 +21,8 @@ async function createServices(options = {}) {
   await database.connect().catch((error) => {
     logger.warn(
       { error: error.message },
-      'Database unavailable, disabling persistent profile storage'
+      'Database unavailable during bootstrap; profile storage will retry on demand'
     );
-    database.disable();
   });
 
   const partyService = new PartyService(store);

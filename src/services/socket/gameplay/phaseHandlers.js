@@ -18,6 +18,20 @@ module.exports = {
       const player = party.getPlayer(playerId);
       if (!player) throw new Error('Player not found');
 
+      if (party.gameState.phase === 'playing') {
+        // A client can submit a late/retried ready action after the room has
+        // already advanced. Treat that as a resync request instead of a fatal
+        // mismatch so the player still lands in the active round.
+        if (party.allPlayersReady()) {
+          this.io.to(socket.id).emit('playing_started', {
+            party: party.getDetailedState(),
+          });
+          return;
+        }
+
+        throw new Error('Selection already completed');
+      }
+
       if (party.gameState.phase !== 'selection') {
         throw new Error('Not in selection phase');
       }

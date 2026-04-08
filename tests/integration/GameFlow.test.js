@@ -19,6 +19,21 @@ describe('Integration: Full Match', () => {
       });
     });
 
+  const expectNoEvent = (socket, event, timeout = 500) =>
+    new Promise((resolve, reject) => {
+      const handler = (data) => {
+        clearTimeout(timer);
+        reject(new Error(`Unexpected ${event}: ${JSON.stringify(data)}`));
+      };
+
+      const timer = setTimeout(() => {
+        socket.off(event, handler);
+        resolve();
+      }, timeout);
+
+      socket.on(event, handler);
+    });
+
   const makeSocket = () =>
     io(`http://localhost:${serverPort}`, { transports: ['websocket'], forceNew: true });
 
@@ -117,6 +132,39 @@ describe('Integration: Full Match', () => {
       const closedPromise = waitForEvent(guest, 'party_closed_host_left');
       host.emit('leave_party');
       await closedPromise;
+    } finally {
+      host.disconnect();
+      guest.disconnect();
+    }
+  });
+
+  test('Late ready retries resync to playing instead of failing after phase already advanced', async () => {
+    const host = makeSocket();
+    const guest = makeSocket();
+    try {
+      host.emit('create_party', { playerName: 'HostResync' });
+      const { party } = await waitForEvent(host, 'party_created');
+
+      guest.emit('join_party', { partyCode: party.code, playerName: 'GuestResync' });
+      await waitForEvent(guest, 'party_joined');
+
+      host.emit('start_game');
+      await waitForEvent(host, 'game_started');
+
+      host.emit('set_ready', { secretNumber: 10 });
+      await waitForEvent(host, 'player_ready');
+
+      const partySnapshot = await gameServer.partyService.getParty(party.code);
+      const guestPlayer = Array.from(partySnapshot.players.values()).find((player) => !player.isHost);
+      partySnapshot.setPlayerReady(guestPlayer.id, 40);
+      partySnapshot.startPlayingPhase();
+      await gameServer.partyService.saveParty(partySnapshot);
+
+      const noErrorPromise = expectNoEvent(guest, 'error');
+      const playingStartedPromise = waitForEvent(guest, 'playing_started');
+      guest.emit('set_ready', { secretNumber: 40 });
+
+      await Promise.all([playingStartedPromise, noErrorPromise]);
     } finally {
       host.disconnect();
       guest.disconnect();

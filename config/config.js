@@ -92,6 +92,7 @@ const config = {
   PARTY_CREATION_COOLDOWN: 30000,
 
   LOG_LEVEL: process.env.LOG_LEVEL || 'info',
+  LOAD_TEST_DEBUG_LOGS: parseBoolean(process.env.LOAD_TEST_DEBUG_LOGS, false),
   ENABLE_DEBUG: nodeEnv === 'development',
   TRUST_PROXY: parseTrustProxy(process.env.TRUST_PROXY, isProduction ? 1 : false),
 

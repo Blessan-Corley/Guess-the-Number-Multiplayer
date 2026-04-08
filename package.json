@@ -24,6 +24,9 @@
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:debug": "playwright test --debug",
+    "test:load": "npm run test:load:http && npm run test:load:socket",
+    "test:load:http": "node scripts/load/run-k6.js scripts/load/k6/profile-leaderboard.js",
+    "test:load:socket": "node scripts/load/socketio-match-runner.js",
     "test:ci": "npm run lint && npm run format:check && npm run test:coverage && npm run build && npm run test:e2e"
   },
   "keywords": [
@@ -69,6 +72,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Blessan-Corley/Guess-the-Number-Multiplayer.git"
+    "url": "https://github.com/Blessan-Corley/Num-Duel.git"
   }
 }

@@ -9,16 +9,47 @@ function getGuestToken(req) {
   return req.get('x-guest-token') || null;
 }
 
+function summarizeGuestToken(guestToken) {
+  if (!guestToken || typeof guestToken !== 'string') {
+    return 'missing';
+  }
+
+  const normalized = guestToken.trim();
+  return normalized.length <= 8 ? normalized : `...${normalized.slice(-8)}`;
+}
+
 function registerProfileRoutes(gameServer) {
   gameServer.app.post(
     '/api/profiles/guest',
     gameServer.withReady(async (req, res) => {
       const payload = httpSchemas.parseGuestProfileRequest(req.body, getGuestSessionSecret(req));
+      if (config.LOAD_TEST_DEBUG_LOGS) {
+        gameServer.logger.info(
+          {
+            route: '/api/profiles/guest',
+            guestToken: summarizeGuestToken(payload.guestToken),
+            displayNameLength: payload.displayName.length,
+          },
+          'Guest profile create requested'
+        );
+      }
+
       const profile = await gameServer.profileService.resolveGuestProfile(
         payload.displayName,
         payload.guestToken,
         payload.guestSessionSecret
       );
+
+      if (config.LOAD_TEST_DEBUG_LOGS) {
+        gameServer.logger.info(
+          {
+            route: '/api/profiles/guest',
+            guestToken: summarizeGuestToken(payload.guestToken),
+            profileId: profile?.id || null,
+          },
+          'Guest profile create completed'
+        );
+      }
 
       return res.json({
         profile,

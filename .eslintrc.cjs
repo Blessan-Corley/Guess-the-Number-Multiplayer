@@ -3,6 +3,28 @@ module.exports = {
   reportUnusedDisableDirectives: true,
   overrides: [
     {
+      files: ['scripts/load/k6/**/*.js'],
+      env: {
+        es2021: true,
+      },
+      extends: ['eslint:recommended', 'prettier'],
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+      },
+      globals: {
+        __ENV: 'readonly',
+        __ITER: 'readonly',
+        __VU: 'readonly',
+        module: 'readonly',
+      },
+      rules: {
+        'no-console': 'off',
+        'no-empty': ['error', { allowEmptyCatch: true }],
+        'no-unused-vars': ['error', { argsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' }],
+      },
+    },
+    {
       files: [
         'server.js',
         'src/**/*.js',
@@ -11,6 +33,7 @@ module.exports = {
         'playwright.config.js',
         'jest.config.js',
       ],
+      excludedFiles: ['scripts/load/k6/**/*.js'],
       env: {
         node: true,
         es2021: true,
