@@ -155,7 +155,9 @@ describe('Integration: Full Match', () => {
       await waitForEvent(host, 'player_ready');
 
       const partySnapshot = await gameServer.partyService.getParty(party.code);
-      const guestPlayer = Array.from(partySnapshot.players.values()).find((player) => !player.isHost);
+      const guestPlayer = Array.from(partySnapshot.players.values()).find(
+        (player) => !player.isHost
+      );
       partySnapshot.setPlayerReady(guestPlayer.id, 40);
       partySnapshot.startPlayingPhase();
       await gameServer.partyService.saveParty(partySnapshot);
