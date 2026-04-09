@@ -63,19 +63,45 @@ const parseTrustProxy = (value, fallback) => {
   return value;
 };
 
+const firstNonEmpty = (...values) =>
+  values.find((value) => value !== undefined && value !== null && String(value).trim() !== '') ||
+  '';
+
+const toOrigin = (value) => {
+  if (!value) {
+    return '';
+  }
+
+  try {
+    return new URL(value).origin;
+  } catch {
+    return '';
+  }
+};
+
 const nodeEnv = process.env.NODE_ENV || 'development';
 const isProduction = nodeEnv === 'production';
-const defaultStoreMode =
-  process.env.STORE_MODE ||
-  (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN ? 'redis' : 'memory');
+const resolvedAppBaseUrl =
+  firstNonEmpty(process.env.APP_BASE_URL, process.env.RENDER_EXTERNAL_URL) ||
+  `http://localhost:${parseInteger(process.env.PORT, 3000)}`;
+const resolvedAppOrigin = toOrigin(resolvedAppBaseUrl);
+const resolvedDatabaseUrl = firstNonEmpty(
+  process.env.DATABASE_URL,
+  process.env.POSTGRES_URL,
+  process.env.POSTGRESQL_URL
+);
+const hasRedisConfig = Boolean(
+  (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) ||
+    process.env.REDIS_URL
+);
+const defaultStoreMode = process.env.STORE_MODE || (hasRedisConfig ? 'redis' : 'memory');
 
 const config = {
   ...sharedConfig,
 
   PORT: parseInteger(process.env.PORT, 3000),
   NODE_ENV: nodeEnv,
-  APP_BASE_URL:
-    process.env.APP_BASE_URL || `http://localhost:${parseInteger(process.env.PORT, 3000)}`,
+  APP_BASE_URL: resolvedAppBaseUrl,
 
   PARTY_CODE_LENGTH: 6,
   MAX_PLAYERS_PER_PARTY: 2,
@@ -96,10 +122,13 @@ const config = {
   ENABLE_DEBUG: nodeEnv === 'development',
   TRUST_PROXY: parseTrustProxy(process.env.TRUST_PROXY, isProduction ? 1 : false),
 
-  CORS_ORIGINS: parseList(process.env.CORS_ORIGINS, isProduction ? [] : ['*']),
+  CORS_ORIGINS: parseList(
+    process.env.CORS_ORIGINS,
+    isProduction ? (resolvedAppOrigin ? [resolvedAppOrigin] : []) : ['*']
+  ),
   SOCKET_CORS_ORIGINS: parseList(
     process.env.SOCKET_CORS_ORIGINS || process.env.CORS_ORIGINS,
-    isProduction ? [] : ['*']
+    isProduction ? (resolvedAppOrigin ? [resolvedAppOrigin] : []) : ['*']
   ),
 
   ENABLE_COMPRESSION: true,
@@ -118,7 +147,7 @@ const config = {
   UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL || '',
   UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN || '',
 
-  DATABASE_URL: process.env.DATABASE_URL || '',
+  DATABASE_URL: resolvedDatabaseUrl,
   DATABASE_POOL_MAX: parseInteger(process.env.DATABASE_POOL_MAX, 10),
   DATABASE_SSL_REJECT_UNAUTHORIZED: parseBoolean(
     process.env.DATABASE_SSL_REJECT_UNAUTHORIZED,

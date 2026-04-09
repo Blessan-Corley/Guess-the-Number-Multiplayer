@@ -43,7 +43,9 @@ will cause players to be routed to different processes, breaking game state.
 | `NODE_ENV`                 | No       | `development` | Set to `production` in prod                              |
 | `PORT`                     | No       | `3000`        | HTTP/WebSocket listen port                               |
 | `DATABASE_URL`             | No       | —             | PostgreSQL connection string for profile persistence     |
-| `REDIS_URL`                | No       | —             | Standard Redis URL (ioredis)                             |
+| `POSTGRES_URL`             | No       | —             | Accepted alias for `DATABASE_URL`                        |
+| `POSTGRESQL_URL`           | No       | —             | Accepted alias for `DATABASE_URL`                        |
+| `REDIS_URL`                | No       | —             | Standard Redis URL (ioredis); auto-enables Redis mode    |
 | `UPSTASH_REDIS_REST_URL`   | No       | —             | Upstash REST endpoint (alternative to REDIS_URL)         |
 | `UPSTASH_REDIS_REST_TOKEN` | No       | —             | Upstash REST token                                       |
 | `SESSION_SECRET`           | No       | random        | HMAC secret for reconnect tokens — **set in production** |
@@ -99,12 +101,19 @@ the raw `public/` directory (useful when running without a build step in develop
 - [ ] `NODE_ENV=production`
 - [ ] `SESSION_SECRET` set to a long random string (`openssl rand -hex 32`)
 - [ ] `TRUST_PROXY=true` if behind Nginx / Heroku / Render / Railway
-- [ ] `CORS_ORIGINS` set to your actual domain(s)
+- [ ] `CORS_ORIGINS` set to your actual domain(s), or let the app fall back to `APP_BASE_URL` / `RENDER_EXTERNAL_URL`
 - [ ] `DATABASE_URL` set if you want persistent player profiles
 - [ ] `npm run build` executed before starting the server
 - [ ] Only **one** process / replica unless Redis store is configured
 - [ ] Health check endpoint: `GET /api/health`
 - [ ] Readiness check endpoint: `GET /api/readiness`
+
+If profiles or leaderboards are unexpectedly disabled in production, check the startup log for:
+
+- `databaseEnabled: false`
+- `Database connection string not configured; profile persistence is disabled`
+
+That means no supported database connection string variable reached the runtime process.
 
 ---
 

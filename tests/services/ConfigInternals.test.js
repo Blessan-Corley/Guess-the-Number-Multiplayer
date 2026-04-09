@@ -9,12 +9,20 @@
 
 const SAVED_ENV = {};
 const ENV_KEYS = [
+  'NODE_ENV',
+  'APP_BASE_URL',
+  'RENDER_EXTERNAL_URL',
   'CORS_ORIGINS',
   'SOCKET_CORS_ORIGINS',
   'TRUST_PROXY',
+  'DATABASE_URL',
+  'POSTGRES_URL',
+  'POSTGRESQL_URL',
   'DATABASE_SSL_REJECT_UNAUTHORIZED',
   'DATABASE_AUTO_MIGRATE',
   'DATABASE_FAIL_ON_PENDING_MIGRATIONS',
+  'STORE_MODE',
+  'REDIS_URL',
 ];
 
 beforeEach(() => {
@@ -57,6 +65,24 @@ describe('parseList (via CORS_ORIGINS env var)', () => {
     jest.resetModules();
     const cfg = require('../../config/config');
     expect(cfg.CORS_ORIGINS).toEqual(['https://mygame.io']);
+  });
+
+  test('production falls back to APP_BASE_URL origin when CORS_ORIGINS is unset', () => {
+    process.env.NODE_ENV = 'production';
+    process.env.APP_BASE_URL = 'https://numduel.example.com/path';
+    jest.resetModules();
+    const cfg = require('../../config/config');
+    expect(cfg.CORS_ORIGINS).toEqual(['https://numduel.example.com']);
+    expect(cfg.SOCKET_CORS_ORIGINS).toEqual(['https://numduel.example.com']);
+  });
+
+  test('APP_BASE_URL falls back to RENDER_EXTERNAL_URL when explicit base URL is unset', () => {
+    process.env.NODE_ENV = 'production';
+    process.env.RENDER_EXTERNAL_URL = 'https://guess-the-number-multiplayer-3rk1.onrender.com';
+    jest.resetModules();
+    const cfg = require('../../config/config');
+    expect(cfg.APP_BASE_URL).toBe('https://guess-the-number-multiplayer-3rk1.onrender.com');
+    expect(cfg.CORS_ORIGINS).toEqual(['https://guess-the-number-multiplayer-3rk1.onrender.com']);
   });
 });
 
@@ -155,5 +181,21 @@ describe('config.validate() warning branches', () => {
     const cfg = require('../../config/config');
     const { warnings } = cfg.validate();
     expect(warnings.some((w) => w.includes('PostgreSQL'))).toBe(true);
+  });
+
+  test('uses POSTGRES_URL when DATABASE_URL is unset', () => {
+    process.env.POSTGRES_URL = 'postgresql://user:pass@db.example.com/app?sslmode=require';
+    jest.resetModules();
+    const cfg = require('../../config/config');
+    expect(cfg.DATABASE_URL).toBe(process.env.POSTGRES_URL);
+    expect(cfg.DATABASE_ENABLED).toBe(true);
+  });
+
+  test('defaults STORE_MODE to redis when REDIS_URL is present', () => {
+    process.env.REDIS_URL = 'redis://default:password@redis.example.com:6379';
+    jest.resetModules();
+    const cfg = require('../../config/config');
+    expect(cfg.STORE_MODE).toBe('redis');
+    expect(cfg.REDIS_ENABLED).toBe(true);
   });
 });

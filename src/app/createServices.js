@@ -18,6 +18,16 @@ async function createServices(options = {}) {
 
   const store = options.store || (await createStore());
 
+  if (!database.enabled) {
+    logger.warn(
+      {
+        databaseEnabled: false,
+        expectedEnvVars: ['DATABASE_URL', 'POSTGRES_URL', 'POSTGRESQL_URL'],
+      },
+      'Database connection string not configured; profile persistence is disabled'
+    );
+  }
+
   await database.connect().catch((error) => {
     logger.warn(
       { error: error.message },
